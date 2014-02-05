@@ -75,23 +75,6 @@
 			send_intercept()
 	..()
 
-/datum/game_mode/cult/grant_runeword(mob/living/carbon/human/cult_mob, var/word)
-	if (!word)
-		if(startwords.len > 0)
-			word=pick(startwords)
-			startwords -= word
-	return ..(cult_mob,word)
-
-
-/datum/game_mode/proc/grant_runeword(mob/living/carbon/human/cult_mob, var/word)
-	if(!cultwords["travel"])
-		runerandom()
-	if (!word)
-		word=pick(allwords)
-	var/wordexp = "[cultwords[word]] is [word]..."
-	cult_mob << "\red You remember one thing from the dark teachings of your master... [wordexp]"
-	cult_mob.mind.store_memory("<B>You remember that</B> [wordexp]", 0, 0)
-
 
 /datum/game_mode/proc/add_cultist(datum/mind/cult_mind) //BASE
 	if (!istype(cult_mind))
