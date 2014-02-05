@@ -12,9 +12,6 @@
 	uplink_welcome = "Crazy AI Uplink Console:"
 	uplink_uses = 10
 
-	var/const/waittime_l = 600
-	var/const/waittime_h = 1800 // started at 1800
-
 	var/AI_win_timeleft = 1800 //started at 1800, in case I change this for testing round end.
 	var/malf_mode_declared = 0
 	var/station_captured = 0

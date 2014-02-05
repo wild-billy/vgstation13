@@ -21,6 +21,12 @@
 			if(!v.welded && v.z == STATION_Z && v.canSpawnMice==1) // No more spawning in atmos.  Assuming the mappers did their jobs, anyway.
 				found_vents.Add(v)
 
+/antag_role/borer/calculateRoleNumbers()
+	// for every 10 players, get 1 borer, and for each borer, get a host
+	// also make sure that there's at least one borer and one host
+	min_players = max(ticker.mode.num_players() / 20 * 2, 2)
+	max_players = min_players
+
 /antag_role/borer/CanBeAssigned(var/datum/mind/M)
 	return ..()
 

@@ -33,6 +33,11 @@
 	var/uplink_welcome = "Syndicate Uplink Console:"
 	var/uplink_uses = 10
 
+	var/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
+	var/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
+
+	var/no_intercept=0
+
 /datum/game_mode/proc/announce() //to be calles when round starts
 	world << "<B>Notice</B>: [src] did not define announce()"
 
@@ -145,6 +150,10 @@
 
 	spawn (ROUNDSTART_LOGOUT_REPORT_TIME)
 		display_roundstart_logout_report()
+
+	if(no_intercept)
+		spawn(rand(waittime_l,waittime_h))
+			send_intercept()
 
 	feedback_set_details("round_start","[time2text(world.realtime)]")
 	if(ticker && ticker.mode)

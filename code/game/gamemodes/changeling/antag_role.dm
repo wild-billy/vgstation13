@@ -1,6 +1,8 @@
 ///////////////////////////////////
 // Antag Datum
 ///////////////////////////////////
+var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon","Zeta","Eta","Theta","Iota","Kappa","Lambda","Mu","Nu","Xi","Omicron","Pi","Rho","Sigma","Tau","Upsilon","Phi","Chi","Psi","Omega")
+
 /antag_role/changeling
 	name="Changeling"
 	id="changeling"
@@ -137,7 +139,7 @@
 	return chosen_dna
 
 /antag_role/changeling/DeclareAll()
-	var/text = "<FONT size = 2><B>The changelings were:</B></FONT>"
+	world << "<FONT size = 2><B>The changelings were:</B></FONT>"
 	for(var/datum/mind/mind in minds)
 		var/antag_role/R=mind.antag_roles[id]
 		R.Declare()
@@ -145,25 +147,26 @@
 /antag_role/changeling/Declare()
 	var/changelingwin = 1
 
-	text += "<br><br>[changeling.key] was [changeling.name] ("
-	if(changeling.current)
-		if(changeling.current.stat == DEAD)
+	var/text = "<br><br>[antag.key] was [antag.name] ("
+	if(antag.current)
+		if(antag.current.stat == DEAD)
 			text += "died"
 		else
 			text += "survived"
-		if(changeling.current.real_name != changeling.name)
-			text += " as [changeling.current.real_name]"
+		if(antag.current.real_name != antag.name)
+			text += " as [antag.current.real_name]"
 	else
 		text += "body destroyed"
 		changelingwin = 0
 	text += ")"
 
-	text += {"<br><b>Changeling ID:</b> [changeling_info.GetChangelingID()].
-<b>Genomes Absorbed:</b> [changeling_info.absorbedcount]"}
+	text += {"
+<b>Changeling ID:</b> [GetChangelingID()].
+<b>Genomes Absorbed:</b> [absorbedcount]"}
 
-	if(changeling.objectives.len)
+	if(antag.objectives.len)
 		var/count = 1
-		for(var/datum/objective/objective in changeling.objectives)
+		for(var/datum/objective/objective in antag.objectives)
 			if(objective.check_completion())
 				text += "<br><B>Objective #[count]</B>: [objective.explanation_text] <font color='green'><B>Success!</B></font>"
 				feedback_add_details("changeling_objective","[objective.type]|SUCCESS")

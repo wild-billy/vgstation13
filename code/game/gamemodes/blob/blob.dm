@@ -14,9 +14,6 @@ var/list/blob_nodes = list()
 	required_players_secret = 25
 	restricted_jobs = list("Cyborg", "AI", "Mobile MMI")
 
-	var/const/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
-	var/const/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
-
 	var/declared = 0
 
 	var/cores_to_spawn = 1

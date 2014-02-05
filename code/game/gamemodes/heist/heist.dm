@@ -18,9 +18,6 @@ VOX HEIST ROUNDTYPE
 	required_enemies = 4
 	recommended_enemies = 6
 
-	var/const/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
-	var/const/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
-
 	var/list/raid_objectives = list()     //Raid objectives.
 	var/list/obj/cortical_stacks = list() //Stacks for 'leave nobody behind' objective.
 
@@ -165,7 +162,7 @@ VOX HEIST ROUNDTYPE
 	//-All- vox raids have these two objectives. Failing them loses the game.
 	objs += new /datum/objective/heist/inviolate_crew
 	objs += new /datum/objective/heist/inviolate_death */
-	
+
 	if(prob(25))
 		raid_objectives += new /datum/objective/heist/kidnap
 	raid_objectives += new /datum/objective/heist/loot
