@@ -181,12 +181,12 @@ var/list/datum/power/changeling/powerinstances = list()
 
 
 // Modularchangling, totally stolen from the new player panel.  YAYY
-/datum/changeling/proc/EvolutionMenu()//The new one
+/antag_role/changeling/proc/EvolutionMenu()//The new one
 	set category = "Changeling"
 	set desc = "Level up!"
 
-	if(!usr || !usr.mind || !usr.mind.changeling)	return
-	src = usr.mind.changeling
+	if(!usr || !usr.mind || !usr.mind.antag_roles["changeling"])	return
+	src = usr.mind.antag_roles["changeling"]
 
 	if(!powerinstances.len)
 		for(var/P in powers)
@@ -445,7 +445,7 @@ var/list/datum/power/changeling/powerinstances = list()
 	usr << browse(dat, "window=powers;size=900x480")
 
 
-/datum/changeling/Topic(href, href_list)
+/antag_role/changeling/Topic(href, href_list)
 	..()
 	if(!ismob(usr))
 		return
@@ -455,12 +455,12 @@ var/list/datum/power/changeling/powerinstances = list()
 		if(!istype(M))
 			return
 		purchasePower(M, href_list["P"])
-		call(/datum/changeling/proc/EvolutionMenu)()
+		call(/antag_role/changeling/proc/EvolutionMenu)()
 
 
 
-/datum/changeling/proc/purchasePower(var/datum/mind/M, var/Pname, var/remake_verbs = 1)
-	if(!M || !M.changeling)
+/antag_role/changeling/proc/purchasePower(var/datum/mind/M, var/Pname, var/remake_verbs = 1)
+	if(!M || !M.antag_roles["changeling"])
 		return
 
 	var/datum/power/changeling/Thepower = Pname

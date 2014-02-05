@@ -725,7 +725,7 @@ LOOK FOR SURGERY.DM*/
 					return
 
 			if(3.0)
-				/*if(M.mind && M.mind.changeling)
+				/*if(M.mind && M.mind.antag_roles["changeling"])
 					user << "\red The neural tissue regrows before your eyes as you cut it."
 					return*/
 

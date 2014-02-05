@@ -303,14 +303,16 @@ var/list/department_radio_keys = list(
 				italics = 1
 
 			if("changeling")
-				if(mind && mind.changeling)
-					log_say("[key_name(src)] ([mind.changeling.changelingID]): [message]")
-					for(var/mob/Changeling in mob_list)
-						if(istype(Changeling, /mob/living/silicon)) continue //WHY IS THIS NEEDED?
-						if((Changeling.mind && Changeling.mind.changeling) || istype(Changeling, /mob/dead/observer))
-							Changeling << "<i><font color=#800080><b>[mind.changeling.changelingID]:</b> [message]</font></i>"
-						else if(istype(Changeling,/mob/dead/observer)  && (Changeling.client && Changeling.client.prefs.toggles & CHAT_GHOSTEARS))
-							Changeling << "<i><font color=#800080><b>[mind.changeling.changelingID] (:</b> <a href='byond://?src=\ref[Changeling];follow2=\ref[Changeling];follow=\ref[src]'>(Follow)</a> [message]</font></i>"
+				if(mind && mind.antag_roles["changeling"])
+					var/antag_role/changeling/changeling = mind.antag_roles["changeling"]
+					var/changeling_id=changeling.GetChangelingID()
+					log_say("[key_name(src)] ([changeling_id]): [message]")
+					for(var/mob/C in mob_list)
+						if(istype(C, /mob/living/silicon)) continue //WHY IS THIS NEEDED?
+						if((C.mind && C.mind.antag_roles["changeling"]))
+							C << "<i><font color=#800080><b>[changeling_id]:</b> [message]</font></i>"
+						else if(istype(C,/mob/dead/observer)  && (C.client && C.client.prefs.toggles & CHAT_GHOSTEARS))
+							C << "<i><font color=#800080><b>[changeling_id] (:</b> <a href='byond://?src=\ref[C];follow2=\ref[C];follow=\ref[src]'>(Follow)</a> [message]</font></i>"
 					return
 			else // headset, department channels.
 				if(iscarbon(src))

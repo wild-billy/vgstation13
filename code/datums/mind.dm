@@ -43,6 +43,8 @@ datum/mind
 
 	var/role_alt_title
 
+	var/list/antag_roles = list() // List of id = /antag_roles.
+
 	var/datum/job/assigned_job
 
 	var/list/kills=list()
@@ -52,7 +54,7 @@ datum/mind
 	var/has_been_rev = 0//Tracks if this mind has been a rev or not
 
 	var/datum/faction/faction 			//associated faction
-	var/datum/changeling/changeling		//changeling holder
+	//var/antag_role/changeling/changeling		//changeling holder
 	var/datum/vampire/vampire			//vampire holder
 
 	var/rev_cooldown = 0
@@ -66,16 +68,46 @@ datum/mind
 	//put this here for easier tracking ingame
 	var/datum/money_account/initial_account
 
+
+	proc/assignRole(var/antag_role/R)
+		// Assume we're being passed a string.
+		if(!istype(R))
+			R=ticker.antag_types[R]
+
+		antag_roles[R.id]=new R.type(src,R)
+		ticker.mode.add_player_role_association(R.id)
+
+	proc/unassignRole(var/antag_role/R)
+		// Assume we're being passed a string.
+		if(!istype(R))
+			R=ticker.antag_types[R]
+
+		var/antag_role/role=antag_roles[R.id]
+		role.Drop()
+
+	proc/QuickAssignRole(var/role_id)
+		assignRole(role_id)
+		var/antag_role/R=antag_roles[role_id]
+		for (var/datum/objective/O in R.ForgeObjectives())
+			O.owner = src
+			objectives += O
+		R.Greet(1)
+
 	proc/transfer_to(mob/living/new_character)
 		if(!istype(new_character))
 			error("transfer_to(): Some idiot has tried to transfer_to() a non mob/living mob. Please inform Carn")
 
+		for(var/antag_role/A in antag_roles)
+			A.PreMindTransfer(src)
+
 		if(current)					//remove ourself from our old body's mind variable
+			/*
 			if(changeling)
 				current.remove_changeling_powers()
-				current.verbs -= /datum/changeling/proc/EvolutionMenu
+				current.verbs -= /antag_role/changeling/proc/EvolutionMenu
 			if(vampire)
 				current.remove_vampire_powers()
+			*/
 			current.mind = null
 		if(new_character.mind)		//remove any mind currently in our new body's mind variable
 			new_character.mind.current = null
@@ -84,11 +116,14 @@ datum/mind
 
 		current = new_character		//link ourself to our new body
 		new_character.mind = src	//and link our new body to ourself
-
+		/*
 		if(changeling)
 			new_character.make_changeling()
 		if(vampire)
 			new_character.make_vampire()
+		*/
+		for(var/antag_role/A in antag_roles)
+			A.PostMindTransfer(src)
 		if(active)
 			new_character.key = key		//now transfer the key to link the client to our new body
 
@@ -227,11 +262,12 @@ datum/mind
 			if (ticker.mode.config_tag=="changeling" || ticker.mode.config_tag=="traitorchan")
 				text = uppertext(text)
 			text = "<i><b>[text]</b></i>: "
-			if (src in ticker.mode.changelings)
+			if (src in ticker.GetPlayersWithRole("changeling"))
 				text += "<b>YES</b>|<a href='?src=\ref[src];changeling=clear'>no</a>"
 				if (objectives.len==0)
 					text += "<br>Objectives are empty! <a href='?src=\ref[src];changeling=autoobjectives'>Randomize!</a>"
-				if( changeling && changeling.absorbed_dna.len && (current.real_name != changeling.absorbed_dna[1]) )
+				var/antag_role/changeling/changeling=antag_roles["changeling"]
+				if(changeling && changeling.absorbed_dna.len && (current.real_name != changeling.absorbed_dna[1]) )
 					text += "<br><a href='?src=\ref[src];changeling=initialdna'>Transform to initial appearance.</a>"
 			else
 				text += "<a href='?src=\ref[src];changeling=changeling'>yes</a>|<b>NO</b>"
@@ -715,26 +751,23 @@ datum/mind
 		else if (href_list["changeling"])
 			switch(href_list["changeling"])
 				if("clear")
-					if(src in ticker.mode.changelings)
-						ticker.mode.changelings -= src
-						special_role = null
-						current.remove_changeling_powers()
-						current.verbs -= /datum/changeling/proc/EvolutionMenu
-						if(changeling)	del(changeling)
-						current << "<FONT color='red' size = 3><B>You grow weak and lose your powers! You are no longer a changeling and are stuck in your current form!</B></FONT>"
-						log_admin("[key_name_admin(usr)] has de-changeling'ed [current].")
+					var/antag_role/changeling = antag_roles["changeling"]
+					changeling.Drop()
+					current << "<FONT color='red' size = 3><B>You grow weak and lose your powers! You are no longer a changeling and are stuck in your current form!</B></FONT>"
+					log_admin("[key_name_admin(usr)] has de-changeling'ed [current].")
 				if("changeling")
-					if(!(src in ticker.mode.changelings))
-						ticker.mode.changelings += src
-						ticker.mode.grant_changeling_powers(current)
-						special_role = "Changeling"
-						current << "<B><font color='red'>Your powers are awoken. A flash of memory returns to us...we are a changeling!</font></B>"
-						log_admin("[key_name_admin(usr)] has changeling'ed [current].")
+					assignRole(ticker.antag_types["changeling"])
+					current << "<B><font color='red'>Your powers are awoken. A flash of memory returns to us...we are a changeling!</font></B>"
+					log_admin("[key_name_admin(usr)] has changeling'ed [current].")
 				if("autoobjectives")
-					ticker.mode.forge_changeling_objectives(src)
-					usr << "\blue The objectives for changeling [key] have been generated. You can edit them and anounce manually."
+					var/antag_role/changeling = antag_roles["changeling"]
+					for(var/datum/objective/O in changeling.ForgeObjectives())
+						O.owner += src
+						objectives += O
+					usr << "\blue The objectives for changeling [key] have been generated. You can edit them. Remember to announce their objectives."
 
 				if("initialdna")
+					var/antag_role/changeling/changeling = antag_roles["changeling"]
 					if( !changeling || !changeling.absorbed_dna.len )
 						usr << "\red Resetting DNA failed!"
 					else
@@ -1107,12 +1140,7 @@ datum/mind
 			ticker.mode.equip_syndicate(current)
 
 	proc/make_Changling()
-		if(!(src in ticker.mode.changelings))
-			ticker.mode.changelings += src
-			ticker.mode.grant_changeling_powers(current)
-			special_role = "Changeling"
-			ticker.mode.forge_changeling_objectives(src)
-			ticker.mode.greet_changeling(src)
+		QuickAssignRole("changeling")
 
 	proc/make_Wizard()
 		if(!(src in ticker.mode.wizards))

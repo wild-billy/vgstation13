@@ -36,7 +36,22 @@ var/global/datum/controller/gameticker/ticker
 
 	var/triai = 0//Global holder for Triumvirate
 
+	var/list/antag_types=list()
+
+/datum/controller/gameticker/proc/RoleCount(var/role_id)
+	var/antag_role/R = ticker.antag_types[role_id]
+	return R.minds.len
+
+/datum/controller/gameticker/proc/GetPlayersWithRole(var/role_id)
+	var/antag_role/R = ticker.antag_types[role_id]
+	return R.minds
+
 /datum/controller/gameticker/proc/pregame()
+	antag_types.Cut()
+	for(var/antagtype in typesof(/antag_role) - /antag_role)
+		var/antag_role/A = new antagtype()
+		antag_types[A.id]=A
+
 	login_music = pick(\
 	'sound/music/space.ogg',\
 	'sound/music/traitor.ogg',\

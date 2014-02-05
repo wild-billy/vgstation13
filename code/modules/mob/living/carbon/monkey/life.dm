@@ -667,8 +667,9 @@
 
 
 	proc/handle_changeling()
-		if(mind && mind.changeling)
-			mind.changeling.regenerate()
+		if(mind && mind.antag_roles["changeling"])
+			var/antag_role/changeling/changeling=mind.antag_roles["changeling"]
+			changeling.regenerate()
 
 ///FIRE CODE
 	handle_fire()

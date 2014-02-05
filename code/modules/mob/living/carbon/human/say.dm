@@ -6,7 +6,7 @@
 	//Mimes dont speak! Changeling hivemind and emotes are allowed.
 	if(miming)
 		if(length(message) >= 2)
-			if(mind && mind.changeling)
+			if(mind && mind.antag_roles["changeling"])
 				if(copytext(message, 1, 2) != "*" && department_radio_keys[copytext(message, 1, 3)] != "changeling")
 					return
 				else
@@ -101,7 +101,7 @@
 		else if(istype(wear_mask, /obj/item/clothing/mask/horsehead))
 			var/obj/item/clothing/mask/horsehead/hoers = wear_mask
 			if(hoers.voicechange)
-				if(!(copytext(message, 1, 2) == "*" || (mind && mind.changeling && department_radio_keys[copytext(message, 1, 3)] != "changeling")))
+				if(!(copytext(message, 1, 2) == "*" || (mind && mind.antag_roles["changeling"] && department_radio_keys[copytext(message, 1, 3)] != "changeling")))
 					message = pick("NEEIIGGGHHHH!", "NEEEIIIIGHH!", "NEIIIGGHH!", "HAAWWWWW!", "HAAAWWW!")
 
 	if ((M_HULK in mutations) && health >= 25 && length(message))
@@ -168,8 +168,10 @@
 			return V.voice
 		else
 			return name
-	if(mind && mind.changeling && mind.changeling.mimicing)
-		return mind.changeling.mimicing
+	if(mind && mind.antag_roles["changeling"])
+		var/antag_role/changeling/changeling=mind.antag_roles["changeling"]
+		if(changeling.mimicing)
+			return changeling.mimicing
 	if(GetSpecialVoice())
 		return GetSpecialVoice()
 	return real_name

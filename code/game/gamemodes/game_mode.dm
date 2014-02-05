@@ -21,6 +21,8 @@
 	var/station_was_nuked = 0 //see nuclearbomb.dm and malfunction.dm
 	var/explosion_in_progress = 0 //sit back and relax
 	var/list/datum/mind/modePlayer = new
+	var/list/available_roles = new // What roles are used in this mode?
+	var/list/player_roles = new
 	var/list/restricted_jobs = list()	// Jobs it doesn't make sense to be.  I.E chaplain or AI cultist
 	var/list/protected_jobs = list()	// Jobs that can't be traitors
 	var/required_players = 0
@@ -33,7 +35,6 @@
 
 /datum/game_mode/proc/announce() //to be calles when round starts
 	world << "<B>Notice</B>: [src] did not define announce()"
-
 
 ///can_start()
 ///Checks to see if the game can be setup and ran with the current number of players or whatnot.
@@ -51,16 +52,97 @@
 			return 1
 	return 0
 
+/datum/game_mode/proc/add_player_role_association(var/datum/mind/M, var/role_id)
+	if(!(M in player_roles))
+		player_roles[M] = list(role_id)
+	else if(!(role_id in player_roles[M]))
+		var/list/mind_list = player_roles[M]
+		mind_list += role_id
+		player_roles[M] = mind_list
+
+/datum/game_mode/proc/remove_player_role_association(var/datum/mind/M, var/role_id)
+	if(role_id in player_roles[M])
+		var/list/mind_list = player_roles[M]
+		mind_list.Remove(role_id)
+		player_roles[M] = mind_list
+
 
 ///pre_setup()
 ///Attempts to select players for special roles the mode might have.
 /datum/game_mode/proc/pre_setup()
+	// People who are currently assigned roles.
+	player_roles=list()
+
+	// For each available role, select some players..
+	for(var/role_id in available_roles)
+		// Instantiate our role.
+		var/antag_role/role = ticker.antag_types[role_id]
+
+		// Do scaling, if needed.
+		if(!role.calculateRoleNumbers())
+			continue
+
+		// Select players who wanted to be this role.
+		var/list/available_minds = get_players_for_role(role.be_flag)//ticker.minds.Copy()
+
+		var/role_failed=0
+		if(role.flags & ANTAG_NEED_HOST)
+			if(available_minds.len < 2)
+				role_failed=1
+		else
+			if(available_minds.len < 1)
+				role_failed=1
+		if(role_failed)
+			log_admin("MODE FAILURE: [name]. NOT ENOUGH CANDIDATES FOR ROLE [role.name]!")
+			return 0 // not enough candidates for mode
+
+		// For up to X players (where X is between min and max players allowed in this role)
+		for(var/i=0;i<rand(role.min_players,role.max_players);i++)
+
+			// Pop a random mind off the queue
+			var/datum/mind/M = pick(available_minds)
+			available_minds.Remove(M)
+
+			// Check if they already have a role, or this role can be slapped on top of other roles
+			if(M in player_roles && role.flags & ANTAG_ADDITIVE)
+				continue
+
+			// Do a sanity check
+			if(role.CanBeAssigned(M))
+
+				// Assign the role
+				M.assignRole(role)
+
+	// Run PreSetup hooks on all assigned roles.
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.antag_roles[rid]
+				R.OnPreSetup(M)
 	return 1
 
 
 ///post_setup()
 ///Everyone should now be on the station and have their normal gear.  This is the place to give the special roles extra things
 /datum/game_mode/proc/post_setup()
+
+	// Run PostSetup hooks on all assigned roles.
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.antag_roles[rid]
+				R.antag = M.current
+				// Select a random partner, if needed.
+				if(R.flags & ANTAG_NEED_HOST)
+					for(var/datum/mind/HM in ticker.minds)
+						if(HM.current && R.CanBeHost(HM))
+							R.host=HM.current
+
+				if(!R.OnPostSetup())
+					log_admin("MODE FAILURE: [name] UNABLE TO COMPLETE POST-SETUP FOR ROLE [R.name] ON [R.antag.current]!")
+					return 0
+
+
 	spawn (ROUNDSTART_LOGOUT_REPORT_TIME)
 		display_roundstart_logout_report()
 
@@ -76,6 +158,11 @@
 ///process()
 ///Called by the gameticker
 /datum/game_mode/proc/process()
+	for(var/datum/mind/M in ticker.minds)
+		if(M.antag_roles.len>0)
+			for(var/rid in M.antag_roles)
+				var/antag_role/R=M.antag_roles[rid]
+				R.process()
 	return 0
 
 
