@@ -12,7 +12,7 @@ var/list/blob_nodes = list()
 
 	required_players = 15
 	required_players_secret = 25
-	restricted_jobs = list("Cyborg", "AI", "Mobile MMI")
+	restricted_jobs = SILICON_JOBS
 
 	var/declared = 0
 
@@ -24,55 +24,19 @@ var/list/blob_nodes = list()
 
 	var/list/infected_crew = list()
 
-/datum/game_mode/blob/pre_setup()
-
-	var/list/possible_blobs = get_players_for_role(BE_ALIEN)
-
-	// stop setup if no possible traitors
-	if(!possible_blobs.len)
-		return 0
-
-	cores_to_spawn = max(round(num_players()/players_per_core, 1), 1)
-
-	blobwincount = initial(blobwincount) * cores_to_spawn
-
-
-	for(var/j = 0, j < cores_to_spawn, j++)
-		if (!possible_blobs.len)
-			break
-		var/datum/mind/blob = pick(possible_blobs)
-		infected_crew += blob
-		blob.special_role = "Blob"
-		log_game("[blob.key] (ckey) has been selected as a Blob")
-		possible_blobs -= blob
-
-	if(!infected_crew.len)
-		return 0
-
-	return 1
-
+	no_intercept=1 // We do it ourselves.
 
 /datum/game_mode/blob/announce()
 	world << {"<B>The current game mode is - <font color='green'>Blob</font>!</B>
 <B>A dangerous alien organism is rapidly spreading throughout the station!</B>
 You must kill it all while minimizing the damage to the station."}
 
-
-/datum/game_mode/blob/proc/greet_blob(var/datum/mind/blob)
-	blob.current << {"<B>\red You are infected by the Blob!</B>
-<b>Your body is ready to give spawn to a new blob core which will eat this station.</b>
-<b>Find a good location to spawn the core and then take control and overwhelm the station!</b>
-<b>When you have found a location, wait until you spawn; this will happen automatically and you cannot speed up the process.</b>
-<b>If you go outside of the station level, or in space, then you will die; make sure your location has lots of ground to cover.</b>"}
-	return
-
 /datum/game_mode/blob/proc/show_message(var/message)
 	for(var/datum/mind/blob in infected_crew)
 		blob.current << message
 
 /datum/game_mode/blob/proc/burst_blobs()
-	for(var/datum/mind/blob in infected_crew)
-
+	for(var/datum/mind/blob in ticker.GetPlayersWithRole("blob"))
 		var/client/blob_client = null
 		var/turf/location = null
 
@@ -95,9 +59,6 @@ You must kill it all while minimizing the damage to the station."}
 
 
 /datum/game_mode/blob/post_setup()
-
-	for(var/datum/mind/blob in infected_crew)
-		greet_blob(blob)
 
 	if(emergency_shuttle)
 		emergency_shuttle.always_fake_recall = 1

@@ -55,7 +55,15 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 		if(P.isVerb)
 			antag.current.verbs -= P.verbpath
 
-/antag_role/changeling/PostMindTransfer()
+/antag_role/changeling/proc/GetChangelingID()
+	return "[honorific] [changeling_id]"
+
+/antag_role/changeling/PreMindTransfer(var/datum/mind/M)
+	M.current.verbs -= /antag_role/changeling/proc/EvolutionMenu
+	M.current.remove_changeling_powers()
+
+/antag_role/changeling/PostMindTransfer(var/datum/mind/M)
+	antag.current.make_changeling()
 	if(antag.current.gender == FEMALE)
 		honorific = "Ms."
 	else
@@ -68,16 +76,6 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 			possible_changeling_IDs -= changeling_id
 		else
 			changeling_id = rand(1,999)
-
-/antag_role/changeling/proc/GetChangelingID()
-	return "[honorific] [changeling_id]"
-
-/antag_role/changeling/PreMindTransfer(var/datum/mind/M)
-	M.current.verbs -= /antag_role/changeling/proc/EvolutionMenu
-	M.current.remove_changeling_powers()
-
-/antag_role/changeling/PostMindTransfer(var/datum/mind/M)
-	M.current.make_changeling()
 
 /antag_role/changeling/ForgeObjectives()
 	var/list/objectives = list()

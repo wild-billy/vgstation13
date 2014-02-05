@@ -6,7 +6,9 @@
 	id="borer"
 	flags = ANTAG_MIXABLE | ANTAG_NEED_HOST
 	protected_jobs = SILICON_JOBS
-	special_role="Borer"
+	special_role = "Borer"
+	disallow_job = 1
+	be_flag = BE_ALIEN
 
 	var/list/found_vents[0]
 
