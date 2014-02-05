@@ -11,10 +11,7 @@
 	var/list/found_vents[0]
 
 /antag_role/borer/New(var/datum/mind/M=null,var/antag_role/borer/parent=null)
-	if(M)
-		if(ticker.mode.config_tag=="borer")
-			if(!(M in ticker.mode:borers))
-				ticker.mode:borers += M
+	..()
 
 	// Transfer "static" data from parent.
 	if(parent)
@@ -58,9 +55,38 @@
 
 	return objectives
 
-/antag_role/borer/Greet()
-	antag << "<B>\red You are a Cortical Borer!</B>"
+/antag_role/borer/Greet(you_are=1)
+	if(you_are)
+		antag << "<B>\red You are a Cortical Borer!</B>"
 
 	var/i=0
 	for(var/datum/objective/objective in antag.objectives)
 		antag << "<B>Objective #[i++]</B>: [objective.explanation_text]"
+
+
+/antag_role/borer/Declare()
+	var/borerwin = 1
+	if((antag.current) && istype(antag.current,/mob/living/simple_animal/borer))
+		world << "<B>The borer was [antag.current.key].</B>"
+		world << "<B>The last host was [antag.current:host.key].</B>"
+
+		var/count = 1
+		for(var/datum/objective/objective in antag.objectives)
+			if(objective.check_completion())
+				world << "<B>Objective #[count]</B>: [objective.explanation_text] \green <B>Success</B>"
+				feedback_add_details("borer_objective","[objective.type]|SUCCESS")
+			else
+				world << "<B>Objective #[count]</B>: [objective.explanation_text] \red Failed"
+				feedback_add_details("borer_objective","[objective.type]|FAIL")
+				borerwin = 0
+			count++
+
+	else
+		borerwin = 0
+
+	if(borerwin)
+		world << "<B>The borer was successful!<B>"
+		feedback_add_details("borer_success","SUCCESS")
+	else
+		world << "<B>The borer has failed!<B>"
+		feedback_add_details("borer_success","FAIL")

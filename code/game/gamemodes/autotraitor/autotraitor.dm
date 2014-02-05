@@ -1,7 +1,5 @@
 //This is a beta game mode to test ways to implement an "infinite" traitor round in which more traitors are automatically added in as needed.
 //Automatic traitor adding is complete pending the inevitable bug fixes.  Need to add a respawn system to let dead people respawn after 30 minutes or so.
-
-
 /datum/game_mode/traitor/autotraitor
 	name = "AutoTraitor"
 	config_tag = "autotraitor"

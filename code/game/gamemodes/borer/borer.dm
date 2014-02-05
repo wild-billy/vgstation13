@@ -6,13 +6,11 @@
 	config_tag = "borer"
 	required_players = 3
 	required_players_secret = 10
-	restricted_jobs = list("AI", "Cyborg", "Mobile MMI")
+	restricted_jobs = SILICON_JOBS
 	recommended_enemies = 2 // need at least a borer and a host
 	votable = 0 // temporarily disable this mode for voting
 	var/const/waittime_l = 600 //lower bound on time before intercept arrives (in tenths of seconds)
 	var/const/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
-
-	var/list/borers=list()
 
 /datum/game_mode/borer/announce()
 	world << "<B>The current game mode is - Cortical Borer!</B>"
@@ -31,7 +29,7 @@
 /datum/game_mode/borer/post_setup()
 	if(!..()) return 0
 
-	log_admin("Created [borers.len] borers.")
+	log_admin("Created [ticker.GetPlayersWithRole("borer")] borers.")
 
 	spawn (rand(waittime_l, waittime_h))
 		send_intercept()
@@ -50,7 +48,7 @@
 
 /datum/game_mode/borer/check_finished()
 	var/borers_alive = 0
-	for(var/datum/mind/borer in borers)
+	for(var/datum/mind/borer in ticker.GetPlayersWithRole("borer"))
 		if(!istype(borer.current,/mob/living))
 			continue
 		if(borer.current.stat==2)
@@ -61,32 +59,3 @@
 		return ..()
 	else
 		return 1
-
-/datum/game_mode/borer/proc/auto_declare_completion_borer()
-	for(var/datum/mind/borer in borers)
-		var/borerwin = 1
-		if((borer.current) && istype(borer.current,/mob/living/simple_animal/borer))
-			world << "<B>The borer was [borer.current.key].</B>"
-			world << "<B>The last host was [borer.current:host.key].</B>"
-
-			var/count = 1
-			for(var/datum/objective/objective in borer.objectives)
-				if(objective.check_completion())
-					world << "<B>Objective #[count]</B>: [objective.explanation_text] \green <B>Success</B>"
-					feedback_add_details("borer_objective","[objective.type]|SUCCESS")
-				else
-					world << "<B>Objective #[count]</B>: [objective.explanation_text] \red Failed"
-					feedback_add_details("borer_objective","[objective.type]|FAIL")
-					borerwin = 0
-				count++
-
-		else
-			borerwin = 0
-
-		if(borerwin)
-			world << "<B>The borer was successful!<B>"
-			feedback_add_details("borer_success","SUCCESS")
-		else
-			world << "<B>The borer has failed!<B>"
-			feedback_add_details("borer_success","FAIL")
-	return 1

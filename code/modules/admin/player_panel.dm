@@ -409,6 +409,11 @@
 				if(1)
 					dat += "ETA: <a href='?src=\ref[src];edit_shuttle_time=1'>[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]</a><BR>"
 		dat += "<a href='?src=\ref[src];delay_round_end=1'>[ticker.delay_end ? "End Round Normally" : "Delay Round End"]</a><br>"
+		for(var/role_id in ticker.antag_types)
+			var/antag_role/global_role = ticker.antag_types[role_id]
+			if(global_role.minds.len>0)
+				dat += global_role.CheckAntags()
+		/*
 		if(ticker.mode.syndicates.len)
 			dat += "<br><table cellspacing=5><tr><td><B>Syndicates</B></td><td></td></tr>"
 			for(var/datum/mind/N in ticker.mode.syndicates)
@@ -473,22 +478,6 @@
 					dat += "<td>[mob_loc.loc]</td></tr>"
 				else
 					dat += "<tr><td><i>Head not found!</i></td></tr>"
-			dat += "</table>"
-
-		if(ticker.RoleCount("changeling") > 0)
-			dat += "<br><table cellspacing=5><tr><td><B>Changelings</B></td><td></td><td></td></tr>"
-			for(var/datum/mind/changeling in ticker.GetPlayersWithRole("changeling"))
-				var/mob/M = changeling.current
-				if(M)
-
-					// AUTOFIXED BY fix_string_idiocy.py
-					// C:\Users\Rob\Documents\Projects\vgstation13\code\modules\admin\player_panel.dm:455: dat += "<tr><td><a href='?src=\ref[src];adminplayeropts=\ref[M]'>[M.real_name]</a>[M.client ? "" : " <i>(logged out)</i>"][M.stat == 2 ? " <b><font color=red>(DEAD)</font></b>" : ""]</td>"
-					dat += {"<tr><td><a href='?src=\ref[src];adminplayeropts=\ref[M]'>[M.real_name]</a>[M.client ? "" : " <i>(logged out)</i>"][M.stat == 2 ? " <b><font color=red>(DEAD)</font></b>" : ""]</td>
-						<td><A href='?src=\ref[usr];priv_msg=\ref[M]'>PM</A></td>
-						<td><A HREF='?src=\ref[src];traitor=\ref[M]'>Show Objective</A></td></tr>"}
-					// END AUTOFIX
-				else
-					dat += "<tr><td><i>Changeling not found!</i></td></tr>"
 			dat += "</table>"
 
 		if(ticker.mode.wizards.len > 0)
@@ -628,7 +617,7 @@
 						<td><A href='?priv_msg=\ref[M]'>PM</A></td>"}
 					// END AUTOFIX
 			dat += "</table>"
-
+		*/
 		dat += "</body></html>"
 		usr << browse(dat, "window=roundstatus;size=400x500")
 	else

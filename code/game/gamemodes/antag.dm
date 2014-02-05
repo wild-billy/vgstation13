@@ -1,11 +1,14 @@
 /**
 * Used in Mixed Mode, also simplifies equipping antags for other gamemodes and
 * for the traitor panel.
+*
+* By N3X15
 */
 
 #define ANTAG_MIXABLE   1 // Can be used in mixed mode
 #define ANTAG_NEED_HOST 2 // Antag needs a host/partner
 #define ANTAG_ADDITIVE  4 // Antag can be added on top of another antag.
+#define ANTAG_GOOD      8 // Role is not actually an antag. (Used for GetAllBadMinds() etc)
 
 /antag_role
 	//////////////////////////////
@@ -16,6 +19,8 @@
 
 	// Displayed name of the antag type
 	var/name = null
+
+	var/plural_name = null
 
 	// Various flags and things.
 	var/flags = 0
@@ -57,6 +62,8 @@
 		if(!(M in parent.minds))
 			parent.minds += M
 		ticker.mode.add_player_role_association(M,parent.id)
+	if(!plural_name)
+		plural_name="[name]s"
 
 // Remove
 /antag_role/proc/Drop()
@@ -127,3 +134,26 @@
 
 /antag_role/proc/PostMindTransfer(var/datum/mind/M)
 	return
+
+// Dump a table for Check Antags.
+/antag_role/proc/CheckAntags()
+	// HOW DOES EVERYONE MISS FUCKING COLSPAN
+	// AM I THE ONLY ONE WHO REMEMBERS XHTML
+	var/dat = "<br><table cellspacing=5><tr><td colspan=\"3\"><B>[plural_name]</B></td></tr>"
+	for(var/datum/mind/mind in minds)
+		var/mob/M=mind.current
+		//var/antag_role/R=mind.antag_roles[id]
+		dat += {"<tr><td><a href='?src=\ref[src];adminplayeropts=\ref[M]'>[M.real_name]</a>[M.client ? "" : " <i>(logged out)</i>"][M.stat == 2 ? " <b><font color=red>(DEAD)</font></b>" : ""]</td>
+						<td><A href='?src=\ref[usr];priv_msg=\ref[M]'>PM</A></td>
+						<td><A HREF='?src=\ref[src];traitor=\ref[M]'>Show Objective</A></td></tr>"}
+	dat += "</table>"
+	return dat
+
+/antag_role/proc/DeclareAll()
+
+	for(var/datum/mind/mind in minds)
+		var/antag_role/R=mind.antag_roles[id]
+		R.Declare()
+
+/antag_role/proc/Declare()
+	world << "\red <b>[type] didn't make a Declare() override!</b>"

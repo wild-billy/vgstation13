@@ -46,6 +46,19 @@ var/global/datum/controller/gameticker/ticker
 	var/antag_role/R = ticker.antag_types[role_id]
 	return R.minds
 
+/datum/controller/gameticker/proc/GetAllGoodMinds()
+	return minds - GetAllBadMinds()
+
+/datum/controller/gameticker/proc/GetAllBadMinds()
+	var/list/bad_minds[0]
+	for(var/role_id in antag_types)
+		var/antag_role/R = antag_types[role_id]
+		if(R.flags & ANTAG_GOOD)
+			continue
+
+		bad_minds |= R.minds
+	return bad_minds
+
 /datum/controller/gameticker/proc/pregame()
 	antag_types.Cut()
 	for(var/antagtype in typesof(/antag_role) - /antag_role)

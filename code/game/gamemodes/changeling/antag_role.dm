@@ -28,6 +28,7 @@
 	var/mimicing = ""
 
 /antag_role/changeling/New(var/datum/mind/M=null,var/antag_role/changeling/parent=null)
+	..()
 	if(config.protect_roles_from_antagonist)
 		protected_jobs |= SECURITY_JOBS
 
@@ -134,3 +135,49 @@
 			chosen_dna = DNA
 			break
 	return chosen_dna
+
+/antag_role/changeling/DeclareAll()
+	var/text = "<FONT size = 2><B>The changelings were:</B></FONT>"
+	for(var/datum/mind/mind in minds)
+		var/antag_role/R=mind.antag_roles[id]
+		R.Declare()
+
+/antag_role/changeling/Declare()
+	var/changelingwin = 1
+
+	text += "<br><br>[changeling.key] was [changeling.name] ("
+	if(changeling.current)
+		if(changeling.current.stat == DEAD)
+			text += "died"
+		else
+			text += "survived"
+		if(changeling.current.real_name != changeling.name)
+			text += " as [changeling.current.real_name]"
+	else
+		text += "body destroyed"
+		changelingwin = 0
+	text += ")"
+
+	text += {"<br><b>Changeling ID:</b> [changeling_info.GetChangelingID()].
+<b>Genomes Absorbed:</b> [changeling_info.absorbedcount]"}
+
+	if(changeling.objectives.len)
+		var/count = 1
+		for(var/datum/objective/objective in changeling.objectives)
+			if(objective.check_completion())
+				text += "<br><B>Objective #[count]</B>: [objective.explanation_text] <font color='green'><B>Success!</B></font>"
+				feedback_add_details("changeling_objective","[objective.type]|SUCCESS")
+			else
+				text += "<br><B>Objective #[count]</B>: [objective.explanation_text] <font color='red'>Fail.</font>"
+				feedback_add_details("changeling_objective","[objective.type]|FAIL")
+				changelingwin = 0
+			count++
+
+	if(changelingwin)
+		text += "<br><font color='green'><B>The changeling was successful!</B></font>"
+		feedback_add_details("changeling_success","SUCCESS")
+	else
+		text += "<br><font color='red'><B>The changeling has failed.</B></font>"
+		feedback_add_details("changeling_success","FAIL")
+
+	world << text

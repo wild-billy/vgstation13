@@ -124,8 +124,7 @@ var/ninja_confirmed_selection = 0
 	/*No longer need to determine what mode it is since bad guys are basically universal.
 	And there is now a mode with two types of bad guys.*/
 
-	var/possible_bad_dudes[] = list(current_mode.traitors,current_mode.head_revolutionaries,current_mode.head_revolutionaries,
-	                                current_mode.cult,current_mode.wizards,current_mode.changelings,current_mode.syndicates)
+	var/possible_bad_dudes[] = ticker.GetAllBadMinds()
 	for(var/list in possible_bad_dudes)//For every possible antagonist type.
 		for(current_mind in list)//For each mind in that list.
 			if(current_mind.current&&current_mind.current.stat!=2)//If they are not destroyed and not dead.

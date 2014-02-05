@@ -9,43 +9,8 @@
 /datum/event/blob/announce()
 	burst_blobs()
 
-
-#define ROLE_TYPE_FACE 0
-#define ROLE_TYPE_HEEL 1
-/proc/get_minds_in_role(var/roletype)
-	var/antagonist_list[] = list()//The main bad guys. Evil minds that plot destruction.
-	var/protagonist_list[] = ticker.mode.get_living_heads()//The good guys. Mostly Heads. Who are alive.
-
-	//var/xeno_list[] = list()//Aliens.
-	//var/commando_list[] = list()//Commandos.
-
-	var/datum/mind/current_mind
-
-	var/possible_bad_dudes[] = list(
-		ticker.mode.traitors,
-		ticker.mode.head_revolutionaries,
-		ticker.mode.head_revolutionaries,
-	    ticker.mode.cult,
-	    ticker.mode.wizards,
-	    ticker.mode.changelings,
-	    ticker.mode.syndicates)
-	for(var/list in possible_bad_dudes)//For every possible antagonist type.
-		for(current_mind in list)//For each mind in that list.
-			if(current_mind.current&&current_mind.current.stat!=2 && current_mind.current.client && !current_mind.current.client.is_afk())//If they are not destroyed and not dead.
-				antagonist_list += current_mind//Add them.
-
-	if(protagonist_list.len)//If the mind is both a protagonist and antagonist.
-		for(current_mind in protagonist_list)
-			if(current_mind in antagonist_list)
-				protagonist_list -= current_mind//We only want it in one list.
-
-	if(roletype==ROLE_TYPE_FACE)
-		return protagonist_list
-	else
-		return antagonist_list
-
 /datum/event/blob/start()
-	var/list/possible_blobs = get_minds_in_role(ROLE_TYPE_FACE)
+	var/list/possible_blobs = ticker.GetAllGoodMinds()
 	if (!possible_blobs.len)
 		return
 	for(var/mob/living/G in possible_blobs)
