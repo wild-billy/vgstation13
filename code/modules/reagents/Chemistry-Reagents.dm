@@ -619,7 +619,7 @@ datum
 
 			on_mob_life(var/mob/living/M as mob,var/alien)
 				if(ishuman(M))
-					if((M.mind in ticker.mode.cult) && prob(10))
+					if((M.mind.antag_roles["cultist"]) && prob(10))
 						M << "\blue A cooling sensation from inside you brings you an untold calmness."
 						ticker.mode.remove_cultist(M.mind)
 						for(var/mob/O in viewers(M, null))

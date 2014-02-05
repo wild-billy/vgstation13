@@ -135,25 +135,52 @@
 /antag_role/proc/PostMindTransfer(var/datum/mind/M)
 	return
 
-// Dump a table for Check Antags.
+// Dump a table for Check Antags. GLOBAL
 /antag_role/proc/CheckAntags()
 	// HOW DOES EVERYONE MISS FUCKING COLSPAN
-	// AM I THE ONLY ONE WHO REMEMBERS XHTML
+	// AM I THE ONLY ONE WHO REMEMBERS XHTML?
 	var/dat = "<br><table cellspacing=5><tr><td colspan=\"3\"><B>[plural_name]</B></td></tr>"
 	for(var/datum/mind/mind in minds)
 		var/mob/M=mind.current
 		//var/antag_role/R=mind.antag_roles[id]
 		dat += {"<tr><td><a href='?src=\ref[src];adminplayeropts=\ref[M]'>[M.real_name]</a>[M.client ? "" : " <i>(logged out)</i>"][M.stat == 2 ? " <b><font color=red>(DEAD)</font></b>" : ""]</td>
 						<td><A href='?src=\ref[usr];priv_msg=\ref[M]'>PM</A></td>
-						<td><A HREF='?src=\ref[src];traitor=\ref[M]'>Show Objective</A></td></tr>"}
+						<td><A href='?src=\ref[src];traitor=\ref[M]'>Show Objective</A></td></tr>"}
 	dat += "</table>"
 	return dat
 
 /antag_role/proc/DeclareAll()
-
 	for(var/datum/mind/mind in minds)
 		var/antag_role/R=mind.antag_roles[id]
 		R.Declare()
 
 /antag_role/proc/Declare()
 	world << "\red <b>[type] didn't make a Declare() override!</b>"
+
+// Called from the global instance, NOT the one in /datum/mind!
+/antag_role/proc/EditMemory(var/datum/mind/M)
+	return {"<br /><b><i>[name]</i></b>: \[NO EditMemory() FOR THIS ROLE\]"}
+
+// DO NOT OVERRIDE.
+/antag_role/Topic(href, href_list)
+	if(!check_rights(R_ADMIN)) return 1
+
+	if(!href_list["mind"])
+		usr << "\red BUG: mind variable not specified in Topic([href])!"
+		return
+
+	var/datum/mind/M = locate(href_list["mind"])
+	if(!M)
+		return
+
+	if("auto_objectives" in href_list)
+		var/antag_role/R = M.antag_roles[href_list["auto_objectives"]]
+		for(var/datum/objective/O in R.ForgeObjectives())
+			O.owner=M
+			M.objectives += O
+		usr << "\blue The objectives for [M.key] have been generated. You can edit them. Remember to announce their objectives."
+		return
+
+// USE THIS INSTEAD (global)
+/antag_role/proc/RoleTopic(href, href_list, var/datum/mind/M)
+	return

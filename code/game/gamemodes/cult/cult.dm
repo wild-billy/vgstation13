@@ -1,12 +1,7 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
 
-/datum/game_mode
-	var/list/datum/mind/cult = list()
-	var/list/allwords = list("travel","self","see","hell","blood","join","tech","destroy", "other", "hide")
-
-
 /proc/iscultist(mob/living/M as mob)
-	return istype(M) && M.mind && ticker && ticker.mode && (M.mind in ticker.mode.cult)
+	return istype(M) && M.mind && ticker && ticker.mode && (M.mind.antag_roles["cultist"])
 
 /proc/is_convertable_to_cult(datum/mind/mind)
 	if(!istype(mind))	return 0
@@ -33,7 +28,8 @@
 	var/datum/mind/sacrifice_target = null
 	var/finished = 0
 
-	var/list/startwords = list("blood","join","self","hell")
+	startwords = list("blood","join","self","hell")
+	allwords = list("travel","self","see","hell","blood","join","tech","destroy", "other", "hide")
 
 	var/list/objectives = list()
 
@@ -51,103 +47,33 @@
 
 
 /datum/game_mode/cult/pre_setup()
+	if(!..()) return 0
+	// This is absolute shit, but I don't feel like rewriting this shit. - N3X
 	if(prob(50))
 		objectives += "survive"
 		objectives += "sacrifice"
 	else
 		objectives += "eldergod"
 		objectives += "sacrifice"
-
-	if(config.protect_roles_from_antagonist)
-		restricted_jobs += protected_jobs
-
-	var/list/cultists_possible = get_players_for_role(BE_CULTIST)
-	for(var/datum/mind/player in cultists_possible)
-		for(var/job in restricted_jobs)//Removing heads and such from the list
-			if(player.assigned_role == job)
-				cultists_possible -= player
-
-	for(var/cultists_number = 1 to max_cultists_to_start)
-		if(!cultists_possible.len)
-			break
-		var/datum/mind/cultist = pick(cultists_possible)
-		cultists_possible -= cultist
-		cult += cultist
-
-	return (cult.len>0)
-
+	return 1
 
 /datum/game_mode/cult/post_setup()
-	modePlayer += cult
+	modePlayer += ticker.GetPlayersWithRole("cultist")
+
 	if("sacrifice" in objectives)
 		var/list/possible_targets = get_unconvertables()
 
 		if(!possible_targets.len)
 			for(var/mob/living/carbon/human/player in player_list)
-				if(player.mind && !(player.mind in cult))
+				if(player.mind && !player.mind.antag_roles["cultist"])
 					possible_targets += player.mind
 
 		if(possible_targets.len > 0)
 			sacrifice_target = pick(possible_targets)
-
-	for(var/datum/mind/cult_mind in cult)
-		equip_cultist(cult_mind.current)
-		grant_runeword(cult_mind.current)
-		update_cult_icons_added(cult_mind)
-		cult_mind.current << "\blue You are a member of the cult!"
-		memoize_cult_objectives(cult_mind)
-		cult_mind.special_role = "Cultist"
 	if(!mixed)
 		spawn (rand(waittime_l, waittime_h))
 			send_intercept()
 	..()
-
-
-/datum/game_mode/cult/proc/memoize_cult_objectives(var/datum/mind/cult_mind)
-	for(var/obj_count = 1,obj_count <= objectives.len,obj_count++)
-		var/explanation
-		switch(objectives[obj_count])
-			if("survive")
-				explanation = "Our knowledge must live on. Make sure at least [acolytes_needed] acolytes escape on the shuttle to spread their work on an another station."
-			if("sacrifice")
-				if(sacrifice_target)
-					explanation = "Sacrifice [sacrifice_target.name], the [sacrifice_target.assigned_role]. You will need the sacrifice rune (Hell blood join) and three acolytes to do so."
-				else
-					explanation = "Free objective."
-			if("eldergod")
-				explanation = "Summon Nar-Sie via the use of the appropriate rune (Hell join self). It will only work if nine cultists stand on and around it."
-		cult_mind.current << "<B>Objective #[obj_count]</B>: [explanation]"
-		cult_mind.memory += "<B>Objective #[obj_count]</B>: [explanation]<BR>"
-	cult_mind.current << "The convert rune is join blood self"
-	cult_mind.memory += "The convert rune is join blood self<BR>"
-
-
-/datum/game_mode/proc/equip_cultist(mob/living/carbon/human/mob)
-	if(!istype(mob))
-		return
-
-	if (mob.mind)
-		if (mob.mind.assigned_role == "Clown")
-			mob << "Your training has allowed you to overcome your clownish nature, allowing you to wield weapons without harming yourself."
-			mob.mutations.Remove(M_CLUMSY)
-
-
-	var/obj/item/weapon/paper/talisman/supply/T = new(mob)
-	var/list/slots = list (
-		"backpack" = slot_in_backpack,
-		"left pocket" = slot_l_store,
-		"right pocket" = slot_r_store,
-		"left hand" = slot_l_hand,
-		"right hand" = slot_r_hand,
-	)
-	var/where = mob.equip_in_one_of_slots(T, slots, EQUIP_FAILACTION_DROP)
-	if (!where)
-		mob << "Unfortunately, you weren't able to get a talisman. This is very bad and you should adminhelp immediately."
-	else
-		mob << "You have a talisman in your [where], one that will help you start the cult on this station. Use it well and remember - there are others."
-		mob.update_icons()
-		return 1
-
 
 /datum/game_mode/cult/grant_runeword(mob/living/carbon/human/cult_mob, var/word)
 	if (!word)
@@ -170,31 +96,26 @@
 /datum/game_mode/proc/add_cultist(datum/mind/cult_mind) //BASE
 	if (!istype(cult_mind))
 		return 0
-	if(!(cult_mind in cult) && is_convertable_to_cult(cult_mind))
-		cult += cult_mind
+	if(!cult_mind.antag_roles["cultist"] && is_convertable_to_cult(cult_mind))
+		cult_mind.assignRole("cultist")
 		update_cult_icons_added(cult_mind)
-		return 1
-
 
 /datum/game_mode/cult/add_cultist(datum/mind/cult_mind) //INHERIT
 	if (!..(cult_mind))
 		return
-	memoize_cult_objectives(cult_mind)
-
+	var/antag_role/cultist/cultist = cult_mind.antag_roles["cultist"]
+	cultist.MemorizeCultObjectives()
 
 /datum/game_mode/proc/remove_cultist(datum/mind/cult_mind, show_message = 1)
-	if(cult_mind in cult)
-		cult -= cult_mind
-		cult_mind.current << "\red <FONT size = 3><B>An unfamiliar white light flashes through your mind, cleansing the taint of the dark-one and the memories of your time as his servant with it.</B></FONT>"
-		cult_mind.memory = ""
-		update_cult_icons_removed(cult_mind)
+	if(cult_mind.antag_roles["cultist"])
+		cult_mind.unassignRole("cultist")
 		if(show_message)
 			for(var/mob/M in viewers(cult_mind.current))
 				M << "<FONT size = 3>[cult_mind.current] looks like they just reverted to their old faith!</FONT>"
-		log_admin("[cult_mind.current] ([ckey(cult_mind.current.key)] has been deconverted from the cult")
 
-/datum/game_mode/proc/update_all_cult_icons()
+/proc/update_all_cult_icons()
 	spawn(0)
+		var/list/cult=ticker.GetPlayersWithRole("cultist")
 		for(var/datum/mind/cultist in cult)
 			if(cultist.current)
 				if(cultist.current.client)
@@ -211,9 +132,9 @@
 							cultist.current.client.images += I
 
 
-/datum/game_mode/proc/update_cult_icons_added(datum/mind/cult_mind)
+/proc/update_cult_icons_added(datum/mind/cult_mind)
 	spawn(0)
-		for(var/datum/mind/cultist in cult)
+		for(var/datum/mind/cultist in ticker.GetPlayersWithRole("cultist"))
 			if(cultist.current)
 				if(cultist.current.client)
 					var/I = image('icons/mob/mob.dmi', loc = cult_mind.current, icon_state = "cult")
@@ -224,9 +145,9 @@
 					cult_mind.current.client.images += J
 
 
-/datum/game_mode/proc/update_cult_icons_removed(datum/mind/cult_mind)
+/proc/update_cult_icons_removed(datum/mind/cult_mind)
 	spawn(0)
-		for(var/datum/mind/cultist in cult)
+		for(var/datum/mind/cultist in ticker.GetPlayersWithRole("cultist"))
 			if(cultist.current)
 				if(cultist.current.client)
 					for(var/image/I in cultist.current.client.images)
@@ -263,7 +184,7 @@
 
 /datum/game_mode/cult/proc/check_survive()
 	acolytes_survived = 0
-	for(var/datum/mind/cult_mind in cult)
+	for(var/datum/mind/cult_mind in ticker.GetPlayersWithRole("cultist"))
 		if (cult_mind.current && cult_mind.current.stat!=2)
 			var/area/A = get_area(cult_mind.current )
 			if ( is_type_in_list(A, centcom_areas))
@@ -322,23 +243,3 @@
 	world << text
 	..()
 	return 1
-
-
-/datum/game_mode/proc/auto_declare_completion_cult()
-	if( cult.len || (ticker && istype(ticker.mode,/datum/game_mode/cult)) )
-		var/text = "<FONT size = 2><B>The cultists were:</B></FONT>"
-		for(var/datum/mind/cultist in cult)
-
-			text += "<br>[cultist.key] was [cultist.name] ("
-			if(cultist.current)
-				if(cultist.current.stat == DEAD)
-					text += "died"
-				else
-					text += "survived"
-				if(cultist.current.real_name != cultist.name)
-					text += " as [cultist.current.real_name]"
-			else
-				text += "body destroyed"
-			text += ")"
-
-		world << text

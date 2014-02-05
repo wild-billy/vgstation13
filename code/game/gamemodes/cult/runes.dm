@@ -386,10 +386,7 @@ var/list/sacrificed = list()
 
 			D.key = ghost.key
 
-			if(ticker.mode.name == "cult")
-				ticker.mode:add_cultist(D.mind)
-			else
-				ticker.mode.cult+=D.mind
+			D.mind.QuickAssignRole("cultist")
 
 			D.mind.special_role = "Cultist"
 			D << "<font color=\"purple\"><b><i>Your blood pulses. Your head throbs. The world goes red. All at once you are aware of a horrible, horrible truth. The veil of reality has been ripped away and in the festering wound left behind something sinister takes root.</b></i></font>"
@@ -531,7 +528,7 @@ var/list/sacrificed = list()
 				usr.say("[input]")
 			else
 				usr.whisper("[input]")
-			for(var/datum/mind/H in ticker.mode.cult)
+			for(var/datum/mind/H in ticker.GetPlayersWithRole("cultist"))
 				if (H.current)
 					H.current << "\red \b [input]"
 			del(src)
@@ -747,7 +744,7 @@ var/list/sacrificed = list()
 		freedom()
 			var/mob/living/user = usr
 			var/list/mob/living/carbon/cultists = new
-			for(var/datum/mind/H in ticker.mode.cult)
+			for(var/datum/mind/H in ticker.GetPlayersWithRole("cultist"))
 				if (istype(H.current,/mob/living/carbon))
 					cultists+=H.current
 			var/list/mob/living/carbon/users = new
@@ -797,7 +794,7 @@ var/list/sacrificed = list()
 		cultsummon()
 			var/mob/living/user = usr
 			var/list/mob/living/carbon/cultists = new
-			for(var/datum/mind/H in ticker.mode.cult)
+			for(var/datum/mind/H in ticker.GetPlayersWithRole("cultist"))
 				if (istype(H.current,/mob/living/carbon))
 					cultists+=H.current
 			var/list/mob/living/carbon/users = new
@@ -913,7 +910,7 @@ var/list/sacrificed = list()
 		bloodboil() //cultists need at least one DANGEROUS rune. Even if they're all stealthy.
 /*
 			var/list/mob/living/carbon/cultists = new
-			for(var/datum/mind/H in ticker.mode.cult)
+			for(var/datum/mind/H.antag_roles["cultist"])
 				if (istype(H.current,/mob/living/carbon))
 					cultists+=H.current
 */

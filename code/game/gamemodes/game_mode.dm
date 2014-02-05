@@ -38,6 +38,9 @@
 
 	var/no_intercept=0
 
+	var/list/allwords=list()
+	var/list/startwords=list()
+
 /datum/game_mode/proc/announce() //to be calles when round starts
 	world << "<B>Notice</B>: [src] did not define announce()"
 

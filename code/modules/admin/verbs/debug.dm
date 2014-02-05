@@ -324,7 +324,7 @@ Pressure: [env.return_pressure()]"}
 	if(!cultwords["travel"])
 		runerandom()
 	if(M)
-		if(M.mind in ticker.mode.cult)
+		if(M.mind.antag_roles["cultist"])
 			return
 		else
 			if(alert("Spawn that person a tome?",,"Yes","No")=="Yes")

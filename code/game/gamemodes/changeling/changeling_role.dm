@@ -55,6 +55,8 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 		if(P.isVerb)
 			antag.current.verbs -= P.verbpath
 
+	antag << "<FONT color='red' size=3><B>You grow weak and lose your powers! You are no longer a changeling and are stuck in your current form!</B></FONT>"
+
 /antag_role/changeling/proc/GetChangelingID()
 	return "[honorific] [changeling_id]"
 
@@ -182,3 +184,31 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 		feedback_add_details("changeling_success","FAIL")
 
 	world << text
+
+/antag_role/changeling/EditMemory(var/datum/mind/M)
+	var/text = name
+	if (ticker.mode.config_tag=="changeling" || ticker.mode.config_tag=="traitorchan")
+		text = uppertext(text)
+	text = "<i><b>[text]</b></i>: "
+	if (M.antag_roles["changeling"])
+		text += "<b>YES</b>|<a href='?src=\ref[M];remove_role=[id]'>no</a> <ul>"
+		if (M.objectives.len==0)
+			text += "<li>Objectives are empty! <a href='?src=\ref[src];mind=\ref[M];auto_objectives=[id]'>Randomize!</a></li>"
+		var/antag_role/changeling/changeling=M.antag_roles["changeling"]
+		if(changeling && changeling.absorbed_dna.len && (M.current.real_name != changeling.absorbed_dna[1]) )
+			text += "<li><a href='?src=\ref[src];mind=\ref[M];initialdna=1'>Transform to initial appearance.</a></li>"
+		text += "</ul>"
+	else
+		text += "<a href='?src=\ref[M];assign_role=[id]'>yes</a>|<b>NO</b>"
+	return text
+
+/antag_role/changeling/RoleTopic(href, href_list, var/datum/mind/M)
+	if("initialdna" in href_list)
+		var/antag_role/changeling/changeling = M.antag_roles[id]
+		if( !changeling || !changeling.absorbed_dna.len )
+			usr << "\red Resetting DNA failed!"
+		else
+			M.current.dna = changeling.absorbed_dna[1]
+			M.current.real_name = M.current.dna.real_name
+			M.current.UpdateAppearance()
+			domutcheck(M.current, null)

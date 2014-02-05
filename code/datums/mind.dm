@@ -215,30 +215,6 @@ datum/mind
 				text += "head|officer|<b>EMPLOYEE</b>|<a href='?src=\ref[src];revolution=headrev'>headrev</a>|<a href='?src=\ref[src];revolution=rev'>rev</a>"
 			sections["revolution"] = text
 
-			/** CULT ***/
-			text = "cult"
-			if (ticker.mode.config_tag=="cult")
-				text = uppertext(text)
-			text = "<i><b>[text]</b></i>: "
-			if (assigned_role in command_positions)
-				text += "<b>HEAD</b>|officer|employee|cultist"
-			else if (assigned_role in list("Security Officer", "Detective", "Warden"))
-				text += "head|<b>OFFICER</b>|employee|cultist"
-			else if (src in ticker.mode.cult)
-
-				// AUTOFIXED BY fix_string_idiocy.py
-				// C:\Users\Rob\Documents\Projects\vgstation13\code\datums\mind.dm:169: text += "head|officer|<a href='?src=\ref[src];cult=clear'>employee</a>|<b>CULTIST</b>"
-				text += {"head|officer|<a href='?src=\ref[src];cult=clear'>employee</a>|<b>CULTIST</b>
-					<br>Give <a href='?src=\ref[src];cult=tome'>tome</a>|<a href='?src=\ref[src];cult=amulet'>amulet</a>."}
-				// END AUTOFIX
-/*
-				if (objectives.len==0)
-					text += "<br>Objectives are empty! Set to sacrifice and <a href='?src=\ref[src];cult=escape'>escape</a> or <a href='?src=\ref[src];cult=summon'>summon</a>."
-*/
-			else
-				text += "head|officer|<b>EMPLOYEE</b>|<a href='?src=\ref[src];cult=cultist'>cultist</a>"
-			sections["cult"] = text
-
 			/** WIZARD ***/
 			text = "wizard"
 			if (ticker.mode.config_tag=="wizard")
@@ -437,7 +413,18 @@ datum/mind
 		usr << browse(out, "window=edit_memory[src]")
 
 	Topic(href, href_list)
-		if(!check_rights(R_ADMIN))	return
+		if(!check_rights(R_ADMIN))
+			return
+
+		if("assign_role" in href_list)
+			assignRole(href_list["assign_role"])
+			log_admin("[key_name_admin(usr)] has assigned special role [href_list["assign_role"]] to [current].")
+			return
+
+		if("remove_role" in href_list)
+			unassignRole(href_list["assign_role"])
+			log_admin("[key_name_admin(usr)] has removed special role [href_list["assign_role"]] from [current].")
+			return
 
 		if (href_list["role_edit"])
 			var/new_role = input("Select new role", "Assigned role", assigned_role) as null|anything in get_all_jobs()
@@ -676,52 +663,6 @@ datum/mind
 					if (fail)
 						usr << "\red Reequipping revolutionary goes wrong!"
 
-		else if (href_list["cult"])
-			switch(href_list["cult"])
-				if("clear")
-					if(src in ticker.mode.cult)
-						ticker.mode.cult -= src
-						ticker.mode.update_cult_icons_removed(src)
-						special_role = null
-						var/datum/game_mode/cult/cult = ticker.mode
-						if (istype(cult))
-							cult.memoize_cult_objectives(src)
-						current << "\red <FONT size = 3><B>You have been brainwashed! You are no longer a cultist!</B></FONT>"
-						memory = ""
-						log_admin("[key_name_admin(usr)] has de-cult'ed [current].")
-				if("cultist")
-					if(!(src in ticker.mode.cult))
-						ticker.mode.cult += src
-						ticker.mode.update_cult_icons_added(src)
-						special_role = "Cultist"
-						current << "<font color=\"purple\"><b><i>You catch a glimpse of the Realm of Nar-Sie, The Geometer of Blood. You now see how flimsy the world is, you see that it should be open to the knowledge of Nar-Sie.</b></i></font>"
-						current << "<font color=\"purple\"><b><i>Assist your new compatriots in their dark dealings. Their goal is yours, and yours is theirs. You serve the Dark One above all else. Bring It back.</b></i></font>"
-						var/datum/game_mode/cult/cult = ticker.mode
-						if (istype(cult))
-							cult.memoize_cult_objectives(src)
-						log_admin("[key_name_admin(usr)] has cult'ed [current].")
-				if("tome")
-					var/mob/living/carbon/human/H = current
-					if (istype(H))
-						var/obj/item/weapon/tome/T = new(H)
-
-						var/list/slots = list (
-							"backpack" = slot_in_backpack,
-							"left pocket" = slot_l_store,
-							"right pocket" = slot_r_store,
-							"left hand" = slot_l_hand,
-							"right hand" = slot_r_hand,
-						)
-						var/where = H.equip_in_one_of_slots(T, slots)
-						if (!where)
-							usr << "\red Spawning tome failed!"
-						else
-							H << "A tome, a message from your new master, appears in your [where]."
-
-				if("amulet")
-					if (!ticker.mode.equip_cultist(current))
-						usr << "\red Spawning amulet failed!"
-
 		else if (href_list["wizard"])
 			switch(href_list["wizard"])
 				if("clear")
@@ -753,28 +694,10 @@ datum/mind
 				if("clear")
 					var/antag_role/changeling = antag_roles["changeling"]
 					changeling.Drop()
-					current << "<FONT color='red' size = 3><B>You grow weak and lose your powers! You are no longer a changeling and are stuck in your current form!</B></FONT>"
-					log_admin("[key_name_admin(usr)] has de-changeling'ed [current].")
 				if("changeling")
 					assignRole(ticker.antag_types["changeling"])
 					current << "<B><font color='red'>Your powers are awoken. A flash of memory returns to us...we are a changeling!</font></B>"
 					log_admin("[key_name_admin(usr)] has changeling'ed [current].")
-				if("autoobjectives")
-					var/antag_role/changeling = antag_roles["changeling"]
-					for(var/datum/objective/O in changeling.ForgeObjectives())
-						O.owner += src
-						objectives += O
-					usr << "\blue The objectives for changeling [key] have been generated. You can edit them. Remember to announce their objectives."
-
-				if("initialdna")
-					var/antag_role/changeling/changeling = antag_roles["changeling"]
-					if( !changeling || !changeling.absorbed_dna.len )
-						usr << "\red Resetting DNA failed!"
-					else
-						current.dna = changeling.absorbed_dna[1]
-						current.real_name = current.dna.real_name
-						current.UpdateAppearance()
-						domutcheck(current, null)
 
 		else if (href_list["vampire"])
 			switch(href_list["vampire"])
@@ -1163,40 +1086,7 @@ datum/mind
 
 
 	proc/make_Cultist()
-		if(!(src in ticker.mode.cult))
-			ticker.mode.cult += src
-			ticker.mode.update_cult_icons_added(src)
-			special_role = "Cultist"
-			current << "<font color=\"purple\"><b><i>You catch a glimpse of the Realm of Nar-Sie, The Geometer of Blood. You now see how flimsy the world is, you see that it should be open to the knowledge of Nar-Sie.</b></i></font>"
-			current << "<font color=\"purple\"><b><i>Assist your new compatriots in their dark dealings. Their goal is yours, and yours is theirs. You serve the Dark One above all else. Bring It back.</b></i></font>"
-			var/datum/game_mode/cult/cult = ticker.mode
-			if (istype(cult))
-				cult.memoize_cult_objectives(src)
-			else
-				var/explanation = "Summon Nar-Sie via the use of the appropriate rune (Hell join self). It will only work if nine cultists stand on and around it."
-				current << "<B>Objective #1</B>: [explanation]"
-				current.memory += "<B>Objective #1</B>: [explanation]<BR>"
-				current << "The convert rune is join blood self"
-				current.memory += "The convert rune is join blood self<BR>"
-
-		var/mob/living/carbon/human/H = current
-		if (istype(H))
-			var/obj/item/weapon/tome/T = new(H)
-
-			var/list/slots = list (
-				"backpack" = slot_in_backpack,
-				"left pocket" = slot_l_store,
-				"right pocket" = slot_r_store,
-				"left hand" = slot_l_hand,
-				"right hand" = slot_r_hand,
-			)
-			var/where = H.equip_in_one_of_slots(T, slots)
-			if (!where)
-			else
-				H << "A tome, a message from your new master, appears in your [where]."
-
-		if (!ticker.mode.equip_cultist(current))
-			H << "Spawning an amulet from your Master failed."
+		QuickAssignRole("cultist")
 
 	proc/make_Rev()
 		if (ticker.mode.head_revolutionaries.len>0)

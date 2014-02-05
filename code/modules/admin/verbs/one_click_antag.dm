@@ -199,9 +199,8 @@ client/proc/one_click_antag()
 
 		for(var/i = 0, i<numCultists, i++)
 			H = pick(candidates)
-			H.mind.make_Cultist()
+			H.mind.QuickAssignRole("cultist")
 			candidates.Remove(H)
-			temp.grant_runeword(H)
 
 		return 1
 

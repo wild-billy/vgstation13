@@ -140,9 +140,9 @@ Growing it to term with nothing injected will grab a ghost from the observers. *
 			if (podman.mind in ticker.mode:syndicates)
 				ticker.mode:update_all_synd_icons()
 		if ("cult")
-			if (podman.mind in ticker.mode:cult)
+			if (podman.mind.antag_roles["cultist"])
 				ticker.mode:add_cultist(podman.mind)
-				ticker.mode:update_all_cult_icons() //So the icon actually appears
+				update_all_cult_icons() //So the icon actually appears
 		// -- End mode specific stuff
 
 	podman << "\green <B>You awaken slowly, feeling your sap stir into sluggish motion as the warm air caresses your bark.</B>"

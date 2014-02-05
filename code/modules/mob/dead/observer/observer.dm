@@ -595,8 +595,7 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 
 	var/ghosts_can_write
 	if(ticker.mode.name == "cult")
-		var/datum/game_mode/cult/C = ticker.mode
-		if(C.cult.len > config.cult_ghostwriter_req_cultists)
+		if(ticker.GetPlayersWithRole("cultist") > config.cult_ghostwriter_req_cultists)
 			ghosts_can_write = 1
 
 	if(!ghosts_can_write)

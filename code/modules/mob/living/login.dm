@@ -12,8 +12,8 @@
 				CanBuild()
 		if((mind in ticker.mode.revolutionaries) || (src.mind in ticker.mode:head_revolutionaries))
 			ticker.mode.update_rev_icons_added(src.mind)
-		if(mind in ticker.mode:cult)
-			ticker.mode.update_cult_icons_added(src.mind)
+		if(mind.antag_roles["cultist"])
+			update_cult_icons_added(src.mind)
 		if(mind in ticker.mode:syndicates)
 			ticker.mode.update_all_synd_icons()
 		var/ref = "\ref[mind]"

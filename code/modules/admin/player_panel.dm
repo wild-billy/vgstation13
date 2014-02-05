@@ -531,7 +531,7 @@
 
 		if(ticker.mode.cult.len)
 			dat += "<br><table cellspacing=5><tr><td><B>Cultists</B></td><td></td></tr>"
-			for(var/datum/mind/N in ticker.mode.cult)
+			for(var/datum/mind/N.antag_roles["cultist"])
 				var/mob/M = N.current
 				if(M)
 
