@@ -1,5 +1,5 @@
 :a:`/antag_role` -- Antag Roles
-=============================
+===============================
 
 :a:`/antag_role` is intended to replace the mess of code that a :a:`/datum/game_mode` would have to execute
 just to assign antagonists and set up objectives.  With this new system, thousands of lines of redundant
@@ -79,7 +79,7 @@ code has been removed and the gamemode system is far cleaner as a result.
 	
 	.. proc:: DeclareAll()
 		
-		Call :proc:Declare() in all assigned minds' roles.
+		Call :p:`/antag_role/Declare()` in all assigned minds' roles.
 		
 		.. warning:: This proc is used from a global context.
 		
@@ -99,7 +99,7 @@ code has been removed and the gamemode system is far cleaner as a result.
 		
 	.. proc:: RoleTopic(href, href_list, mind)
 	
-		``Topic()`` calls with associated *mind*s.
+		``Topic()`` calls with associated :a:`/datum/mind`.
 		
 		.. :param string href:
 			Entire GET request, as received from Topic()
