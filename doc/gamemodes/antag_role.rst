@@ -1,7 +1,7 @@
-:atom:/antag_role -- Antag Roles
-================================
+:a:`/antag_role` -- Antag Roles
+=============================
 
-:atom:`/antag_role`s  are intended to replace the mess of code that :atom:/datum/`game_mode`s would have to execute
+:a:`/antag_role` is intended to replace the mess of code that a :a:`/datum/game_mode` would have to execute
 just to assign antagonists and set up objectives.  With this new system, thousands of lines of redundant
 code has been removed and the gamemode system is far cleaner as a result.
 
@@ -14,17 +14,21 @@ code has been removed and the gamemode system is far cleaner as a result.
 		
 	.. proc:: Drop()
 	
-		Remove the :atom:`/antag_role` from the mind, and execute any defined post-removal actions.
+		Remove the :a:`/antag_role` from the mind, and execute any defined post-removal actions.
 		
 	.. proc:: calculateRoleNumbers()
 		
-		Used primarily for scaling.  This should adjust :var:`min_players` and :var:`max_players`.
+		Used primarily for scaling.  This should adjust :v:`min_players` and :v:`max_players`.
+		
+		.. warning:: This proc is used from a global context.
 		
 		.. returns boolean 1 on success, 0 on failure
 		
 	.. proc:: CanBeAssigned(mind)
 		
 		General sanity checks before assigning the role.
+		
+		.. warning:: This proc is used from a global context.
 		
 		.. :param /datum/mind mind:
 			The mind to check.
@@ -33,6 +37,8 @@ code has been removed and the gamemode system is far cleaner as a result.
 	.. proc:: CanBeHost(mind)
 		
 		General sanity checks before assigning host.
+		
+		.. warning:: This proc is used from a global context.
 		
 		.. :param /datum/mind mind:
 			The mind to check.
@@ -69,13 +75,13 @@ code has been removed and the gamemode system is far cleaner as a result.
 	
 		Dump a table for Check Antags.
 		
-		..warning This function is used from a global context.
+		.. warning:: This proc is used from a global context.
 	
 	.. proc:: DeclareAll()
 		
 		Call :proc:Declare() in all assigned minds' roles.
 		
-		..warning This function is used from a global context.
+		.. warning:: This proc is used from a global context.
 		
 	.. proc:: Declare()
 		
@@ -85,7 +91,7 @@ code has been removed and the gamemode system is far cleaner as a result.
 		
 		Edit the role-specific memory of a given mind.
 		
-		..warning This function is used from a global context.
+		.. warning:: This proc is used from a global context.
 		
 		.. :param /datum/mind mind:
 			The mind to edit
