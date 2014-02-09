@@ -12,6 +12,9 @@
 	min_players = 4 // 3
 	max_players = 4
 
+	// Minds sacrificed.
+	var/list/sacrificed=list()
+
 /antag_role/cultist/calculateRoleNumbers()
 	return
 
@@ -31,21 +34,19 @@
 	update_cult_icons_removed(antag)
 	log_admin("[antag.current] ([ckey(antag.current.key)] has been deconverted from the cult")
 
+/antag_role/cultist/ForgeGroupObjectives()
+	if(ticker.mode.config_tag == "cult" && prob(50))
+		objectives += new ticker.mode:summon_objective(src)
+	else
+		objectives += new /datum/group_objective/cult/survive(src,5,7)
+	objectives += new /datum/group_objective/targetted/sacrifice(src)
+
 /antag_role/cultist/proc/MemorizeCultObjectives()
 	var/text=""
-	for(var/obj_count = 1,obj_count <= ticker.mode:objectives.len,obj_count++)
-		var/explanation
-		switch(ticker.mode:objectives[obj_count])
-			if("survive")
-				explanation = "Our knowledge must live on. Make sure at least [ticker.mode:acolytes_needed] acolytes escape on the shuttle to spread their work on an another station."
-			if("sacrifice")
-				if(ticker.mode:sacrifice_target)
-					explanation = "Sacrifice [ticker.mode:sacrifice_target.name], the [ticker.mode:sacrifice_target.assigned_role]. You will need the sacrifice rune (Hell blood join) and three acolytes to do so."
-				else
-					explanation = "Free objective."
-			if("eldergod")
-				explanation = "Summon Nar-Sie via the use of the appropriate rune (Hell join self). It will only work if nine cultists stand on and around it."
-		text +=  "<B>Objective #[obj_count]</B>: [explanation]"
+	if(ticker.mode.config_tag=="cult")
+		for(var/obj_count = 1,obj_count <= objectives.len,obj_count++)
+			var/datum/group_objective/O = objectives[obj_count]
+			text +=  "<B>Objective #[obj_count]</B>: [O.explanation_text]"
 	text += "The convert rune is join blood self."
 	antag.current << text
 	antag.memory += "[text]<BR>"
@@ -82,8 +83,14 @@
 
 
 /antag_role/cultist/DeclareAll()
-	world << "<FONT size = 2><B>The cultists were:</B></FONT>"
+	var/text = ""
+	if(objectives.len)
+		text += "<br /><b>The cultists' objectives were:</b>"
+		for(var/obj_count=1, obj_count <= objectives.len, obj_count++)
+			var/datum/group_objective/objective = objectives[obj_count]
+			text += "<br /><b>Objective #[obj_count]:</b> [objective.declare()]"
 
+	text += "<br /><FONT size = 2><B>The cultists were:</B></FONT>"
 	for(var/datum/mind/mind in minds)
 		var/antag_role/R=mind.antag_roles[id]
 		R.Declare()

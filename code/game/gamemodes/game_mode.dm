@@ -133,6 +133,10 @@
 ///post_setup()
 ///Everyone should now be on the station and have their normal gear.  This is the place to give the special roles extra things
 /datum/game_mode/proc/post_setup()
+	// Run ForgeGroupObjectives on all antag_role groups.
+	for(var/antag_id in ticker.antag_types)
+		var/antag_role/group = ticker.antag_types[antag_id]
+		group.ForgeGroupObjectives()
 
 	// Run PostSetup hooks on all assigned roles.
 	for(var/datum/mind/M in ticker.minds)

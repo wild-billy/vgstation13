@@ -48,6 +48,9 @@
 	// List of minds assigned to this role
 	var/list/minds=list()
 
+	// Objectives (global or local, depending on role)
+	var/list/objectives=list()
+
 	//////////////////////////////
 	// Local
 	//////////////////////////////
@@ -59,9 +62,13 @@
 
 /antag_role/New(var/datum/mind/M=null, var/antag_role/parent=null)
 	if(M)
+		// If we don't have this guy in the parent, add him.
 		if(!(M in parent.minds))
 			parent.minds += M
+
+		// Notify gamemode that this player has this role, too.
 		ticker.mode.add_player_role_association(M,parent.id)
+
 	if(!plural_name)
 		plural_name="[name]s"
 
@@ -104,6 +111,7 @@
 				return 0
 	return 1
 
+// Return 1 on success, 0 on failure.
 /antag_role/proc/OnPreSetup()
 	if(special_role)
 		antag.special_role=special_role
@@ -112,9 +120,6 @@
 		ticker.mode.modePlayer += antag
 	return 1
 
-/antag_role/proc/process()
-	return
-
 // Return 1 on success, 0 on failure.
 /antag_role/proc/OnPostSetup()
 	for(var/datum/objective/O in ForgeObjectives())
@@ -122,9 +127,16 @@
 		antag.objectives += O
 	return 0
 
+/antag_role/proc/process()
+	return
+
 // Return list of objectives.
 /antag_role/proc/ForgeObjectives()
 	return list()
+
+// Create the group's objectives.
+/antag_role/proc/ForgeGroupObjectives()
+	return
 
 /antag_role/proc/Greet(var/you_are=1)
 	return

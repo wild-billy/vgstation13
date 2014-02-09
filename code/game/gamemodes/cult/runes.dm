@@ -133,10 +133,19 @@ var/list/sacrificed = list()
 					M.say("Tok-lyr rqa'nap g[pick("'","`")]lt-ulotf!")
 					cultist_count += 1
 			if(cultist_count >= 9)
-				new /obj/machinery/singularity/narsie/large(src.loc)
-				if(ticker.mode.name == "cult")
-					ticker.mode:eldergod = 0
-				return
+				// If there's enough summons left
+				// (Sorry, this is to prevent cultists accidentally spawning 3 narsies at once.)
+				if(ticker.mode.config_tag == "cult" && ticker.mode:summons_left)
+					if(ticker.mode.name == "cult")
+						ticker.mode:summons_left--
+					var/antag_role/cultist/cult = ticker.antag_types["cultist"]
+					for(var/datum/group_objective/cult/summon/summon in cult.objectives)
+						if(summon && !summon.completed)
+							// Deletes this rune.
+							summon.complete(src)
+							return
+				else
+					return fizzle()
 			else
 				return fizzle()
 
@@ -228,9 +237,13 @@ var/list/sacrificed = list()
 			var/mob/living/carbon/human/body_to_sacrifice
 
 			var/is_sacrifice_target = 0
+
+			var/antag_role/cultist/cult = ticker.antag_types["cultist"]
+			var/datum/group_objective/targetted/sacrifice/sacrifice = locate() in cult.objectives
+
 			for(var/mob/living/carbon/human/M in src.loc)
 				if(M.stat == DEAD)
-					if(ticker.mode.name == "cult" && M.mind == ticker.mode:sacrifice_target)
+					if(sacrifice && M.mind == sacrifice.target)
 						is_sacrifice_target = 1
 					else
 						corpse_to_raise = M
@@ -248,7 +261,7 @@ var/list/sacrificed = list()
 				for(var/obj/effect/rune/R in world)
 					if(R.word1==cultwords["blood"] && R.word2==cultwords["join"] && R.word3==cultwords["hell"])
 						for(var/mob/living/carbon/human/N in R.loc)
-							if(ticker.mode.name == "cult" && N.mind && N.mind == ticker.mode:sacrifice_target)
+							if(sacrifice && N.mind == sacrifice.target)
 								is_sacrifice_target = 1
 							else
 								if(N.stat!= DEAD)
@@ -558,9 +571,12 @@ var/list/sacrificed = list()
 				if(iscultist(C) && !C.stat)
 					cultsinrange += C
 					C.say("Barhah hra zar[pick("'","`")]garis!")
+
+			var/antag_role/cultist/cult = ticker.antag_types["cultist"]
+			var/datum/group_objective/targetted/sacrifice/sacrifice = locate() in cult.objectives
 			for(var/mob/H in victims)
-				if (ticker.mode.name == "cult")
-					if(H.mind == ticker.mode:sacrifice_target)
+				if (sacrifice)
+					if(H.mind == sacrifice.target)
 						if(cultsinrange.len >= 3)
 							sacrificed += H.mind
 							if(isrobot(H))
@@ -648,7 +664,7 @@ var/list/sacrificed = list()
 								H.gib()
 			for(var/mob/living/carbon/monkey/M in src.loc)
 				if (ticker.mode.name == "cult")
-					if(M.mind == ticker.mode:sacrifice_target)
+					if(M.mind == sacrifice.target)
 						if(cultsinrange.len >= 3)
 							sacrificed += M.mind
 							usr << "\red The Geometer of Blood accepts this sacrifice, your objective is now complete."

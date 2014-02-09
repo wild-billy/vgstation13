@@ -11,7 +11,6 @@
 			return 0
 	return 1
 
-
 /datum/game_mode/cult
 	name = "cult"
 	config_tag = "cult"
@@ -25,51 +24,39 @@
 	uplink_welcome = "Nar-Sie Uplink Console:"
 	uplink_uses = 10
 
-	var/datum/mind/sacrifice_target = null
 	var/finished = 0
 
 	startwords = list("blood","join","self","hell")
 	allwords = list("travel","self","see","hell","blood","join","tech","destroy", "other", "hide")
 
-	var/list/objectives = list()
+	// for the survive objective
+	var/const/min_acolytes_needed = 5
+	var/const/max_acolytes_needed = 7
 
-	var/eldergod = 1 //for the summon god objective
-
-	var/const/acolytes_needed = 5 //for the survive objective
+	// "Difficulty"
 	var/const/min_cultists_to_start = 3
 	var/const/max_cultists_to_start = 4
-	var/acolytes_survived = 0
 
+	// Future gamemodes can swap this out to be silly.
+	var/summon_objective = /datum/group_objective/cult/summon
+	var/summons_left=0
+
+	available_roles=list("cultist")
+
+	var/list/objectives = list()
 
 /datum/game_mode/cult/announce()
 	world << "<B>The current game mode is - Cult!</B>"
 	world << "<B>Some crewmembers are attempting to start a cult!<BR>\nCultists - complete your objectives. Convert crewmembers to your cause by using the convert rune. Remember - there is no you, there is only the cult.<BR>\nPersonnel - Do not let the cult succeed in its mission. Brainwashing them with the chaplain's bible reverts them to whatever CentCom-allowed faith they had.</B>"
 
-
-/datum/game_mode/cult/pre_setup()
-	if(!..()) return 0
-	// This is absolute shit, but I don't feel like rewriting this shit. - N3X
-	if(prob(50))
-		objectives += "survive"
-		objectives += "sacrifice"
-	else
-		objectives += "eldergod"
-		objectives += "sacrifice"
-	return 1
-
 /datum/game_mode/cult/post_setup()
-	modePlayer += ticker.GetPlayersWithRole("cultist")
+	var/antag_role/cultist/cult = ticker.antag_types["cultist"]
 
-	if("sacrifice" in objectives)
-		var/list/possible_targets = get_unconvertables()
+	modePlayer += cult.minds
 
-		if(!possible_targets.len)
-			for(var/mob/living/carbon/human/player in player_list)
-				if(player.mind && !player.mind.antag_roles["cultist"])
-					possible_targets += player.mind
+	// Objective forging moved here so we can choose targets properly.- N3X.
+	cult.ForgeGroupObjectives()
 
-		if(possible_targets.len > 0)
-			sacrifice_target = pick(possible_targets)
 	if(!mixed)
 		spawn (rand(waittime_l, waittime_h))
 			send_intercept()
@@ -151,78 +138,25 @@
 			ucs += player.mind
 	return ucs
 
-
 /datum/game_mode/cult/proc/check_cult_victory()
-	var/cult_fail = 0
-	if(objectives.Find("survive"))
-		cult_fail += check_survive() //the proc returns 1 if there are not enough cultists on the shuttle, 0 otherwise
-	if(objectives.Find("eldergod"))
-		cult_fail += eldergod //1 by default, 0 if the elder god has been summoned at least once
-	if(objectives.Find("sacrifice"))
-		if(sacrifice_target && !sacrificed.Find(sacrifice_target)) //if the target has been sacrificed, ignore this step. otherwise, add 1 to cult_fail
-			cult_fail++
-
-	return cult_fail //if any objectives aren't met, failure
-
-
-/datum/game_mode/cult/proc/check_survive()
-	acolytes_survived = 0
-	for(var/datum/mind/cult_mind in ticker.GetPlayersWithRole("cultist"))
-		if (cult_mind.current && cult_mind.current.stat!=2)
-			var/area/A = get_area(cult_mind.current )
-			if ( is_type_in_list(A, centcom_areas))
-				acolytes_survived++
-	if(acolytes_survived>=acolytes_needed)
-		return 0
-	else
-		return 1
-
-
+	var/antag_role/cultist/cult = ticker.antag_types["cultist"]
+	var/success=1
+	for(var/datum/group_objective/O in cult.objectives)
+		if(!O.completed) success=0
+	return success
 /datum/game_mode/cult/declare_completion()
 
-	if(!check_cult_victory())
+	if(check_cult_victory())
 		feedback_set_details("round_end_result","win - cult win")
-		feedback_set("round_end_result",acolytes_survived)
+		//feedback_set("round_end_result",acolytes_survived)
 		world << "\red <FONT size = 3><B> The cult wins! It has succeeded in serving its dark masters!</B></FONT>"
 	else
 		feedback_set_details("round_end_result","loss - staff stopped the cult")
-		feedback_set("round_end_result",acolytes_survived)
+		//feedback_set("round_end_result",acolytes_survived)
 		world << "\red <FONT size = 3><B> The staff managed to stop the cult!</B></FONT>"
 
-	var/text = "<b>Cultists escaped:</b> [acolytes_survived]"
+	var/antag_role/cultist/cult = ticker.antag_types["cultist"]
 
-	if(objectives.len)
-		text += "<br><b>The cultists' objectives were:</b>"
-		for(var/obj_count=1, obj_count <= objectives.len, obj_count++)
-			var/explanation
-			switch(objectives[obj_count])
-				if("survive")
-					if(!check_survive())
-						explanation = "Make sure at least [acolytes_needed] acolytes escape on the shuttle. <font color='green'><B>Success!</B></font>"
-						feedback_add_details("cult_objective","cult_survive|SUCCESS|[acolytes_needed]")
-					else
-						explanation = "Make sure at least [acolytes_needed] acolytes escape on the shuttle. <font color='red'>Fail.</font>"
-						feedback_add_details("cult_objective","cult_survive|FAIL|[acolytes_needed]")
-				if("sacrifice")
-					if(sacrifice_target)
-						if(sacrifice_target in sacrificed)
-							explanation = "Sacrifice [sacrifice_target.name], the [sacrifice_target.assigned_role]. <font color='green'><B>Success!</B></font>"
-							feedback_add_details("cult_objective","cult_sacrifice|SUCCESS")
-						else if(sacrifice_target && sacrifice_target.current)
-							explanation = "Sacrifice [sacrifice_target.name], the [sacrifice_target.assigned_role]. <font color='red'>Fail.</font>"
-							feedback_add_details("cult_objective","cult_sacrifice|FAIL")
-						else
-							explanation = "Sacrifice [sacrifice_target.name], the [sacrifice_target.assigned_role]. <font color='red'>Fail (Gibbed).</font>"
-							feedback_add_details("cult_objective","cult_sacrifice|FAIL|GIBBED")
-				if("eldergod")
-					if(!eldergod)
-						explanation = "Summon Nar-Sie. <font color='green'><B>Success!</B></font>"
-						feedback_add_details("cult_objective","cult_narsie|SUCCESS")
-					else
-						explanation = "Summon Nar-Sie. <font color='red'>Fail.</font>"
-						feedback_add_details("cult_objective","cult_narsie|FAIL")
-			text += "<br><B>Objective #[obj_count]</B>: [explanation]"
-
-	world << text
+	world << cult.DeclareAll()
 	..()
 	return 1
