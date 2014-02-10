@@ -54,9 +54,6 @@
 
 	modePlayer += cult.minds
 
-	// Objective forging moved here so we can choose targets properly.- N3X.
-	cult.ForgeGroupObjectives()
-
 	if(!mixed)
 		spawn (rand(waittime_l, waittime_h))
 			send_intercept()

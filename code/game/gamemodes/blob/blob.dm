@@ -5,7 +5,6 @@ var/list/blobs = list()
 var/list/blob_cores = list()
 var/list/blob_nodes = list()
 
-
 /datum/game_mode/blob
 	name = "blob"
 	config_tag = "blob"
@@ -22,41 +21,14 @@ var/list/blob_nodes = list()
 
 	var/blobwincount = 500 // WAS: 350
 
-	var/list/infected_crew = list()
+	available_roles=list("blob")
 
-	no_intercept=1 // We do it ourselves.
+	var/known_stage=0
 
 /datum/game_mode/blob/announce()
 	world << {"<B>The current game mode is - <font color='green'>Blob</font>!</B>
 <B>A dangerous alien organism is rapidly spreading throughout the station!</B>
 You must kill it all while minimizing the damage to the station."}
-
-/datum/game_mode/blob/proc/show_message(var/message)
-	for(var/datum/mind/blob in infected_crew)
-		blob.current << message
-
-/datum/game_mode/blob/proc/burst_blobs()
-	for(var/datum/mind/blob in ticker.GetPlayersWithRole("blob"))
-		var/client/blob_client = null
-		var/turf/location = null
-
-		if(iscarbon(blob.current))
-			var/mob/living/carbon/C = blob.current
-			if(directory[ckey(blob.key)])
-				blob_client = directory[ckey(blob.key)]
-				location = get_turf(C)
-				if(location.z != 1 || istype(location, /turf/space))
-					location = null
-				C.gib()
-
-
-		if(blob_client && location)
-			var/obj/effect/blob/core/core = new(location, 200, blob_client, blob_point_rate)
-			if(core.overmind && core.overmind.mind)
-				core.overmind.mind.name = blob.name
-				infected_crew -= blob
-				infected_crew += core.overmind.mind
-
 
 /datum/game_mode/blob/post_setup()
 
@@ -75,50 +47,25 @@ You must kill it all while minimizing the damage to the station."}
 		start_state = new /datum/station_state()
 		start_state.count()
 
-	spawn(0)
-
-		var/wait_time = rand(waittime_l, waittime_h)
-
-		sleep(wait_time)
-
-		send_intercept(0)
-
-		sleep(100)
-
-		show_message("<span class='alert'>You feel tired and bloated.</span>")
-
-		sleep(wait_time)
-
-		show_message("<span class='alert'>You feel like you are about to burst.</span>")
-
-		sleep(wait_time / 2)
-
-		burst_blobs()
-
-		// Stage 0
-		sleep(40)
-		stage(0)
-
-		// Stage 1
-		sleep(2000)
-		stage(1)
-
 	..()
 
-/datum/game_mode/blob/proc/stage(var/stage)
-
+/datum/game_mode/blob/proc/send_alert(var/stage)
+	if(known_stage>=stage) return
+	known_stage=stage
 	switch(stage)
-		if (0)
-			send_intercept(1)
-			declared = 1
-			return
+		if(1)
+			biohazard_alert() // Who fucking cares.
+		if(3)
+			spawn(rand(300,600)) // 30-60 seconds of leeway.
+				command_alert("Alert.  Biohazard outbreak upgraded to level 9.  Station is now locked down under directive 7-10 until further notice.")
 
-		if (1)
-			command_alert("Confirmed outbreak of level 5 biohazard aboard [station_name()]. All personnel must contain the outbreak.", "Biohazard Alert")
-			for(var/mob/M in player_list)
-				if(!istype(M,/mob/new_player))
-					M << sound('sound/AI/outbreak5.ogg')
-			return
+				for(var/mob/M in player_list)
+					if(!istype(M,/mob/new_player))
+						M << sound('sound/AI/blob_confirmed.ogg')
 
-	return
+				var/obj/item/weapon/aiModule/quarantine/Q = new
+				for(var/mob/living/silicon/ai/ai in world)
+					if(ai.mind && ai.mind.assigned_role == "AI")
+						Q.transmitInstructions(ai)
+				del(Q)
 

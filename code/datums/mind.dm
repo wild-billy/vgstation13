@@ -165,6 +165,12 @@ datum/mind
 		out += {"Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>
 			Assigned role: [assigned_role]. <a href='?src=\ref[src];role_edit=1'>Edit</a><br>
 			Factions and special roles:<br>"}
+
+		for(var/antag_id in ticker.antag_types)
+			var/antag_role/role_type = ticker.antag_types[antag_id]
+			out += "<hr /><span class=\"role-name\">[role_type.GetMemoryHeader()]</span>: "
+			out += role_type.EditMemory(src)
+
 		// END AUTOFIX
 		var/list/sections = list(
 			"revolution",
@@ -237,16 +243,6 @@ datum/mind
 			text = "changeling"
 			if (ticker.mode.config_tag=="changeling" || ticker.mode.config_tag=="traitorchan")
 				text = uppertext(text)
-			text = "<i><b>[text]</b></i>: "
-			if (src in ticker.GetPlayersWithRole("changeling"))
-				text += "<b>YES</b>|<a href='?src=\ref[src];changeling=clear'>no</a>"
-				if (objectives.len==0)
-					text += "<br>Objectives are empty! <a href='?src=\ref[src];changeling=autoobjectives'>Randomize!</a>"
-				var/antag_role/changeling/changeling=antag_roles["changeling"]
-				if(changeling && changeling.absorbed_dna.len && (current.real_name != changeling.absorbed_dna[1]) )
-					text += "<br><a href='?src=\ref[src];changeling=initialdna'>Transform to initial appearance.</a>"
-			else
-				text += "<a href='?src=\ref[src];changeling=changeling'>yes</a>|<b>NO</b>"
 //			var/datum/game_mode/changeling/changeling = ticker.mode
 //			if (istype(changeling) && changeling.changelingdeath)
 //				text += "<br>All the changelings are dead! Restart in [round((changeling.TIME_TO_GET_REVIVED-(world.time-changeling.changelingdeathtime))/10)] seconds."

@@ -2,6 +2,16 @@
 // Sacrifice some dude.
 //////////////////////////////////////////////////
 
+/datum/group_objective/targetted/sacrifice/New(var/antag_role/owner)
+	..(owner)
+	load_targets()
+	filter_by_antag_role("cultist",1)
+	filter_convertable()
+	if(pick_target())
+		explanation_text="Sacrifice [target.name], the [target.assigned_role]."
+	else
+		explanation_text="Sacrifice a non-cultist."
+
 // Don't target people we can convert, unless no one is left.
 /datum/group_objective/targetted/sacrifice/proc/filter_convertable()
 	var/list/new_target_pool=list()
@@ -13,15 +23,6 @@
 	// If we just eliminated our target pool, allow sacrificing convertables.
 	if(target_pool.len > 0)
 		target_pool=new_target_pool
-
-/datum/group_objective/targetted/sacrifice/proc/find_target()
-	load_targets()
-	filter_by_antag_role("cultist",1)
-	filter_convertable()
-	if(pick_target())
-		explanation_text="Sacrifice [target.name], the [target.assigned_role]."
-	else
-		explanation_text="Sacrifice a non-cultist."
 
 /datum/group_objective/targetted/sacrifice/check_completion()
 	var/antag_role/cultist/cult = ticker.antag_types["cultist"]

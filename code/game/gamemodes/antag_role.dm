@@ -60,6 +60,9 @@
 	// The host (set if NEED_HOST)
 	var/datum/mind/host=null
 
+	// Parent group
+	var/antag_role/group/group=null
+
 /antag_role/New(var/datum/mind/M=null, var/antag_role/parent=null)
 	if(M)
 		// If we don't have this guy in the parent, add him.
@@ -68,6 +71,9 @@
 
 		// Notify gamemode that this player has this role, too.
 		ticker.mode.add_player_role_association(M,parent.id)
+
+		// Link parent.
+		group=parent
 
 	if(!plural_name)
 		plural_name="[name]s"
@@ -125,6 +131,10 @@
 	for(var/datum/objective/O in ForgeObjectives())
 		O.owner=antag
 		antag.objectives += O
+	return 0
+
+// Return 1 on success, 0 on failure.
+/antag_role/group/proc/GroupOnPostSetup()
 	return 0
 
 /antag_role/proc/process()
@@ -196,3 +206,25 @@
 // USE THIS INSTEAD (global)
 /antag_role/proc/RoleTopic(href, href_list, var/datum/mind/M)
 	return
+
+/antag_role/proc/MemorizeObjectives()
+	var/text="<b>[name] Objectives:</b><ul>"
+	for(var/obj_count = 1,obj_count <= objectives.len,obj_count++)
+		var/datum/objective/O = objectives[obj_count]
+		text +=  "<B>Objective #[obj_count]</B>: [O.explanation_text]"
+	antag.current << text
+	antag.memory += "[text]<BR>"
+
+/antag_role/group/MemorizeObjectives()
+	var/text="<b>[name] Group Objectives:</b><ul>"
+	for(var/obj_count = 1,obj_count <= group.objectives.len,obj_count++)
+		var/datum/group_objective/O = group.objectives[obj_count]
+		text +=  "<B>Objective #[obj_count]</B>: [O.explanation_text]"
+	antag.current << text
+	antag.memory += "[text]<BR>"
+
+/antag_role/proc/GetMemoryHeader()
+	if (id in ticker.mode.available_roles)
+		return uppertext(name)
+	else
+		return name

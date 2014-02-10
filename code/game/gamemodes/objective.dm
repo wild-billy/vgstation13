@@ -6,14 +6,17 @@ var/list/potential_theft_objectives=typesof(/datum/theft_objective) \
 	- /datum/theft_objective/number \
 	- /datum/theft_objective/number/special
 
-datum/objective
+/datum/objective
+	var/antag_role/role
 	var/datum/mind/owner = null			//Who owns the objective.
 	var/explanation_text = "Nothing"	//What that person is supposed to do.
 	var/datum/mind/target = null		//If they are focused on a particular person.
 	var/target_amount = 0				//If they are focused on a particular number. Steal objectives have their own counter.
 	var/completed = 0					//currently only used for custom objectives.
 
-	New(var/text)
+	New(var/antag_role/parent, var/text)
+		role = parent
+		owner = parent.antag
 		if(text)
 			explanation_text = text
 
@@ -37,7 +40,7 @@ datum/objective
 
 
 
-datum/objective/assassinate
+/datum/objective/assassinate
 	find_target()
 		..()
 		if(target && target.current)
@@ -65,7 +68,7 @@ datum/objective/assassinate
 
 
 
-datum/objective/mutiny
+/datum/objective/mutiny
 	find_target()
 		..()
 		if(target && target.current)
@@ -93,7 +96,7 @@ datum/objective/mutiny
 			return 0
 		return 1
 
-datum/objective/mutiny/rp
+/datum/objective/mutiny/rp
 	find_target()
 		..()
 		if(target && target.current)
@@ -128,7 +131,7 @@ datum/objective/mutiny/rp
 			return 0
 		return rval
 
-datum/objective/anti_revolution/execute
+/datum/objective/anti_revolution/execute
 	find_target()
 		..()
 		if(target && target.current)
@@ -153,7 +156,7 @@ datum/objective/anti_revolution/execute
 			return 0
 		return 1
 
-datum/objective/anti_revolution/brig
+/datum/objective/anti_revolution/brig
 	var/already_completed = 0
 
 	find_target()
@@ -186,7 +189,7 @@ datum/objective/anti_revolution/brig
 			return 0
 		return 0
 
-datum/objective/anti_revolution/demote
+/datum/objective/anti_revolution/demote
 	find_target()
 		..()
 		if(target && target.current)
@@ -218,7 +221,7 @@ datum/objective/anti_revolution/demote
 				return 0
 		return 1
 
-datum/objective/debrain//I want braaaainssss
+/datum/objective/debrain//I want braaaainssss
 	find_target()
 		..()
 		if(target && target.current)
@@ -251,7 +254,7 @@ datum/objective/debrain//I want braaaainssss
 		return 0
 
 
-datum/objective/protect//The opposite of killing a dude.
+/datum/objective/protect//The opposite of killing a dude.
 	find_target()
 		..()
 		if(target && target.current)
@@ -279,7 +282,7 @@ datum/objective/protect//The opposite of killing a dude.
 		return 0
 
 
-datum/objective/hijack
+/datum/objective/hijack
 	explanation_text = "Hijack the emergency shuttle by escaping without any organic life-forms, other than yourself."
 
 	check_completion()
@@ -304,7 +307,7 @@ datum/objective/hijack
 		return 1
 
 
-datum/objective/block
+/datum/objective/block
 	explanation_text = "Do not allow any organic lifeforms to escape on the shuttle alive."
 
 	check_completion()
@@ -324,7 +327,7 @@ datum/objective/block
 						return 0
 		return 1
 
-datum/objective/silence
+/datum/objective/silence
 	explanation_text = "Do not allow anyone to escape the station.  Only allow the shuttle to be called when everyone is dead and your story is the only one left."
 
 	check_completion()
@@ -344,7 +347,7 @@ datum/objective/silence
 		return 1
 
 
-datum/objective/escape
+/datum/objective/escape
 	explanation_text = "Escape on the shuttle or an escape pod alive and free."
 
 	check_completion()
@@ -381,7 +384,7 @@ datum/objective/escape
 		else
 			return 0
 
-datum/objective/die
+/datum/objective/die
 	explanation_text = "Die a glorious death."
 
 	check_completion()
@@ -393,7 +396,7 @@ datum/objective/die
 
 
 
-datum/objective/survive
+/datum/objective/survive
 	explanation_text = "Stay alive until the end."
 
 	check_completion()
@@ -404,7 +407,7 @@ datum/objective/survive
 		return 1
 
 // Similar to the anti-rev objective, but for traitors
-datum/objective/brig
+/datum/objective/brig
 	var/already_completed = 0
 
 	find_target()
@@ -439,7 +442,7 @@ datum/objective/brig
 		return 0
 
 // Harm a crew member, making an example of them
-datum/objective/harm
+/datum/objective/harm
 	var/already_completed = 0
 
 	find_target()
@@ -482,12 +485,12 @@ datum/objective/harm
 		return 0
 
 
-datum/objective/nuclear
+/datum/objective/nuclear
 	explanation_text = "Destroy the station with a nuclear device."
 
 
 
-datum/objective/steal
+/datum/objective/steal
 	var/datum/theft_objective/steal_target
 
 	find_target(var/special_only=0)
@@ -535,7 +538,7 @@ datum/objective/steal
 		return steal_target.check_completion(owner)
 
 
-datum/objective/download
+/datum/objective/download
 	proc/gen_amount_goal()
 		target_amount = rand(10,20)
 		explanation_text = "Download [target_amount] research levels."
@@ -561,7 +564,7 @@ datum/objective/download
 
 
 
-datum/objective/capture
+/datum/objective/capture
 	proc/gen_amount_goal()
 		target_amount = rand(5,10)
 		explanation_text = "Accumulate [target_amount] capture points."
@@ -598,7 +601,7 @@ datum/objective/capture
 			return 0
 		return 1
 
-datum/objective/blood
+/datum/objective/blood
 	proc/gen_amount_goal(low = 150, high = 400)
 		target_amount = rand(low,high)
 		target_amount = round(round(target_amount/5)*5)
@@ -610,7 +613,7 @@ datum/objective/blood
 			return 1
 		else
 			return 0
-datum/objective/absorb
+/datum/objective/absorb
 	proc/gen_amount_goal(var/lowbound = 4, var/highbound = 6)
 		target_amount = rand (lowbound,highbound)
 		if (ticker)
@@ -638,7 +641,7 @@ datum/objective/absorb
 			return 0
 
 // /vg/; Vox Inviolate for humans :V
-datum/objective/minimize_casualties
+/datum/objective/minimize_casualties
 	explanation_text = "Minimise casualties."
 	check_completion()
 		if(owner.kills.len>5) return 0

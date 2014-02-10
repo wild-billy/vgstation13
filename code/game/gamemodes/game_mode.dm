@@ -37,6 +37,7 @@
 	var/waittime_h = 1800 //upper bound on time before intercept arrives (in tenths of seconds)
 
 	var/no_intercept=0
+	var/intercept_sent=0
 
 	var/list/allwords=list()
 	var/list/startwords=list()
@@ -135,7 +136,9 @@
 /datum/game_mode/proc/post_setup()
 	// Run ForgeGroupObjectives on all antag_role groups.
 	for(var/antag_id in ticker.antag_types)
-		var/antag_role/group = ticker.antag_types[antag_id]
+		var/antag_role/group/group = ticker.antag_types[antag_id]
+		if(!istype(group)) continue
+		group.GroupOnPostSetup()
 		group.ForgeGroupObjectives()
 
 	// Run PostSetup hooks on all assigned roles.
@@ -387,6 +390,7 @@
 	world << sound('sound/AI/commandreport.ogg')
 
 	command_alert("Summary downloaded and printed out at all communications consoles.", "Enemy communication intercept.")
+	intercept_sent=1
 /*	for(var/mob/M in player_list)
 		if(!istype(M,/mob/new_player))
 			M << sound('sound/AI/intercept.ogg')

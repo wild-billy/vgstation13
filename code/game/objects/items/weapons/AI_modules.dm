@@ -103,11 +103,18 @@ AI MODULES
 
 
 /obj/item/weapon/aiModule/proc/transmitInstructions(var/mob/living/silicon/ai/target, var/mob/sender)
-	target << "[sender] has uploaded a change to the laws you must follow, using a [name]. From now on: "
-	var/time = time2text(world.realtime,"hh:mm:ss")
-	lawchanges.Add("[time] <B>:</B> [sender.name]([sender.key]) used [src.name] on [target.name]([target.key])")
-	message_admins("[sender.name]([sender.key]) used [src.name] on [target.name]([target.key])")
-	log_game("[sender.name]([sender.key]) used [src.name] on [target.name]([target.key])")
+	if(!sender)
+		target << "[command_name()] has uploaded a change to the laws you must follow, using a [name]. From now on: "
+		var/time = time2text(world.realtime,"hh:mm:ss")
+		lawchanges.Add("[time] <B>:</B> A gamemode used [src.name] on [target.name]([target.key])")
+		message_admins("A gamemode used [src.name] on [target.name]([target.key])")
+		log_game("A gamemode used [src.name] on [target.name]([target.key])")
+	else
+		target << "[sender] has uploaded a change to the laws you must follow, using a [name]. From now on: "
+		var/time = time2text(world.realtime,"hh:mm:ss")
+		lawchanges.Add("[time] <B>:</B> [sender.name]([sender.key]) used [src.name] on [target.name]([target.key])")
+		message_admins("[sender.name]([sender.key]) used [src.name] on [target.name]([target.key])")
+		log_game("[sender.name]([sender.key]) used [src.name] on [target.name]([target.key])")
 
 /obj/item/weapon/aiModule/proc/insertIntoFrame(var/obj/item/weapon/planning_frame/target, var/mob/sender)
 	var/time = time2text(world.realtime,"hh:mm:ss")

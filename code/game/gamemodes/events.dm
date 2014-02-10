@@ -103,6 +103,32 @@
 			communications_blackout()
 */
 
+/proc/biohazard_alert(var/level=null)
+	if(!level)
+		level = "[rand(5,7)]"
+	command_alert("Confirmed outbreak of level [level] viral biohazard aboard [station_name()]. All personnel must contain the outbreak.", "Biohazard Alert")
+	var/list/sounds=list(
+		"1" = "one",
+		"2" = "two",
+		"3" = "three",
+		"4" = "four",
+		"5" = "five",
+		"6" = "six",
+		"7" = "seven",
+		"8" = "eight",
+		"9" = "nine",
+	)
+	var/list/sentence=list(
+		'sound/AI/outbreak_before.ogg',
+		vox_sounds[sounds["[level]"]],
+		'sound/AI/outbreak_after.ogg',
+	)
+
+	announcing_vox = world.time + VOX_DELAY
+	for(var/word in sentence)
+		play_vox_word(word, 1, null)
+	announcing_vox = world.time // Honk
+
 /proc/appendicitis()
 	for(var/mob/living/carbon/human/H in living_mob_list)
 		var/foundAlready = 0 // don't infect someone that already has the virus
@@ -178,9 +204,7 @@
 			H.viruses += D
 			break
 	spawn(rand(1500, 3000)) //Delayed announcements to keep the crew on their toes.
-		command_alert("Confirmed outbreak of level 7 viral biohazard aboard [station_name()]. All personnel must contain the outbreak.", "Biohazard Alert")
-		for(var/mob/M in player_list)
-			M << sound('sound/AI/outbreak7.ogg')
+		biohazard_alert()
 
 /proc/alien_infestation(var/spawncount = 1) // -- TLE
 	//command_alert("Unidentified lifesigns detected coming aboard [station_name()]. Secure any exterior access, including ducting and ventilation.", "Lifesign Alert")
