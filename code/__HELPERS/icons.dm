@@ -410,7 +410,11 @@ proc/HSVtoRGB(hsv)
 	if(!hsv) return "#000000"
 	var/list/HSV = ReadHSV(hsv)
 	if(!HSV) return "#000000"
+	var/RGB = ListHSVtoRGB(HSV)
+	if(!RGB) return "#000000"
+	return (HSV.len > 3) ? rgb(RGB[1],RGB[2],RGB[3],HSV[4]) : rgb(RGB[1],RGB[2],RGB[3])
 
+proc/ListHSVtoRGB(var/list/HSV)
 	var/hue = HSV[1]
 	var/sat = HSV[2]
 	var/val = HSV[3]
@@ -431,14 +435,17 @@ proc/HSVtoRGB(hsv)
 		if(hue >= 510)       {r=lo;  g=hi;  b=mid}
 		else if(hue >= 255)  {r=mid; g=hi;  b=lo }
 		else                 {r=hi;  g=mid; b=lo }
-
-	return (HSV.len > 3) ? rgb(r,g,b,HSV[4]) : rgb(r,g,b)
+	return (HSV.len > 3) ? list(r,g,b,HSV[4]) : list(r,g,b)
 
 proc/RGBtoHSV(rgb)
 	if(!rgb) return "#0000000"
 	var/list/RGB = ReadRGB(rgb)
 	if(!RGB) return "#0000000"
+	var/list/HSV = ListRGBtoHSV(RGB)
+	if(!HSV) return "#0000000"
+	return hsv(HSV[1], HSV[2], HSV[3], (RGB.len>3 ? RGB[4] : null))
 
+proc/ListRGBtoHSV(var/list/RGB)
 	var/r = RGB[1]
 	var/g = RGB[2]
 	var/b = RGB[3]
@@ -462,8 +469,7 @@ proc/RGBtoHSV(rgb)
 			if(lo == g) {hue=1024; dir=1; mid=r}
 			else {hue=1023; dir=-1; mid=g}
 		hue += dir * round((mid-lo) * 255 / (hi-lo), 1)
-
-	return hsv(hue, sat, val, (RGB.len>3 ? RGB[4] : null))
+	return (RGB.len > 3) ? list(hue,sat,val,RGB[4]) : list(hue,sat,val)
 
 proc/hsv(hue, sat, val, alpha)
 	if(hue < 0 || hue >= 1536) hue %= 1536

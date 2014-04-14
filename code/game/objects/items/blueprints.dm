@@ -133,7 +133,7 @@ move an amendment</a> to the drawing.</p>
 
 	A.always_unpowered = 0
 	for(var/turf/T in A.contents)
-		T.lighting_changed = 1
+		T._lighting_changed = 1
 		lighting_controller.changed_turfs += T
 
 	spawn(5)

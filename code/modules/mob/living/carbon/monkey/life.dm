@@ -444,11 +444,11 @@
 				var/turf/T = loc
 				var/area/A = T.loc
 				if(A)
-					if(A.lighting_use_dynamic)	light_amount = min(10,T.lighting_lumcount) - 5 //hardcapped so it's not abused by having a ton of flashlights
-					else						light_amount =  5
+					if(A.lighting_use_dynamic)	light_amount = T.lighting_luma*0.5
+					else						light_amount = 0.5
 
-			nutrition += light_amount
-			traumatic_shock -= light_amount
+			nutrition += light_amount * 10
+			traumatic_shock -= light_amount * 10
 
 			if(nutrition > 500)
 				nutrition = 500

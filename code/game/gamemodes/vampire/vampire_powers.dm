@@ -276,7 +276,7 @@
 	if(!mind.vampire.iscloaking)
 		alpha = 255
 		return 0
-	if(T.lighting_lumcount <= 2)
+	if(T.lighting_luma <= 0.16)
 		alpha = round((255 * 0.15))
 		return 1
 	else
@@ -413,7 +413,7 @@
 	var/outer_tele_radius = 6
 
 	// Maximum lighting_lumcount.
-	var/max_lum = 1
+	var/max_lum = 0.8
 
 	if(M.current.vampire_power(30, 0))
 		if(M.current.buckled) M.current.buckled.unbuckle()
@@ -427,7 +427,7 @@
 				if(T.y>world.maxy-outer_tele_radius || T.y<outer_tele_radius)	continue
 
 				// LIGHTING CHECK
-				if(T.lighting_lumcount > max_lum) continue
+				if(T.lighting_luma > max_lum) continue
 				turfs += T
 
 			if(!turfs.len)

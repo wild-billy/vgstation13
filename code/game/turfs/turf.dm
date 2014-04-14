@@ -258,7 +258,7 @@
 ///// Z-Level Stuff
 #endif
 
-	var/old_lumcount = lighting_lumcount - initial(lighting_lumcount)
+	var/old_luma = lighting_luma - initial(lighting_luma)
 
 	//world << "Replacing [src.type] with [N]"
 
@@ -282,9 +282,9 @@
 		var/turf/simulated/W = new N( locate(src.x, src.y, src.z) )
 		//W.Assimilate_Air()
 
-		W.lighting_lumcount += old_lumcount
-		if(old_lumcount != W.lighting_lumcount)
-			W.lighting_changed = 1
+		W.lighting_luma += old_luma
+		if(old_luma != W.lighting_luma)
+			W._lighting_changed = 1
 			lighting_controller.changed_turfs += W
 
 		if (istype(W,/turf/simulated/floor))
@@ -303,9 +303,9 @@
 		//		zone.SetStatus(ZONE_ACTIVE)
 
 		var/turf/W = new N( locate(src.x, src.y, src.z) )
-		W.lighting_lumcount += old_lumcount
-		if(old_lumcount != W.lighting_lumcount)
-			W.lighting_changed = 1
+		W.lighting_luma += old_luma
+		if(old_luma != W.lighting_luma)
+			W._lighting_changed = 1
 			lighting_controller.changed_turfs += W
 
 		if(air_master)

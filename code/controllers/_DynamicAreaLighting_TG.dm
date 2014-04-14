@@ -31,14 +31,34 @@
 		No directional lighting support. Fairly easy to add this and the code is ready.
 */
 
-#define LIGHTING_MAX_LUMINOSITY 12	//Hard maximum luminosity to prevet lag which could be caused by coders making mini-suns
-#define LIGHTING_MAX_LUMINOSITY_MOB 7	//Mobs get their own max because 60-odd human suns running around would be pretty silly
+// Resolution.  Higher values = shittier light.  Lower values = more memory usage.
+#define LUMC_Q_RES 32
+// Quantizing lumchannel resolution so we don't get shitloads of areas.
+#define LUMC_Q(x) Clamp(round(x*LUMC_Q_RES)/LUMC_Q_RES,0,1)
+#define LUMINOSITY_PER_LUMA 12 // Distance light is cast when on max luma.
+
+#define MAX_LUMA_MOB  0.7	    // Counterpart to below.
+
+#define MAX_LUMINOSITY 12	    //Hard maximum luminosity to prevet lag which could be caused by coders making mini-suns
+#define MAX_LUMINOSITY_MOB 7	//Mobs get their own max because 60-odd human suns running around would be pretty silly
 #define LIGHTING_LAYER 10			//Drawing layer for lighting overlays
 #define LIGHTING_ICON 'icons/effects/ss13_dark_alpha7.dmi'	//Icon used for lighting shading effects
-#define LIGHT_GREEN "#01DF01" //hex for lime green light
-#define LIGHT_WHITE "#FFFFFF" //hex for white light, aka normal
 
-datum/light_source
+/***********
+COLORED LIGHTING
+
+Light comes in three types:  Red, green, blue.
+
+Therefore, instead of applying just one color
+(white), we apply THREE lumcounts.
+************/
+                    //    R , G , B
+#define LIGHT_WHITE list(1.0,1.0,1.0) // white light, aka normal
+#define LIGHT_GREEN list(0.0,1.0,0.0) // lime green light
+
+#define LUMA_DEFAULT 0.25 // Default luma level. Dark and moody.
+
+/datum/light_source
 	var/atom/owner
 	var/changed = 1
 	var/mobile = 1
@@ -46,7 +66,9 @@ datum/light_source
 
 	var/__x = 0		//x coordinate at last update
 	var/__y = 0		//y coordinate at last update
-	var/l_color = LIGHT_WHITE
+
+	var/list/light_color = LIGHT_WHITE
+	var/luma = 1.0
 
 	New(atom/A)
 		if(!istype(A))
@@ -54,7 +76,7 @@ datum/light_source
 
 		..()
 		owner = A
-		l_color = owner.l_color
+		light_color = owner.lighting_color
 		if(istype(owner, /atom/movable))	mobile = 1		//apparantly this is faster than type-checking
 		else								mobile = 0		//Perhaps removing support for luminous turfs would be a good idea.
 
@@ -90,7 +112,7 @@ datum/light_source
 		if(effect.len)
 			for(var/turf in effect)	// negate the effect of this light source
 				var/turf/T = turf
-				T.update_lumcount(-effect[T],l_color)
+				T.update_lighting(-effect[T][4],effect[T])
 			effect.Cut()					// clear the effect list
 
 	proc/add_effect()
@@ -99,7 +121,7 @@ datum/light_source
 			effect = new_effect()						// identify the effects of this light source
 			for(var/turf in effect)
 				var/turf/T = turf
-				T.update_lumcount(effect[T],l_color)			// apply the effect
+				T.update_lumcount(effect[T][4],effect[T])			// apply the effect
 			return 0
 		else
 			owner.light = null
@@ -108,34 +130,49 @@ datum/light_source
 
 	proc/new_effect()
 		. = list()
-
 		for(var/turf/T in view(owner.luminosity, owner))
 //			var/area/A = T.loc
 //			if(!A) continue
-			var/change_in_lumcount = lum(T)
-			if(change_in_lumcount > 0)
-				.[T] = change_in_lumcount
+			var/delta_y = lum(T)
+			var/list/delta_c = list(
+				band_lum(T,1),
+				band_lum(T,2),
+				band_lum(T,3)
+			)
+			if(delta_y > 0)
+				.[T] = delta_c + list(delta_y)
 
 		return .
 
 
-	proc/lum(turf/A)
-		var/val = owner.luminosity - max(abs(A.x-__x),abs(A.y-__y))
+	proc/band_lum(var/turf/A,var/cband)
+		var/val = owner.lighting_color[cband] - max(abs(A.x-__x),abs(A.y-__y))
 		if(val < 0)
-			world << "[src] had a val lower than 0, [val]"
+			world << "[src] had a band #[cband] luminosity lower than 0: [val]"
 		return val
 //		var/dist = cheap_hypotenuse(A.x,A.y,__x,__y) //fetches the pythagorean distance between A and the light
 //		if(owner.luminosity < dist)	//if the turf is outside the radius the light doesn't illuminate it
 //			return 0
 //		return round(owner.luminosity - (dist/2),0.1)
 
-atom
+	proc/lum(turf/A)
+		var/val = owner.lighting_luma - max(abs(A.x-__x),abs(A.y-__y))
+		if(val < 0 || val > 1)
+			world << "[src] had a lighting_luma of [val]"
+		return val
+
+/atom
 	var/datum/light_source/light
-	var/l_color = LIGHT_WHITE // default light color
+	// Lighting color. (R,G,B), [0-1] each channel
+	var/list/lighting_color   = LIGHT_WHITE
+
+	// Lighting brightness.  0-1.
+	var/lighting_luma    = 1.0
+
 //Turfs with opacity when they are constructed will trigger nearby lights to update
 //Turfs atoms with luminosity when they are constructed will create a light_source automatically
 //TODO: lag reduction
-turf/New()
+/turf/New()
 	..()
 	if(opacity)
 		UpdateAffectingLights()
@@ -147,7 +184,7 @@ turf/New()
 //Movable atoms with opacity when they are constructed will trigger nearby lights to update
 //Movable atoms with luminosity when they are constructed will create a light_source automatically
 //TODO: lag reduction
-atom/movable/New()
+/atom/movable/New()
 	..()
 	if(opacity)
 		UpdateAffectingLights()
@@ -157,13 +194,13 @@ atom/movable/New()
 
 //Turfs with opacity will trigger nearby lights to update at next lighting process.
 //TODO: is this really necessary? Removing it could help reduce lag during singulo-mayhem somewhat
-turf/Destroy()
+/turf/Destroy()
 	if(opacity)
 		UpdateAffectingLights()
 	..()
 
 //Objects with opacity will trigger nearby lights to update at next lighting process.
-atom/movable/Destroy()
+/atom/movable/Destroy()
 	if(opacity)
 		UpdateAffectingLights()
 	..()
@@ -174,24 +211,23 @@ atom/movable/Destroy()
 //If we are setting luminosity to 0 the light will be cleaned up and delted once all its queues are complete
 //if we have a light already it is merely updated
 /obj/item/weapon/glowstick
-	l_color = LIGHT_GREEN //yes
+	lighting_color = LIGHT_GREEN //yes
+	lighting_luma = 0.16 // 666666666...
 	icon = 'icons/obj/weapons.dmi'
 	icon_state = "glowstick-green"
-	luminosity = 2
 	w_class = 2
 
 	red
 		color = "#FF0000"
-		l_color = "#FF0000"
-atom/proc/SetLuminosity(new_luminosity, max_luminosity = LIGHTING_MAX_LUMINOSITY)
-	if(new_luminosity < 0)
-		new_luminosity = 0
-//		world.log << "## WARNING: [type] - luminosity cannot be negative"
-	else if(max_luminosity < new_luminosity)
-		new_luminosity = max_luminosity
-//		if(luminosity != new_luminosity)
-//			world.log << "## WARNING: [type] - LIGHT_MAX_LUMINOSITY exceeded"
+		lighting_color = list(1.0, 0.0, 0.0)
 
+/atom/proc/SetLuminosity(new_luminosity, max_luminosity = MAX_LUMINOSITY)
+	SetLuma(new_luminosity/MAX_LUMINOSITY)
+
+/atom/proc/SetLuma(new_luma, max_luma = 1.0)
+	lighting_luma = Clamp(new_luma,0.0,1.0) // Simple.
+
+	var/new_luminosity = lighting_luma * MAX_LUMINOSITY
 	if(isturf(loc))
 		if(light)
 			if(luminosity != new_luminosity)	//TODO: remove lights from the light list when they're not luminous? DONE in add_effect
@@ -204,7 +240,7 @@ atom/proc/SetLuminosity(new_luminosity, max_luminosity = LIGHTING_MAX_LUMINOSITY
 
 //Snowflake code to prevent mobs becoming suns (lag-prevention)
 mob/SetLuminosity(new_luminosity)
-	..(new_luminosity,LIGHTING_MAX_LUMINOSITY_MOB)
+	..(new_luminosity,MAX_LUMINOSITY_MOB)
 
 //change our opacity (defaults to toggle), and then update all lights that affect us.
 atom/proc/SetOpacity(var/new_opacity)
@@ -221,75 +257,61 @@ atom/proc/UpdateAffectingLights()
 	if(!isturf(T))
 		T = loc
 		if(!isturf(T))	return
-	for(var/atom in range(LIGHTING_MAX_LUMINOSITY,T))	//TODO: this will probably not work very well :(
+	for(var/atom in range(MAX_LUMINOSITY,T))	//TODO: this will probably not work very well :(
 		var/atom/A = atom
 		if(A.light && A.luminosity)
 			A.light.changed = 1			//force it to update at next process()
 
-//	for(var/light in lighting_controller.lights)		//TODO: this will probably laaaaaag
-//		var/datum/light_source/L = light
-//		if(L.changed)	continue
-//		if(!L.owner)	continue
-//		if(!L.owner.luminosity)	continue
-//		if(src in L.effect)
-//			L.changed = 1
+/turf
+	// Don't mess with this.
+	var/_lighting_changed = 0
 
-turf
-	var/lighting_lumcount = 0
-	var/accepts_lighting = 1
-	var/lighting_changed = 0
-	var/color_lighting_lumcount = 0
 turf/space
-	lighting_lumcount = 4		//starlight
-	accepts_lighting=0 			// Don't apply overlays
+	lighting_luma = 0.3 // Old lumcount was 4. 4/12 = 0.3.
 
-turf/proc/update_lumcount(amount, _lcolor=LIGHT_WHITE)
-	//if(accepts_lighting)
-	//	lighting_lumcount += amount
-	//else if(lighting_lumcount != initial(lighting_lumcount))
-	//	lighting_lumcount = initial(lighting_lumcount)
-	//else
-	//	return
-	lighting_lumcount += amount
-//	if(lighting_lumcount < 0 || lighting_lumcount > 100)
-//		world.log << "## WARNING: [type] ([src]) lighting_lumcount = [lighting_lumcount]"
-	l_color=_lcolor
-	if(l_color != LIGHT_WHITE)
-		color_lighting_lumcount += amount
-	if(!lighting_changed)
+// Luma: [0-1] Multiplier used on color.
+/turf/proc/update_lighting(var/new_luma=-1,var/list/new_color=null)
+	if(new_luma!=-1)
+		lighting_luma = new_luma
+	if(new_color!=null)
+		lighting_color = new_color
+	if(!_lighting_changed)
 		lighting_controller.changed_turfs += src
-		lighting_changed = 1
+		_lighting_changed = 1
+
+// Compatibility.
+// Luma is a multiplier: (luma/MAX_LUMA) * (r,g,b)
+/turf/proc/update_lumcount(var/luma, var/list/_lcolor=null)
+	update_lighting(luma/12,_lcolor)
+
+/proc/mkHexColor(var/list/color)
+	return "#" \
+		+ add_zero2(num2hex(color[1]*255,1), 2) \
+		+ add_zero2(num2hex(color[2]*255,1), 2) \
+		+ add_zero2(num2hex(color[3]*255,1), 2)
+
 turf/proc/shift_to_subarea()
-	lighting_changed = 0
+	_lighting_changed = 0
 	var/area/Area = loc
 
 	if(!istype(Area) || !Area.lighting_use_dynamic /*|| !accepts_lighting*/) return
 
 	// change the turf's area depending on its brightness
 	// restrict light to valid levels
-	var/light = min(max(round(lighting_lumcount,1),0),lighting_controller.lighting_states)
-	var/color_light
+	var/light = LUMC_Q(lighting_luma)
+
+	// Same with colored light.
+	var/list/color_light = list(
+		LUMC_Q(lighting_color[1]),
+		LUMC_Q(lighting_color[2]),
+		LUMC_Q(lighting_color[3])
+	)
+	var/ser_color = mkHexColor(color_light)
 	var/find = findtextEx(Area.tag, "sd_L")
 	var/new_tag = copytext(Area.tag, 1, find)
-	//if(accepts_lighting)
-	//	new_tag += "sd_L[light]"
-	// pomf-If we have a lighting color that is not white, apply the new tag to seperate the areas.
-	if(color_lighting_lumcount && l_color != LIGHT_WHITE)
-		new_tag += "sd_LC[light]" // -pomf We append the color lighting lumcount so we can have colored lights
-	else
-		new_tag += "sd_L[light]"
-	if(l_color)
-		switch(l_color)
-			if(LIGHT_GREEN)
-				new_tag += "Green[color_lighting_lumcount]"
-			if(LIGHT_WHITE)
-				new_tag = new_tag
-			else
-				new_tag += "[l_color][color_lighting_lumcount]" // -pomf undefined colors get their own group
+	new_tag += "sd_L[light][ser_color]" // sd_L0#RRGGBB
 	if(Area.tag!=new_tag)	//skip if already in this area
-
 		var/area/A = locate(new_tag)	// find an appropriate area
-
 		if(!A)
 
 			A = new Area.type()    // create area if it wasn't found
@@ -300,87 +322,105 @@ turf/proc/shift_to_subarea()
 					else
 						if(issaved(Area.vars[V])) A.vars[V] = Area.vars[V]
 
-			A.tag = new_tag
-			A.lighting_subarea = 1
-			if(A.l_color != l_color)
-				world << "colors dont match, setting area color to [l_color]."
-				A.l_color = l_color
-				color_light = min(max(round(color_lighting_lumcount,1),0),lighting_controller.lighting_states)
-				A.SetLightLevel(light,color_light)
-			else
-				A.SetLightLevel(light)
+			A.tag = new_tag        // Tell lighting system we're already subdivided
+			A.lighting_subarea = 1 // In less uncertain terms.
+			A.SetLightLevel(color_light)
 			Area.related += A
-		else
-			if(A.l_color != l_color)
-				world << "colors dont match, setting area color to [l_color]."
-				A.l_color = l_color
-				color_light = min(max(round(color_lighting_lumcount,1),0),lighting_controller.lighting_states)
-				A.SetLightLevel(light,color_light)
 		A.contents += src	// move the turf into the area
 
-area
+/area
 	var/lighting_use_dynamic = 1	//Turn this flag off to prevent sd_DynamicAreaLighting from affecting this area
 	var/image/lighting_overlay		//tracks the darkness image of the area for easy removal
-	var/image/color_overlay			//tracks the color image
-	var/color_
 	var/lighting_subarea = 0		//tracks whether we're a lighting sub-area
 
-	proc/SetLightLevel(light, color_light = 0)
+	proc/SetLightLevel(var/luma,var/list/color_light)
 		if(!src) return
-		if(light <= 0)
-			light = 0
+
+		// FUCK ALL YOUR COMPATIBILITY
+		overlays = 0
+
+		/**
+		This is going to be a fucking mess, so bear with me.
+
+		The old lighting system basically flopped a black mask over
+		the area and dicked around with the alpha.  Well, it didn't
+		have alpha back then, so it swapped between different
+		predefined levels, but you get the idea.
+
+		What we're going to do is make a white mask, and color it.
+
+		Then we get into the hairy part: darkening the color mask
+		from our luma so shit gets darker when luma goes down,
+		rather than brighter.
+
+		Then we simply add our overlay and change the alpha
+		according to luma.
+		**/
+
+		// Let's get this show on the road.
+
+		// Quantize and sanitize input.
+		var/L = LUMC_Q(luma)
+
+		// No luma?  Fuck the rest of this.
+		if(L <= 0)
+			L = 0
 			luminosity = 0
+			if(lighting_overlay)
+				lighting_overlay = null
+				return
 		else
-			if(light > lighting_controller.lighting_states)
-				light = lighting_controller.lighting_states
 			luminosity = 1
 
-		if(lighting_overlay)
-			overlays -= lighting_overlay
-			lighting_overlay.icon_state = "[light]"
-		else
-			var/_state = "[light]"
-			lighting_overlay = image(LIGHTING_ICON,,_state,LIGHTING_LAYER)
-		if(color_overlay)
-			overlays -= color_overlay
-			color_overlay.icon_state = "white"
-		else
-			if(l_color)
-				color_overlay = image(LIGHTING_ICON,,"white",10.1)
-		if(l_color == LIGHT_WHITE)
-			color_overlay = null
+		// Build our icon
+		if(!lighting_overlay)
+			lighting_overlay = image(LIGHTING_ICON,,"white",LIGHTING_LAYER)
 
-		if(color_overlay)
-			color_overlay.color = l_color
-			switch(color_light)
-				if(7)
-					color_overlay.alpha = 140
-				if(6)
-					color_overlay.alpha = 120
-				if(5)
-					color_overlay.alpha = 100
-				if(4)
-					color_overlay.alpha = 80
-				if(3)
-					color_overlay.alpha = 60
-				if(2)
-					color_overlay.alpha = 40
-				if(1)
-					color_overlay.alpha = 20
-				else
-					color_overlay.alpha = 0
-			overlays += color_overlay
-		if(!color_overlay)
-			overlays += lighting_overlay
-		else if(light < 7)
-			overlays += lighting_overlay
+
+		// Quantize colors, too.
+		var/R = LUMC_Q(color_light[1])
+		var/G = LUMC_Q(color_light[2])
+		var/B = LUMC_Q(color_light[3])
+
+		// If we're black, we're going to be black.
+		if(R==0&&G==0&&B==0)
+			lighting_overlay.color = "#000000"
+		else
+			////////////////////////////////
+			// MAGIC STARTS HERE
+			////////////////////////////////
+
+			// Convert to RGB list with [0..255] gamma.
+			var/list/RGB = list(round(R*0xFF),round(G*0xFF),round(B*0xFF))
+
+			// Convert to HSV (Hue, Saturation, Value)
+			var/list/HSV = ListRGBtoHSV(RGB)
+
+			// Set value to luma, otherwise we get brighter rather than darker.
+			HSV[3] = L
+
+			// Convert back to RGB.
+			RGB = ListHSVtoRGB(HSV)
+
+			// Apply color to overlay
+			lighting_overlay.color = mkHexColor(list(R/255,G/255,B/255)) // This is redundant as hell but I stopped caring a long time ago.
+
+			///////////////////////////////
+			// END MAGIC
+			///////////////////////////////
+
+		// Set alpha to luma
+		lighting_overlay.alpha = L
+
+		// And add our overlay.
+		overlays += lighting_overlay
 
 	proc/InitializeLighting()	//TODO: could probably improve this bit ~Carn
 		if(!tag) tag = "[type]"
 		if(!lighting_use_dynamic)
 			if(!lighting_subarea)	// see if this is a lighting subarea already
-			//show the dark overlay so areas, not yet in a lighting subarea, won't be bright as day and look silly.
-				SetLightLevel(4)
+				//show the dark overlay so areas, not yet in a lighting subarea, won't be bright as day and look silly.
+				SetLightLevel(0.3,LIGHT_WHITE)
 
 
 #undef LIGHTING_MAX_LUMINOSITY

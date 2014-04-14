@@ -52,7 +52,7 @@ datum/controller/lighting/proc/process()
 				changed_turfs_workload_max = max(changed_turfs_workload_max,changed_turfs.len)
 				for(var/i=1, i<=changed_turfs.len, i++)
 					var/turf/T = changed_turfs[i]
-					if(T && T.lighting_changed)
+					if(T && T._lighting_changed)
 						T.shift_to_subarea()
 				changed_turfs.Cut()		// reset the changed list
 
@@ -109,7 +109,7 @@ datum/controller/lighting/proc/Recover()
 
 	for(var/i=1, i<=lighting_controller.changed_turfs.len, i++)
 		var/turf/T = lighting_controller.changed_turfs[i]
-		if(istype(T) && T.lighting_changed)
+		if(istype(T) && T._lighting_changed)
 			spawn(-1)
 				T.shift_to_subarea()
 

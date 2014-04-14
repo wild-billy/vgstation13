@@ -940,10 +940,10 @@
 				var/turf/T = loc
 				var/area/A = T.loc
 				if(A)
-					if(A.lighting_use_dynamic)	light_amount = min(10,T.lighting_lumcount) - 5 //hardcapped so it's not abused by having a ton of flashlights
-					else						light_amount =  5
-			nutrition += light_amount
-			traumatic_shock -= light_amount
+					if(A.lighting_use_dynamic)	light_amount = Clamp(T.lighting_luma+0.5,0,1) //hardcapped so it's not abused by having a ton of flashlights
+					else						light_amount = 1
+			nutrition += light_amount * 10
+			traumatic_shock -= light_amount * 10
 
 			if(species.flags & IS_PLANT)
 				if(nutrition > 500)
@@ -960,11 +960,11 @@
 				var/turf/T = loc
 				var/area/A = T.loc
 				if(A)
-					if(A.lighting_use_dynamic)	light_amount = T.lighting_lumcount
+					if(A.lighting_use_dynamic)	light_amount = T.lighting_luma
 					else						light_amount =  10
-			if(light_amount > 2) //if there's enough light, start dying
+			if(light_amount > 0.16) //if there's enough light, start dying
 				take_overall_damage(1,1)
-			else if (light_amount < 2) //heal in the dark
+			else if (light_amount < 0.16) //heal in the dark
 				heal_overall_damage(1,1)
 
 		//The fucking M_FAT mutation is the greatest shit ever. It makes everyone so hot and bothered.
@@ -1457,7 +1457,7 @@
 		//0.1% chance of playing a scary sound to someone who's in complete darkness
 		if(isturf(loc) && rand(1,1000) == 1)
 			var/turf/currentTurf = loc
-			if(!currentTurf.lighting_lumcount)
+			if(!currentTurf.lighting_luma)
 				playsound_local(src,pick(scarySounds),50, 1, -1)
 
 	// Separate proc so we can jump out of it when we've succeeded in spreading disease.
