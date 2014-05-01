@@ -109,6 +109,10 @@
 		if(!M.powernet)	continue	// APCs have powernet=0 so they don't count as network nodes directly
 		M.powernet.nodes[M] = M
 
+	for(var/obj/machinery/networked/M in machines)
+		if(!M.network)	continue
+		M.network.nodes[M] = M
+
 
 // returns a list of all power-related objects (nodes, cable, junctions) in turf,
 // excluding source, that match the direction d
@@ -166,6 +170,7 @@
 		cdir = get_dir(T,loc)
 
 		for(var/obj/structure/cable/C in T)
+			if(C.supplies != SUPPLIES_POWER) continue
 			if(C.powernet)	continue
 			if(C.d1 == cdir || C.d2 == cdir)
 				. += C
@@ -174,25 +179,32 @@
 /obj/machinery/power/proc/get_indirect_connections()
 	. = list()
 	for(var/obj/structure/cable/C in loc)
+		if(C.supplies != SUPPLIES_POWER) continue
 		if(C.powernet)	continue
 		if(C.d1 == 0)
 			. += C
 	return .
 
 
-/proc/powernet_nextlink(var/obj/O, var/datum/powernet/PN)
+/proc/powernet_nextlink(var/obj/O, var/datum/powernet/PN, var/supplytype=SUPPLIES_POWER)
 	var/list/P
 
 	while(1)
 		if( istype(O,/obj/structure/cable) )
 			var/obj/structure/cable/C = O
+			if(C.supplies != supplytype) continue
 			C.powernet = PN
 			P = C.get_connections()
 
-		else if(O.anchored && istype(O,/obj/machinery/power))
-			var/obj/machinery/power/M = O
-			M.powernet = PN
-			P = M.get_connections()
+		else if(O.anchored)
+			if(istype(O,/obj/machinery/power))
+				var/obj/machinery/power/M = O
+				M.powernet = PN
+				P = M.get_connections()
+			else if(O,/obj/machinery/networked))
+				var/obj/machinery/networked/M = O
+				M.network = PN
+				P = M.get_connections()
 
 		else
 			return
@@ -202,7 +214,7 @@
 		O = P[1]
 
 		for(var/L = 2 to P.len)
-			powernet_nextlink(P[L], PN)
+			powernet_nextlink(P[L], PN, supplytype)
 
 
 // cut a powernet at this cable object

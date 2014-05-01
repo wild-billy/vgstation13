@@ -1,7 +1,6 @@
 // attach a wire to a power machine - leads from the turf you are standing on
 
 /obj/machinery/power/attackby(obj/item/weapon/W, mob/user)
-
 	if(istype(W, /obj/item/weapon/cable_coil))
 
 		var/obj/item/weapon/cable_coil/coil = W
@@ -24,11 +23,8 @@
 	return
 
 // the power cable object
-
 /obj/structure/cable/New()
 	..()
-
-
 	// ensure d1 & d2 reflect the icon_state for entering and exiting cable
 
 	var/dash = findtext(icon_state, "-")
@@ -65,10 +61,8 @@
 	updateicon()
 
 /obj/structure/cable/proc/updateicon()
-	if(invisibility)
-		icon_state = "[d1]-[d2]-f"
-	else
-		icon_state = "[d1]-[d2]"
+	icon_state = "[d1]-[d2]"
+	alpha = invisibility ? 128 : 255
 
 
 // returns the powernet this cable belongs to
@@ -90,18 +84,18 @@
 //			user << "\red This piece of cable is tied to a power switch. Flip the switch to remove it."
 //			return
 
-		if (shock(user, 50))
+		if (carries == CARRIES_POWER && shock(user, 50))
 			return
 
 		if(src.d1)	// 0-X cables are 1 unit, X-X cables are 2 units long
-			new/obj/item/weapon/cable_coil(T, 2, _color)
+			new coil_type(T, 2, _color)
 		else
-			new/obj/item/weapon/cable_coil(T, 1, _color)
+			new coil_type(T, 1, _color)
 
 		for(var/mob/O in viewers(src, null))
-			O.show_message("\red [user] cuts the cable.", 1)
+			O.show_message("\red [user] cuts the [src].", 1)
 
-		var/message = "A wire has been cut "
+		var/message = "\A [src] has been cut "
 		var/atom/A = user
 		if(A)
 			var/turf/Z = get_turf(A)
@@ -126,19 +120,16 @@
 		coil.cable_join(src, user)
 
 	else if(istype(W, /obj/item/device/multitool))
-
 		var/datum/powernet/PN = get_powernet()		// find the powernet
-
 		if(PN && (PN.avail > 0))		// is it powered?
 			user << "\red [PN.avail]W in power network."
-
 		else
-			user << "\red The cable is not powered."
+			user << "\red The [src] is not powered."
 
 		shock(user, 5, 0.2)
 
 	else
-		if (W.flags & CONDUCT)
+		if (W.flags & CONDUCT && carries == CARRIES_POWER)
 			shock(user, 50, 0.7)
 
 	src.add_fingerprint(user)
@@ -162,12 +153,12 @@
 			qdel(src)
 		if(2.0)
 			if (prob(50))
-				new/obj/item/weapon/cable_coil(src.loc, src.d1 ? 2 : 1, _color)
+				new coil_type(src.loc, src.d1 ? 2 : 1, _color)
 				qdel(src)
 
 		if(3.0)
 			if (prob(25))
-				new/obj/item/weapon/cable_coil(src.loc, src.d1 ? 2 : 1, _color)
+				new coil_type(src.loc, src.d1 ? 2 : 1, _color)
 				qdel(src)
 	return
 
@@ -180,6 +171,8 @@
 	icon_state = "coil_red"
 	var/amount = MAXCOIL
 	var/max_amount = MAXCOIL
+	var/cable_type = /obj/structure/cable
+	var/carries = CARRIES_POWER
 	_color = "red"
 	desc = "A coil of power cable."
 	throwforce = 10
@@ -271,7 +264,7 @@
 			return
 
 		else
-			user << "You transfer [max_amount - src.amount] length\s of cable from one coil to the other."
+			user << "You transfer [max_amount - C.amount] length\s of cable from one coil to the other."
 			src.amount -= (max_amount-C.amount)
 			src.updateicon()
 			C.amount = max_amount
@@ -312,11 +305,13 @@
 			dirn = get_dir(F, user)
 
 		for(var/obj/structure/cable/LC in F)
+			// If we carry data and the existing cable carries power, skip over it.
+			if(LC.carries != carries) continue
 			if((LC.d1 == dirn && LC.d2 == 0 ) || ( LC.d2 == dirn && LC.d1 == 0))
 				user << "There's already a cable at that position."
 				return
 
-		var/obj/structure/cable/C = new(F)
+		var/obj/structure/cable/C = new cable_type(F)
 
 		C.cableColor(_color)
 
@@ -376,11 +371,13 @@
 			var/fdirn = turn(dirn, 180)		// the opposite direction
 
 			for(var/obj/structure/cable/LC in U)		// check to make sure there's not a cable there already
+				// If we carry data and the existing cable carries power, skip over it.
+				if(LC.carries != carries) continue
 				if(LC.d1 == fdirn || LC.d2 == fdirn)
 					user << "There's already a cable at that position."
 					return
 
-			var/obj/structure/cable/NC = new(U)
+			var/obj/structure/cable/NC = new cable_type(U)
 			NC.cableColor(_color)
 
 			NC.d1 = 0
@@ -396,7 +393,7 @@
 			use(1)
 			if (NC.shock(user, 50))
 				if (prob(50)) //fail
-					new/obj/item/weapon/cable_coil(NC.loc, 1, NC._color)
+					new src.type(NC.loc, 1, NC._color)
 					del(NC)
 
 			return
@@ -412,6 +409,8 @@
 
 
 		for(var/obj/structure/cable/LC in T)		// check to make sure there's no matching cable
+			// If we carry data and the existing cable carries power, skip over it.
+			if(LC.carries != carries) continue
 			if(LC == C)			// skip the cable we're interacting with
 				continue
 			if((LC.d1 == nd1 && LC.d2 == nd2) || (LC.d1 == nd2 && LC.d2 == nd1) )	// make sure no cable matches either direction
@@ -451,7 +450,11 @@
 		if(!TC)
 			continue
 
-		if(src == TC)
+		// If we carry data and the existing cable carries power, skip over it. - N3X
+		if(TC.carries != carries)
+			continue
+
+		if(src == TC) // How ...?
 			continue
 
 		var/fdir = (!direction)? 0 : turn(direction, 180)
@@ -470,8 +473,6 @@
 				powernet.cables += src
 
 
-
-
 /obj/structure/cable/proc/mergeConnectedNetworksOnTurf()
 	if(!powernet)
 		powernet = new()
@@ -481,6 +482,9 @@
 	for(var/AM in loc)
 		if(istype(AM,/obj/structure/cable))
 			var/obj/structure/cable/C = AM
+			// If we carry data and the existing cable carries power, skip over it. - N3X
+			if(C.carries != carries)
+				continue
 			if(C.powernet == powernet)	continue
 			if(C.powernet)
 				merge_powernets(powernet, C.powernet)
@@ -488,6 +492,7 @@
 				C.powernet = powernet
 				powernet.cables += C
 
+		// Why...?  Below has /obj/machinery/power. - N3X
 		else if(istype(AM,/obj/machinery/power/apc))
 			var/obj/machinery/power/apc/N = AM
 			if(!N.terminal)	continue
@@ -504,6 +509,15 @@
 				merge_powernets(powernet, M.powernet)
 			else
 				M.powernet = powernet
+				powernet.nodes[M] = M
+
+		else if(istype(AM,/obj/machinery/networked))
+			var/obj/machinery/power/M = AM
+			if(M.network == powernet)	continue
+			if(M.network)
+				merge_powernets(powernet, M.network)
+			else
+				M.network = powernet
 				powernet.nodes[M] = M
 
 
@@ -574,7 +588,7 @@ obj/structure/cable/proc/cableColor(var/colorC)
 	..()
 
 /obj/item/weapon/cable_coil/attack(mob/M as mob, mob/user as mob)
-	if(hasorgans(M))
+	if(hasorgans(M) && carries == CARRIES_POWER)
 		var/datum/organ/external/S = M:get_organ(user.zone_sel.selecting)
 		if(!(S.status & ORGAN_ROBOT) || user.a_intent != "help")
 			return ..()

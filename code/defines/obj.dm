@@ -269,6 +269,8 @@ var/global/list/PDA_Manifest = list()
 	var/list/container = list(  )
 
 
+#define CARRIES_DATA  1
+#define CARRIES_POWER 2
 /obj/structure/cable
 	level = 1
 	anchored =1
@@ -283,6 +285,8 @@ var/global/list/PDA_Manifest = list()
 	var/_color = "red"
 	var/obj/structure/powerswitch/power_switch
 	var/obj/item/device/powersink/attached // holding this here for qdel
+	var/carries = CARRIES_POWER
+	var/coil_type = /obj/item/weapon/cable_coil
 
 /obj/structure/cable/yellow
 	_color = "yellow"

@@ -42,7 +42,7 @@
 /datum/genetree/proc/ActivateSector(var/sname)
 	var/datum/genetic_sector/sector = sectors[sname]
 	sector.active = 1
-	sector.OnActivate()
+	//sector.OnActivate()
 	for(var/subsect in dependants[sname])
 		var/datum/genetic_sector/subsector = sectors[subsect]
 		subsector.locked=0
