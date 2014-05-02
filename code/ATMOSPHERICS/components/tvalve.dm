@@ -1,4 +1,4 @@
-obj/machinery/atmospherics/tvalve
+obj/machinery/networked/atmos/tvalve
 	icon = 'icons/obj/atmospherics/valve.dmi'
 	icon_state = "tvalve0"
 
@@ -11,13 +11,13 @@ obj/machinery/atmospherics/tvalve
 	var/state = 0 // 0 = go straight, 1 = go to side
 
 	// like a trinary component, node1 is input, node2 is side output, node3 is straight output
-	var/obj/machinery/atmospherics/node1
-	var/obj/machinery/atmospherics/node2
-	var/obj/machinery/atmospherics/node3
+	var/obj/machinery/networked/atmos/node1
+	var/obj/machinery/networked/atmos/node2
+	var/obj/machinery/networked/atmos/node3
 
-	var/datum/pipe_network/network_node1
-	var/datum/pipe_network/network_node2
-	var/datum/pipe_network/network_node3
+	var/datum/network/atmos/network_node1
+	var/datum/network/atmos/network_node2
+	var/datum/network/atmos/network_node3
 
 	update_icon(animation)
 		if(animation)
@@ -60,7 +60,7 @@ obj/machinery/atmospherics/tvalve
 			if(WEST)
 				initialize_directions = EAST|WEST|NORTH
 
-	network_expand(datum/pipe_network/new_network, obj/machinery/atmospherics/pipe/reference)
+	network_expand(datum/network/atmos/new_network, obj/machinery/networked/atmos/pipe/reference)
 		if(reference == node1)
 			network_node1 = new_network
 			if(state)
@@ -206,28 +206,28 @@ obj/machinery/atmospherics/tvalve
 
 	initialize()
 
-		node1 = findConnecting(turn(dir, 180))
-		node2 = findConnecting(turn(dir, -90))
-		node3 = findConnecting(dir)
+		node1 = findConnectingPipe(turn(dir, 180))
+		node2 = findConnectingPipe(turn(dir, -90))
+		node3 = findConnectingPipe(dir)
 
 	build_network()
 		if(!network_node1 && node1)
-			network_node1 = new /datum/pipe_network()
+			network_node1 = new /datum/network/atmos()
 			network_node1.normal_members += src
 			network_node1.build_network(node1, src)
 
 		if(!network_node2 && node2)
-			network_node2 = new /datum/pipe_network()
+			network_node2 = new /datum/network/atmos()
 			network_node2.normal_members += src
 			network_node2.build_network(node2, src)
 
 		if(!network_node3 && node3)
-			network_node3 = new /datum/pipe_network()
+			network_node3 = new /datum/network/atmos()
 			network_node3.normal_members += src
 			network_node3.build_network(node3, src)
 
 
-	return_network(obj/machinery/atmospherics/reference)
+	return_network(obj/machinery/networked/atmos/reference)
 		build_network()
 
 		if(reference==node1)
@@ -241,7 +241,7 @@ obj/machinery/atmospherics/tvalve
 
 		return null
 
-	reassign_network(datum/pipe_network/old_network, datum/pipe_network/new_network)
+	reassign_network(datum/network/atmos/old_network, datum/network/atmos/new_network)
 		if(network_node1 == old_network)
 			network_node1 = new_network
 		if(network_node2 == old_network)
@@ -254,7 +254,7 @@ obj/machinery/atmospherics/tvalve
 	return_network_air(datum/network/reference)
 		return null
 
-	disconnect(obj/machinery/atmospherics/reference)
+	disconnect(obj/machinery/networked/atmos/reference)
 		if(reference==node1)
 			del(network_node1)
 			node1 = null
@@ -324,7 +324,7 @@ obj/machinery/atmospherics/tvalve
 	attackby(var/obj/item/weapon/W as obj, var/mob/user as mob)
 		if (!istype(W, /obj/item/weapon/wrench))
 			return ..()
-		if (istype(src, /obj/machinery/atmospherics/tvalve/digital))
+		if (istype(src, /obj/machinery/networked/atmos/tvalve/digital))
 			user << "\red You cannot unwrench this [src], it's too complicated."
 			return 1
 		var/turf/T = src.loc
@@ -347,7 +347,7 @@ obj/machinery/atmospherics/tvalve
 			new /obj/item/pipe(loc, make_from=src)
 			del(src)
 
-obj/machinery/atmospherics/tvalve/mirrored
+obj/machinery/networked/atmos/tvalve/mirrored
 	icon_state = "tvalvem0"
 
 	initialize_directions()
@@ -370,15 +370,15 @@ obj/machinery/atmospherics/tvalve/mirrored
 		node2_dir = turn(dir, 90)
 		node3_dir = dir
 
-		for(var/obj/machinery/atmospherics/target in get_step(src,node1_dir))
+		for(var/obj/machinery/networked/atmos/target in get_step(src,node1_dir))
 			if(target.initialize_directions & get_dir(target,src))
 				node1 = target
 				break
-		for(var/obj/machinery/atmospherics/target in get_step(src,node2_dir))
+		for(var/obj/machinery/networked/atmos/target in get_step(src,node2_dir))
 			if(target.initialize_directions & get_dir(target,src))
 				node2 = target
 				break
-		for(var/obj/machinery/atmospherics/target in get_step(src,node3_dir))
+		for(var/obj/machinery/networked/atmos/target in get_step(src,node3_dir))
 			if(target.initialize_directions & get_dir(target,src))
 				node3 = target
 				break

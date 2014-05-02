@@ -34,7 +34,7 @@
 	if(activeFor == releaseWhen)
 		if(prisonAreas && prisonAreas.len > 0)
 			for(var/area/A in prisonAreas)
-				for(var/obj/machinery/power/apc/temp_apc in A)
+				for(var/obj/machinery/networked/power/apc/temp_apc in A)
 					temp_apc.overload_lighting()
 
 				for(var/obj/structure/closet/secure_closet/brig/temp_closet in A)

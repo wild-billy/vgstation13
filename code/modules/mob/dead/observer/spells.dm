@@ -45,7 +45,7 @@ var/global/list/boo_phrases=list(
 					L.flicker()
 
 			// OH GOD BLUE APC (single animation cycle)
-			if(istype(A, /obj/machinery/power/apc))
+			if(istype(A, /obj/machinery/networked/power/apc))
 				A:spookify()
 
 			if(istype(A, /obj/machinery/status_display))

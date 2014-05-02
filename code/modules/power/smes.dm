@@ -4,7 +4,7 @@
 #define SMESMAXCHARGELEVEL 200000
 #define SMESMAXOUTPUT 200000
 
-/obj/machinery/power/smes
+/obj/machinery/networked/power/smes
 	name = "power storage unit"
 	desc = "A high-capacity superconducting magnetic energy storage (SMES) unit."
 	icon_state = "smes"
@@ -23,19 +23,19 @@
 	var/chargelevel = 50000
 	var/online = 1
 	var/name_tag = null
-	var/obj/machinery/power/terminal/terminal = null
+	var/obj/machinery/networked/power/terminal/terminal = null
 	//Holders for powerout event.
 	var/last_output = 0
 	var/last_charge = 0
 	var/last_online = 0
 
-/obj/machinery/power/smes/New()
+/obj/machinery/networked/power/smes/New()
 	..()
 	spawn(5)
 		dir_loop:
 			for(var/d in cardinal)
 				var/turf/T = get_step(src, d)
-				for(var/obj/machinery/power/terminal/term in T)
+				for(var/obj/machinery/networked/power/terminal/term in T)
 					if(term && term.dir == turn(d, 180))
 						terminal = term
 						break dir_loop
@@ -62,15 +62,15 @@
 
 	return
 
-/obj/machinery/power/smes/proc/make_terminal()
+/obj/machinery/networked/power/smes/proc/make_terminal()
 	// create a terminal object at the same position as original turf loc
 	// wires will attach to this
 	var/tempLoc = get_step(src.loc, WEST)
-	terminal = new/obj/machinery/power/terminal(tempLoc)
+	terminal = new/obj/machinery/networked/power/terminal(tempLoc)
 	terminal.dir = EAST
 	terminal.master = src
 
-/obj/machinery/power/smes/attackby(var/obj/item/weapon/W as obj, var/mob/user as mob) //these can only be moved by being reconstructed, solves having to remake the powernet.
+/obj/machinery/networked/power/smes/attackby(var/obj/item/weapon/W as obj, var/mob/user as mob) //these can only be moved by being reconstructed, solves having to remake the powernet.
 	if(istype(W, /obj/item/weapon/screwdriver))
 		if(!opened)
 			src.opened = 1
@@ -123,7 +123,7 @@
 			return 1
 	return
 
-/obj/machinery/power/smes/proc/updateicon()
+/obj/machinery/networked/power/smes/proc/updateicon()
 	overlays.Cut()
 	if(stat & BROKEN)	return
 
@@ -141,13 +141,13 @@
 	return
 
 
-/obj/machinery/power/smes/proc/chargedisplay()
+/obj/machinery/networked/power/smes/proc/chargedisplay()
 	return round(5.5*charge/(capacity ? capacity : 5e6))
 
 #define SMESRATE 0.05			// rate of internal charge to external power
 
 
-/obj/machinery/power/smes/process()
+/obj/machinery/networked/power/smes/process()
 
 	if(stat & BROKEN)	return
 
@@ -205,7 +205,7 @@
 // restores charge level to smes if there was excess this ptick
 
 
-/obj/machinery/power/smes/proc/restore()
+/obj/machinery/networked/power/smes/proc/restore()
 	if(stat & BROKEN)
 		return
 
@@ -233,23 +233,23 @@
 	return
 
 
-/obj/machinery/power/smes/add_load(var/amount)
+/obj/machinery/networked/power/smes/add_load(var/amount)
 	if(terminal && terminal.powernet)
 		terminal.powernet.newload += amount
 
 
-/obj/machinery/power/smes/attack_ai(mob/user)
+/obj/machinery/networked/power/smes/attack_ai(mob/user)
 	src.add_hiddenprint(user)
 	add_fingerprint(user)
 	ui_interact(user)
 
 
-/obj/machinery/power/smes/attack_hand(mob/user)
+/obj/machinery/networked/power/smes/attack_hand(mob/user)
 	add_fingerprint(user)
 	ui_interact(user)
 
 
-/obj/machinery/power/smes/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null)
+/obj/machinery/networked/power/smes/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null)
 
 	if(stat & BROKEN)
 		return
@@ -281,7 +281,7 @@
 		ui.set_auto_update(1)
 
 
-/obj/machinery/power/smes/Topic(href, href_list)
+/obj/machinery/networked/power/smes/Topic(href, href_list)
 	..()
 
 	if (usr.stat || usr.restrained() )
@@ -330,7 +330,7 @@
 	return 1
 
 
-/obj/machinery/power/smes/proc/ion_act()
+/obj/machinery/networked/power/smes/proc/ion_act()
 	if(src.z == 1)
 		if(prob(1)) //explosion
 			world << "\red SMES explosion in [src.loc.loc]"
@@ -361,7 +361,7 @@
 			smoke.start()
 
 
-/obj/machinery/power/smes/emp_act(severity)
+/obj/machinery/networked/power/smes/emp_act(severity)
 	online = 0
 	charging = 0
 	output = 0
@@ -376,7 +376,7 @@
 
 
 
-/obj/machinery/power/smes/magical
+/obj/machinery/networked/power/smes/magical
 	name = "magical power storage unit"
 	desc = "A high-capacity superconducting magnetic energy storage (SMES) unit. Magically produces power."
 	process()

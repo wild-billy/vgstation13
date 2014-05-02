@@ -231,8 +231,8 @@
 	if(!stat)
 		if(!lying)
 
-			var/obj/machinery/atmospherics/unary/vent_pump/vent_found
-			for(var/obj/machinery/atmospherics/unary/vent_pump/v in range(1,src))
+			var/obj/machinery/networked/atmos/unary/vent_pump/vent_found
+			for(var/obj/machinery/networked/atmos/unary/vent_pump/v in range(1,src))
 				if(!v.welded)
 					vent_found = v
 				else
@@ -241,7 +241,7 @@
 			if(vent_found)
 				if(vent_found.network&&vent_found.network.normal_members.len)
 					var/list/vents[0]
-					for(var/obj/machinery/atmospherics/unary/vent_pump/temp_vent in vent_found.network.normal_members)
+					for(var/obj/machinery/networked/atmos/unary/vent_pump/temp_vent in vent_found.network.normal_members)
 						if(temp_vent.loc == loc)
 							continue
 						if(temp_vent.welded)
@@ -276,7 +276,7 @@
 								if( !istype(carried_item, /obj/item/weapon/implant) && !istype(carried_item, /obj/item/clothing/mask/facehugger) )//If it's not an implant or a facehugger
 									src << "\red You can't be carrying items or have items equipped when vent crawling!"
 									return
-						var/obj/machinery/atmospherics/unary/vent_pump/target_vent = vents[selection]
+						var/obj/machinery/networked/atmos/unary/vent_pump/target_vent = vents[selection]
 						if(target_vent)
 							for(var/mob/O in viewers(src, null))
 								O.show_message(text("<B>[src] scrambles into the ventilation ducts!</B>"), 1)

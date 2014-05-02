@@ -53,8 +53,8 @@
 				if(collided_catcher.AddParticles(particle_type, 1 + additional_particles))
 					collided_catcher.parent.AddEnergy(energy,mega_energy)
 					del (src)
-		else if( istype(A,/obj/machinery/power/rust_core) )
-			var/obj/machinery/power/rust_core/collided_core = A
+		else if( istype(A,/obj/machinery/networked/power/rust_core) )
+			var/obj/machinery/networked/power/rust_core/collided_core = A
 			if(particle_type && particle_type != "neutron")
 				if(collided_core.AddParticles(particle_type, 1 + additional_particles))
 					var/energy_loss_ratio = abs(collided_core.owned_field.frequency - frequency) / 1e9

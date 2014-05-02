@@ -1,13 +1,11 @@
-/obj/machinery/atmospherics/unary
+/obj/machinery/networked/atmos/unary
 	dir = SOUTH
 	initialize_directions = SOUTH
 	layer = 2.45 // Cable says we're at 2.45, so we're at 2.45.  (old: TURF_LAYER+0.1)
 
 	var/datum/gas_mixture/air_contents
 
-	var/obj/machinery/atmospherics/node
-
-	var/datum/pipe_network/network
+	var/obj/machinery/networked/atmos/node
 
 	New()
 		..()
@@ -31,7 +29,7 @@
 		return 1
 
 // Housekeeping and pipe network stuff below
-	network_expand(datum/pipe_network/new_network, obj/machinery/atmospherics/pipe/reference)
+	network_expand(datum/network/atmos/new_network, obj/machinery/networked/atmos/pipe/reference)
 		if(reference == node)
 			network = new_network
 
@@ -58,7 +56,7 @@
 
 		var/node_connect = dir
 
-		for(var/obj/machinery/atmospherics/target in get_step(src,node_connect))
+		for(var/obj/machinery/networked/atmos/target in get_step(src,node_connect))
 			if(target.initialize_directions & get_dir(target,src))
 				node = target
 				break
@@ -67,12 +65,12 @@
 
 	build_network()
 		if(!network && node)
-			network = new /datum/pipe_network()
+			network = new /datum/network/atmos()
 			network.normal_members += src
 			network.build_network(node, src)
 
 
-	return_network(obj/machinery/atmospherics/reference)
+	return_network(obj/machinery/networked/atmos/reference)
 		build_network()
 
 		if(reference==node)
@@ -80,13 +78,13 @@
 
 		return null
 
-	reassign_network(datum/pipe_network/old_network, datum/pipe_network/new_network)
+	reassign_network(datum/network/atmos/old_network, datum/network/atmos/new_network)
 		if(network == old_network)
 			network = new_network
 
 		return 1
 
-	return_network_air(datum/pipe_network/reference)
+	return_network_air(datum/network/atmos/reference)
 		var/list/results = list()
 
 		if(network == reference)
@@ -94,7 +92,7 @@
 
 		return results
 
-	disconnect(obj/machinery/atmospherics/reference)
+	disconnect(obj/machinery/networked/atmos/reference)
 		if(reference==node)
 			del(network)
 			node = null

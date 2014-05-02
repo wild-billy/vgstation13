@@ -12,7 +12,7 @@ Thus, the two variables affect pump operation are set in New():
 			but overall network volume is also increased as this increases...
 */
 
-obj/machinery/atmospherics/binary/pump
+obj/machinery/networked/atmos/binary/pump
 	icon = 'icons/obj/atmospherics/pump.dmi'
 	icon_state = "intact_off"
 

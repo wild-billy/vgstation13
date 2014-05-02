@@ -8,7 +8,7 @@
 	var/scan_range = 25
 
 	//currently viewed
-	var/obj/machinery/power/rust_core/cur_viewed_device
+	var/obj/machinery/networked/power/rust_core/cur_viewed_device
 
 /obj/machinery/computer/rust_core_control/process()
 	if(stat & (BROKEN|NOPOWER))
@@ -93,7 +93,7 @@
 					<td></td>
 					</tr>"}
 				// END AUTOFIX
-				for(var/obj/machinery/power/rust_core/C in connected_devices)
+				for(var/obj/machinery/networked/power/rust_core/C in connected_devices)
 					if(!check_core_status(C))
 						connected_devices.Remove(C)
 						continue
@@ -132,7 +132,7 @@
 
 	if( href_list["scan"] )
 		connected_devices = list()
-		for(var/obj/machinery/power/rust_core/C in range(scan_range, src))
+		for(var/obj/machinery/networked/power/rust_core/C in range(scan_range, src))
 			if(check_core_status(C))
 				connected_devices.Add(C)
 
@@ -150,7 +150,7 @@
 
 	updateDialog()
 
-/obj/machinery/computer/rust_core_control/proc/check_core_status(var/obj/machinery/power/rust_core/C)
+/obj/machinery/computer/rust_core_control/proc/check_core_status(var/obj/machinery/networked/power/rust_core/C)
 	if(!C)
 		return 0
 

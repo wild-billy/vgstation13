@@ -15,7 +15,7 @@
 	requires_power = 0
 
 
-/obj/machinery/power/emitter/energycannon
+/obj/machinery/networked/power/emitter/energycannon
 	name = "Energy Cannon"
 	desc = "A heavy duty industrial laser"
 	icon = 'icons/obj/singularity.dmi'

@@ -23,8 +23,8 @@
 	var/obj/machinery/telecomms/buffer // simple machine buffer for device linkage
 
 /obj/item/device/debugger/is_used_on(obj/O, mob/user)
-	if(istype(O, /obj/machinery/power/apc))
-		var/obj/machinery/power/apc/A = O
+	if(istype(O, /obj/machinery/networked/power/apc))
+		var/obj/machinery/networked/power/apc/A = O
 		if(A.emagged || A.malfhack)
 			user << "\red There is a software error with the device."
 		else

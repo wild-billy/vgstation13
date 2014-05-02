@@ -969,7 +969,7 @@ ________________________________________________________________________________
 	switch(target_type)
 
 		if("APC")
-			var/obj/machinery/power/apc/A = target
+			var/obj/machinery/networked/power/apc/A = target
 			if(A.cell&&A.cell.charge)
 				var/datum/effect/effect/system/spark_spread/spark_system = new /datum/effect/effect/system/spark_spread()
 				spark_system.set_up(5, 0, A.loc)
@@ -997,7 +997,7 @@ ________________________________________________________________________________
 				U << "\red This APC has run dry of power. You must find another source."
 
 		if("SMES")
-			var/obj/machinery/power/smes/A = target
+			var/obj/machinery/networked/power/smes/A = target
 			if(A.charge)
 				var/datum/effect/effect/system/spark_spread/spark_system = new /datum/effect/effect/system/spark_spread()
 				spark_system.set_up(5, 0, A.loc)
@@ -1044,7 +1044,7 @@ ________________________________________________________________________________
 				var/datum/effect/effect/system/spark_spread/spark_system = new /datum/effect/effect/system/spark_spread()
 				spark_system.set_up(5, 0, A.loc)
 
-				var/obj/machinery/power/apc/B = A.loc.loc:get_apc()//Object.turf.area find APC
+				var/obj/machinery/networked/power/apc/B = A.loc.loc:get_apc()//Object.turf.area find APC
 				if(B)//If APC exists. Might not if the area is unpowered like CentCom.
 					var/datum/powernet/PN = B.terminal.powernet
 					while(G.candrain&&!maxcapacity&&!isnull(A))//And start a proc similar to drain from wire.
@@ -1054,9 +1054,9 @@ ________________________________________________________________________________
 							drained = min(drain, PN.avail)
 							PN.newload += drained
 							if(drained < drain)//if no power on net, drain apcs
-								for(var/obj/machinery/power/terminal/T in PN.nodes)
-									if(istype(T.master, /obj/machinery/power/apc))
-										var/obj/machinery/power/apc/AP = T.master
+								for(var/obj/machinery/networked/power/terminal/T in PN.nodes)
+									if(istype(T.master, /obj/machinery/networked/power/apc))
+										var/obj/machinery/networked/power/apc/AP = T.master
 										if(AP.operating && AP.cell && AP.cell.charge>0)
 											AP.cell.charge = max(0, AP.cell.charge - 5)
 											drained += 5
@@ -1106,9 +1106,9 @@ ________________________________________________________________________________
 					drained = min(drain, PN.avail)
 					PN.newload += drained
 					if(drained < drain)//if no power on net, drain apcs
-						for(var/obj/machinery/power/terminal/T in PN.nodes)
-							if(istype(T.master, /obj/machinery/power/apc))
-								var/obj/machinery/power/apc/AP = T.master
+						for(var/obj/machinery/networked/power/terminal/T in PN.nodes)
+							if(istype(T.master, /obj/machinery/networked/power/apc))
+								var/obj/machinery/networked/power/apc/AP = T.master
 								if(AP.operating && AP.cell && AP.cell.charge>0)
 									AP.cell.charge = max(0, AP.cell.charge - 5)
 									drained += 5

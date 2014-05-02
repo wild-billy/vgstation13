@@ -1,7 +1,7 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:33
 var/global/list/rad_collectors = list()
 
-/obj/machinery/power/rad_collector
+/obj/machinery/networked/power/rad_collector
 	name = "Radiation Collector Array"
 	desc = "A device which uses Hawking Radiation and plasma to produce power."
 	icon = 'icons/obj/singularity.dmi'
@@ -19,15 +19,15 @@ var/global/list/rad_collectors = list()
 	ghost_read=0
 	ghost_write=0
 
-/obj/machinery/power/rad_collector/New()
+/obj/machinery/networked/power/rad_collector/New()
 	..()
 	rad_collectors += src
 
-/obj/machinery/power/rad_collector/Destroy()
+/obj/machinery/networked/power/rad_collector/Destroy()
 	rad_collectors -= src
 	..()
 
-/obj/machinery/power/rad_collector/process()
+/obj/machinery/networked/power/rad_collector/process()
 	if(P)
 		if(P.air_contents.toxins <= 0)
 			investigate_log("<font color='red'>out of fuel</font>.","singulo")
@@ -38,7 +38,7 @@ var/global/list/rad_collectors = list()
 	return
 
 
-/obj/machinery/power/rad_collector/attack_hand(mob/user as mob)
+/obj/machinery/networked/power/rad_collector/attack_hand(mob/user as mob)
 	if(anchored)
 		if(!src.locked)
 			toggle_power()
@@ -52,7 +52,7 @@ var/global/list/rad_collectors = list()
 ..()
 
 
-/obj/machinery/power/rad_collector/attackby(obj/item/W, mob/user)
+/obj/machinery/networked/power/rad_collector/attackby(obj/item/W, mob/user)
 	if(istype(W, /obj/item/device/analyzer))
 		user << "\blue The [W.name] detects that [last_power]W were recently produced."
 		return 1
@@ -100,14 +100,14 @@ var/global/list/rad_collectors = list()
 		return 1
 
 
-/obj/machinery/power/rad_collector/ex_act(severity)
+/obj/machinery/networked/power/rad_collector/ex_act(severity)
 	switch(severity)
 		if(2, 3)
 			eject()
 	return ..()
 
 
-/obj/machinery/power/rad_collector/proc/eject()
+/obj/machinery/networked/power/rad_collector/proc/eject()
 	locked = 0
 	var/obj/item/weapon/tank/plasma/Z = src.P
 	if (!Z)
@@ -120,7 +120,7 @@ var/global/list/rad_collectors = list()
 	else
 		update_icons()
 
-/obj/machinery/power/rad_collector/proc/receive_pulse(var/pulse_strength)
+/obj/machinery/networked/power/rad_collector/proc/receive_pulse(var/pulse_strength)
 	if(P && active)
 		var/power_produced = 0
 		power_produced = P.air_contents.toxins*pulse_strength*20
@@ -130,7 +130,7 @@ var/global/list/rad_collectors = list()
 	return
 
 
-/obj/machinery/power/rad_collector/proc/update_icons()
+/obj/machinery/networked/power/rad_collector/proc/update_icons()
 	overlays.Cut()
 	if(P)
 		overlays += image('icons/obj/singularity.dmi', "ptank")
@@ -140,7 +140,7 @@ var/global/list/rad_collectors = list()
 		overlays += image('icons/obj/singularity.dmi', "on")
 
 
-/obj/machinery/power/rad_collector/proc/toggle_power()
+/obj/machinery/networked/power/rad_collector/proc/toggle_power()
 	active = !active
 	if(active)
 		icon_state = "ca_on"

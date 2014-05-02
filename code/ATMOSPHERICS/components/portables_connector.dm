@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/portables_connector
+/obj/machinery/networked/atmos/portables_connector
 	icon = 'icons/obj/atmospherics/portables_connector.dmi'
 	icon_state = "intact"
 
@@ -10,9 +10,7 @@
 
 	var/obj/machinery/portable_atmospherics/connected_device
 
-	var/obj/machinery/atmospherics/node
-
-	var/datum/pipe_network/network
+	var/obj/machinery/networked/atmos/node
 
 	var/on = 0
 	use_power = 0
@@ -64,8 +62,8 @@
 			network.update = 1
 		return 1
 
-// Housekeeping and pipe network stuff below
-	network_expand(datum/pipe_network/new_network, obj/machinery/atmospherics/pipe/reference)
+	// Housekeeping and pipe network stuff below
+	network_expand(var/datum/network/atmos/new_network, var/obj/machinery/networked/atmos/pipe/reference)
 		if(reference == node)
 			network = new_network
 
@@ -95,21 +93,15 @@
 
 		var/node_connect = dir
 
-		for(var/obj/machinery/atmospherics/target in get_step(src,node_connect))
+		for(var/obj/machinery/networked/atmos/target in get_step(src,node_connect))
 			if(target.initialize_directions & get_dir(target,src))
 				node = target
 				break
 
 		update_icon()
 
-	build_network()
-		if(!network && node)
-			network = new /datum/pipe_network()
-			network.normal_members += src
-			network.build_network(node, src)
 
-
-	return_network(obj/machinery/atmospherics/reference)
+	return_network(obj/machinery/networked/atmos/reference)
 		build_network()
 
 		if(reference==node)
@@ -120,13 +112,13 @@
 
 		return null
 
-	reassign_network(datum/pipe_network/old_network, datum/pipe_network/new_network)
+	reassign_network(var/datum/network/atmos/old_network, var/datum/network/atmos/new_network)
 		if(network == old_network)
 			network = new_network
 
 		return 1
 
-	return_network_air(datum/pipe_network/reference)
+	return_network_air(var/datum/network/atmos/reference)
 		var/list/results = list()
 
 		if(connected_device)
@@ -134,7 +126,7 @@
 
 		return results
 
-	disconnect(obj/machinery/atmospherics/reference)
+	disconnect(var/obj/machinery/networked/atmos/reference)
 		if(reference==node)
 			del(network)
 			node = null

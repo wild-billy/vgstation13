@@ -13,9 +13,8 @@
 #define IPIPE_COLOR_RED   PIPE_COLOR_RED
 #define IPIPE_COLOR_BLUE  "#4285F4"
 
-/obj/machinery/atmospherics/pipe
+/obj/machinery/networked/atmos/pipe
 	var/datum/gas_mixture/air_temporary //used when reconstructing a pipeline that broke
-	var/datum/pipeline/parent
 	var/volume = 0
 	force = 20
 	layer = 2.4 //under wires with their 2.44
@@ -32,56 +31,23 @@
 		"purple"=PIPE_COLOR_PURPLE
 	)
 
-/obj/machinery/atmospherics/pipe/proc/pipeline_expansion()
-	return null
-
-
-/obj/machinery/atmospherics/pipe/proc/check_pressure(pressure)
-	//Return 1 if parent should continue checking other pipes
-	//Return null if parent should stop checking other pipes. Recall: del(src) will by default return null
+/obj/machinery/networked/atmos/pipe/proc/check_pressure(pressure)
+	//Return 1 if network should continue checking other pipes
+	//Return null if network should stop checking other pipes. Recall: del(src) will by default return null
 	return 1
 
 
-/obj/machinery/atmospherics/pipe/return_air()
-	if(!parent)
-		parent = new /datum/pipeline()
-		parent.build_pipeline(src)
-
-	return parent.air
+/obj/machinery/networked/atmos/pipe/return_air()
+	check_network()
+	return network.air
 
 
-/obj/machinery/atmospherics/pipe/build_network()
-	if(!parent)
-		parent = new /datum/pipeline()
-		parent.build_pipeline(src)
-
-	return parent.return_network()
-
-
-/obj/machinery/atmospherics/pipe/network_expand(datum/pipe_network/new_network, obj/machinery/atmospherics/pipe/reference)
-	if(!parent)
-		parent = new /datum/pipeline()
-		parent.build_pipeline(src)
-
-	return parent.network_expand(new_network, reference)
-
-
-/obj/machinery/atmospherics/pipe/return_network(obj/machinery/atmospherics/reference)
-	if(!parent)
-		parent = new /datum/pipeline()
-		parent.build_pipeline(src)
-
-	return parent.return_network(reference)
-
-
-/obj/machinery/atmospherics/pipe/Destroy()
-	del(parent)
+/obj/machinery/networked/atmos/pipe/Destroy()
 	if(air_temporary)
 		loc.assume_air(air_temporary)
-
 	..()
 
-/obj/machinery/atmospherics/pipe/simple
+/obj/machinery/networked/atmos/pipe/simple
 	icon = 'icons/obj/pipes.dmi'
 	icon_state = "intact"
 	name = "pipe"
@@ -89,8 +55,8 @@
 	volume = 70
 	dir = SOUTH
 	initialize_directions = SOUTH|NORTH
-	var/obj/machinery/atmospherics/node1
-	var/obj/machinery/atmospherics/node2
+	var/obj/machinery/networked/atmos/node1
+	var/obj/machinery/networked/atmos/node2
 	var/minimum_temperature_difference = 300
 	var/thermal_conductivity = 0 //WALL_HEAT_TRANSFER_COEFFICIENT No
 	var/maximum_pressure = 70*ONE_ATMOSPHERE
@@ -98,7 +64,7 @@
 	alert_pressure = 55*ONE_ATMOSPHERE
 	level = 1
 
-/obj/machinery/atmospherics/pipe/simple/New()
+/obj/machinery/networked/atmos/pipe/simple/New()
 	..()
 	switch(dir)
 		if(SOUTH || NORTH)
@@ -115,7 +81,7 @@
 			initialize_directions = SOUTH|WEST
 
 
-/obj/machinery/atmospherics/pipe/simple/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
+/obj/machinery/networked/atmos/pipe/simple/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
 	dir = pipe.dir
 	initialize_directions = pipe.get_pipe_dir()
 	var/turf/T = loc
@@ -135,26 +101,26 @@
 	return 1
 
 
-/obj/machinery/atmospherics/pipe/simple/hide(var/i)
+/obj/machinery/networked/atmos/pipe/simple/hide(var/i)
 	if(level == 1 && istype(loc, /turf/simulated))
 		invisibility = i ? 101 : 0
 	update_icon()
 
 
-/obj/machinery/atmospherics/pipe/simple/process()
-	if(!parent) //This should cut back on the overhead calling build_network thousands of times per cycle
+/obj/machinery/networked/atmos/pipe/simple/process()
+	if(!network) //This should cut back on the overhead calling build_network thousands of times per cycle
 		..()
 	else
 		. = PROCESS_KILL
 
 	/*if(!node1)
-		parent.mingle_with_turf(loc, volume)
+		network.mingle_with_turf(loc, volume)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
 
 	else if(!node2)
-		parent.mingle_with_turf(loc, volume)
+		network.mingle_with_turf(loc, volume)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
@@ -162,7 +128,7 @@
 		nodealert = 0
 
 
-	else if(parent)
+	else if(network)
 		var/environment_temperature = 0
 
 		if(istype(loc, /turf/simulated/))
@@ -178,11 +144,11 @@
 		var/datum/gas_mixture/pipe_air = return_air()
 
 		if(abs(environment_temperature-pipe_air.temperature) > minimum_temperature_difference)
-			parent.temperature_interact(loc, volume, thermal_conductivity)
+			network.temperature_interact(loc, volume, thermal_conductivity)
 	*/
 
 
-/obj/machinery/atmospherics/pipe/simple/check_pressure(pressure)
+/obj/machinery/networked/atmos/pipe/simple/check_pressure(pressure)
 	var/datum/gas_mixture/environment = loc.return_air()
 
 	var/pressure_difference = pressure - environment.return_pressure()
@@ -198,7 +164,7 @@
 	else return 1
 
 
-/obj/machinery/atmospherics/pipe/simple/proc/burst()
+/obj/machinery/networked/atmos/pipe/simple/proc/burst()
 	src.visible_message("\red \bold [src] bursts!");
 	playsound(get_turf(src), 'sound/effects/bang.ogg', 25, 1)
 	var/datum/effect/effect/system/smoke_spread/smoke = new
@@ -207,14 +173,14 @@
 	qdel(src)
 
 
-/obj/machinery/atmospherics/pipe/simple/proc/normalize_dir()
+/obj/machinery/networked/atmos/pipe/simple/proc/normalize_dir()
 	if(dir==3)
 		dir = 1
 	else if(dir==12)
 		dir = 4
 
 
-/obj/machinery/atmospherics/pipe/simple/Destroy()
+/obj/machinery/networked/atmos/pipe/simple/Destroy()
 	if(node1)
 		node1.disconnect(src)
 	if(node2)
@@ -223,11 +189,11 @@
 	..()
 
 
-/obj/machinery/atmospherics/pipe/simple/pipeline_expansion()
+/obj/machinery/networked/atmos/pipe/simple/network_expansion()
 	return list(node1, node2)
 
 
-/obj/machinery/atmospherics/pipe/simple/update_icon()
+/obj/machinery/networked/atmos/pipe/simple/update_icon()
 	alpha = invisibility ? 128 : 255
 	color = available_colors[_color]
 	if(node1&&node2)
@@ -241,7 +207,7 @@
 		icon_state = "exposed[have_node1][have_node2]"
 
 
-/obj/machinery/atmospherics/pipe/simple/initialize(var/suppress_icon_check=0)
+/obj/machinery/networked/atmos/pipe/simple/initialize(var/suppress_icon_check=0)
 	normalize_dir()
 
 	findAllConnections(initialize_directions)
@@ -252,85 +218,85 @@
 		update_icon()
 
 
-/obj/machinery/atmospherics/pipe/simple/disconnect(obj/machinery/atmospherics/reference)
+/obj/machinery/networked/atmos/pipe/simple/disconnect(obj/machinery/networked/atmos/reference)
 	if(reference == node1)
-		if(istype(node1, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node1, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node1 = null
 
 	if(reference == node2)
-		if(istype(node2, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node2, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node2 = null
 
 	update_icon()
 	return null
 
-/obj/machinery/atmospherics/pipe/simple/scrubbers
+/obj/machinery/networked/atmos/pipe/simple/scrubbers
 	name = "Scrubbers pipe"
 	_color = "red"
 	color=PIPE_COLOR_RED
-/obj/machinery/atmospherics/pipe/simple/supply
+/obj/machinery/networked/atmos/pipe/simple/supply
 	name = "Air supply pipe"
 	_color = "blue"
 	color=PIPE_COLOR_BLUE
-/obj/machinery/atmospherics/pipe/simple/supplymain
+/obj/machinery/networked/atmos/pipe/simple/supplymain
 	name = "Main air supply pipe"
 	_color = "purple"
 	color=PIPE_COLOR_PURPLE
-/obj/machinery/atmospherics/pipe/simple/general
+/obj/machinery/networked/atmos/pipe/simple/general
 	name = "Pipe"
 	_color = "grey"
 	color=PIPE_COLOR_GREY
-/obj/machinery/atmospherics/pipe/simple/yellow
+/obj/machinery/networked/atmos/pipe/simple/yellow
 	name = "Pipe"
 	_color="yellow"
 	color=PIPE_COLOR_YELLOW
-/obj/machinery/atmospherics/pipe/simple/cyan
+/obj/machinery/networked/atmos/pipe/simple/cyan
 	name = "Pipe"
 	_color="cyan"
 	color=PIPE_COLOR_CYAN
-/obj/machinery/atmospherics/pipe/simple/filtering
+/obj/machinery/networked/atmos/pipe/simple/filtering
 	name = "Pipe"
 	_color = "green"
 	color=PIPE_COLOR_GREEN
 
-/obj/machinery/atmospherics/pipe/simple/scrubbers/visible
+/obj/machinery/networked/atmos/pipe/simple/scrubbers/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/simple/scrubbers/hidden
+/obj/machinery/networked/atmos/pipe/simple/scrubbers/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/simple/supply/visible
+/obj/machinery/networked/atmos/pipe/simple/supply/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/simple/supply/hidden
+/obj/machinery/networked/atmos/pipe/simple/supply/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/simple/supplymain/visible
+/obj/machinery/networked/atmos/pipe/simple/supplymain/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/simple/supplymain/hidden
+/obj/machinery/networked/atmos/pipe/simple/supplymain/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/simple/general/visible
+/obj/machinery/networked/atmos/pipe/simple/general/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/simple/general/hidden
+/obj/machinery/networked/atmos/pipe/simple/general/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/simple/yellow/visible
+/obj/machinery/networked/atmos/pipe/simple/yellow/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/simple/yellow/hidden
+/obj/machinery/networked/atmos/pipe/simple/yellow/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/simple/cyan/visible
+/obj/machinery/networked/atmos/pipe/simple/cyan/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/simple/cyan/hidden
+/obj/machinery/networked/atmos/pipe/simple/cyan/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/simple/filtering/visible
+/obj/machinery/networked/atmos/pipe/simple/filtering/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/simple/filtering/hidden
+/obj/machinery/networked/atmos/pipe/simple/filtering/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/simple/insulated
+/obj/machinery/networked/atmos/pipe/simple/insulated
 	name = "Insulated pipe"
 	//icon = 'icons/obj/atmospherics/red_pipe.dmi'
 	icon = 'icons/obj/atmospherics/insulated.dmi'
@@ -344,22 +310,22 @@
 		"blue"=IPIPE_COLOR_BLUE
 	)
 	_color = "red"
-/obj/machinery/atmospherics/pipe/simple/insulated/visible
+/obj/machinery/networked/atmos/pipe/simple/insulated/visible
 	icon_state = "intact"
 	level = 2
 	color=IPIPE_COLOR_RED
-/obj/machinery/atmospherics/pipe/simple/insulated/visible/blue
+/obj/machinery/networked/atmos/pipe/simple/insulated/visible/blue
 	color=IPIPE_COLOR_BLUE
 	_color = "blue"
-/obj/machinery/atmospherics/pipe/simple/insulated/hidden
+/obj/machinery/networked/atmos/pipe/simple/insulated/hidden
 	icon_state = "intact"
 	alpha=128
 	level = 1
 	color=IPIPE_COLOR_RED
-/obj/machinery/atmospherics/pipe/simple/insulated/hidden/blue
+/obj/machinery/networked/atmos/pipe/simple/insulated/hidden/blue
 	color=IPIPE_COLOR_BLUE
 	_color = "blue"
-/obj/machinery/atmospherics/pipe/tank
+/obj/machinery/networked/atmos/pipe/tank
 	icon = 'icons/obj/atmospherics/pipe_tank.dmi'
 	icon_state = "intact"
 	name = "Pressure Tank"
@@ -368,20 +334,20 @@
 	dir = SOUTH
 	initialize_directions = SOUTH
 	density = 1
-	var/obj/machinery/atmospherics/node1
+	var/obj/machinery/networked/atmos/node1
 
-/obj/machinery/atmospherics/pipe/tank/New()
+/obj/machinery/networked/atmos/pipe/tank/New()
 	initialize_directions = dir
 	..()
 
 
-/obj/machinery/atmospherics/pipe/tank/process()
-	if(!parent)
+/obj/machinery/networked/atmos/pipe/tank/process()
+	if(!network)
 		..()
 	else
 		. = PROCESS_KILL
 	/*			if(!node1)
-		parent.mingle_with_turf(loc, 200)
+		network.mingle_with_turf(loc, 200)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
@@ -389,10 +355,10 @@
 		nodealert = 0
 	*/
 
-/obj/machinery/atmospherics/pipe/tank/carbon_dioxide
+/obj/machinery/networked/atmos/pipe/tank/carbon_dioxide
 	name = "Pressure Tank (Carbon Dioxide)"
 
-/obj/machinery/atmospherics/pipe/tank/carbon_dioxide/New()
+/obj/machinery/networked/atmos/pipe/tank/carbon_dioxide/New()
 	air_temporary = new
 	air_temporary.volume = volume
 	air_temporary.temperature = T20C
@@ -401,11 +367,11 @@
 
 	..()
 
-/obj/machinery/atmospherics/pipe/tank/toxins
+/obj/machinery/networked/atmos/pipe/tank/toxins
 	icon = 'icons/obj/atmospherics/orange_pipe_tank.dmi'
 	name = "Pressure Tank (Plasma)"
 
-/obj/machinery/atmospherics/pipe/tank/toxins/New()
+/obj/machinery/networked/atmos/pipe/tank/toxins/New()
 	air_temporary = new
 	air_temporary.volume = volume
 	air_temporary.temperature = T20C
@@ -414,11 +380,11 @@
 
 	..()
 
-/obj/machinery/atmospherics/pipe/tank/oxygen_agent_b
+/obj/machinery/networked/atmos/pipe/tank/oxygen_agent_b
 	icon = 'icons/obj/atmospherics/red_orange_pipe_tank.dmi'
 	name = "Pressure Tank (Oxygen + Plasma)"
 
-/obj/machinery/atmospherics/pipe/tank/oxygen_agent_b/New()
+/obj/machinery/networked/atmos/pipe/tank/oxygen_agent_b/New()
 	air_temporary = new
 	air_temporary.volume = volume
 	air_temporary.temperature = T0C
@@ -430,11 +396,11 @@
 
 	..()
 
-/obj/machinery/atmospherics/pipe/tank/oxygen
+/obj/machinery/networked/atmos/pipe/tank/oxygen
 	icon = 'icons/obj/atmospherics/blue_pipe_tank.dmi'
 	name = "Pressure Tank (Oxygen)"
 
-/obj/machinery/atmospherics/pipe/tank/oxygen/New()
+/obj/machinery/networked/atmos/pipe/tank/oxygen/New()
 	air_temporary = new
 	air_temporary.volume = volume
 	air_temporary.temperature = T20C
@@ -443,11 +409,11 @@
 
 	..()
 
-/obj/machinery/atmospherics/pipe/tank/nitrogen
+/obj/machinery/networked/atmos/pipe/tank/nitrogen
 	icon = 'icons/obj/atmospherics/red_pipe_tank.dmi'
 	name = "Pressure Tank (Nitrogen)"
 
-/obj/machinery/atmospherics/pipe/tank/nitrogen/New()
+/obj/machinery/networked/atmos/pipe/tank/nitrogen/New()
 	air_temporary = new
 	air_temporary.volume = volume
 	air_temporary.temperature = T20C
@@ -456,11 +422,11 @@
 
 	..()
 
-/obj/machinery/atmospherics/pipe/tank/air
+/obj/machinery/networked/atmos/pipe/tank/air
 	icon = 'icons/obj/atmospherics/red_pipe_tank.dmi'
 	name = "Pressure Tank (Air)"
 
-/obj/machinery/atmospherics/pipe/tank/air/New()
+/obj/machinery/networked/atmos/pipe/tank/air/New()
 	air_temporary = new
 	air_temporary.volume = volume
 	air_temporary.temperature = T20C
@@ -471,18 +437,17 @@
 	..()
 
 
-/obj/machinery/atmospherics/pipe/tank/Destroy()
+/obj/machinery/networked/atmos/pipe/tank/Destroy()
 	if(node1)
 		node1.disconnect(src)
 
 	..()
 
-
-/obj/machinery/atmospherics/pipe/tank/pipeline_expansion()
+/obj/machinery/networked/atmos/pipe/tank/network_expansion()
 	return list(node1)
 
 
-/obj/machinery/atmospherics/pipe/tank/update_icon()
+/obj/machinery/networked/atmos/pipe/tank/update_icon()
 	if(node1)
 		icon_state = "intact"
 		dir = get_dir(src, node1)
@@ -490,19 +455,19 @@
 		icon_state = "exposed"
 
 
-/obj/machinery/atmospherics/pipe/tank/initialize()
+/obj/machinery/networked/atmos/pipe/tank/initialize()
 
 	var/connect_direction = dir
 
-	node1=findConnecting(connect_direction)
+	node1=findConnectingPipe(connect_direction)
 
 	update_icon()
 
 
-/obj/machinery/atmospherics/pipe/tank/disconnect(obj/machinery/atmospherics/reference)
+/obj/machinery/networked/atmos/pipe/tank/disconnect(obj/machinery/networked/atmos/reference)
 	if(reference == node1)
-		if(istype(node1, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node1, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node1 = null
 
 	update_icon()
@@ -510,22 +475,22 @@
 	return null
 
 
-/obj/machinery/atmospherics/pipe/tank/attackby(var/obj/item/weapon/W as obj, var/mob/user as mob)
+/obj/machinery/networked/atmos/pipe/tank/attackby(var/obj/item/weapon/W as obj, var/mob/user as mob)
 	if(istype(W, /obj/item/weapon/pipe_dispenser) || istype(W, /obj/item/device/pipe_painter))
 		return // Coloring pipes.
 	if (istype(W, /obj/item/device/analyzer) && get_dist(user, src) <= 1)
 		for (var/mob/O in viewers(user, null))
 			O << "\red [user] has used the analyzer on \icon[icon]"
 
-		var/pressure = parent.air.return_pressure()
-		var/total_moles = parent.air.total_moles()
+		var/pressure = network.air.return_pressure()
+		var/total_moles = network.air.total_moles()
 
 		user << "\blue Results of analysis of \icon[icon]"
 		if (total_moles>0)
-			var/o2_concentration = parent.air.oxygen/total_moles
-			var/n2_concentration = parent.air.nitrogen/total_moles
-			var/co2_concentration = parent.air.carbon_dioxide/total_moles
-			var/plasma_concentration = parent.air.toxins/total_moles
+			var/o2_concentration = network.air.oxygen/total_moles
+			var/n2_concentration = network.air.nitrogen/total_moles
+			var/co2_concentration = network.air.carbon_dioxide/total_moles
+			var/plasma_concentration = network.air.toxins/total_moles
 
 			var/unknown_concentration =  1-(o2_concentration+n2_concentration+co2_concentration+plasma_concentration)
 
@@ -536,11 +501,11 @@
 			user << "\blue Plasma: [round(plasma_concentration*100)]%"
 			if(unknown_concentration>0.01)
 				user << "\red Unknown: [round(unknown_concentration*100)]%"
-			user << "\blue Temperature: [round(parent.air.temperature-T0C)]&deg;C"
+			user << "\blue Temperature: [round(network.air.temperature-T0C)]&deg;C"
 		else
 			user << "\blue Tank is empty!"
 
-/obj/machinery/atmospherics/pipe/vent
+/obj/machinery/networked/atmos/pipe/vent
 	icon = 'icons/obj/atmospherics/pipe_vent.dmi'
 	icon_state = "intact"
 	name = "Vent"
@@ -550,18 +515,18 @@
 	dir = SOUTH
 	initialize_directions = SOUTH
 	var/build_killswitch = 1
-	var/obj/machinery/atmospherics/node1
+	var/obj/machinery/networked/atmos/node1
 
-/obj/machinery/atmospherics/pipe/vent/New()
+/obj/machinery/networked/atmos/pipe/vent/New()
 	initialize_directions = dir
 	..()
 
-/obj/machinery/atmospherics/pipe/vent/high_volume
+/obj/machinery/networked/atmos/pipe/vent/high_volume
 	name = "Larger vent"
 	volume = 1000
 
-/obj/machinery/atmospherics/pipe/vent/process()
-	if(!parent)
+/obj/machinery/networked/atmos/pipe/vent/process()
+	if(!network)
 		if(build_killswitch <= 0)
 			. = PROCESS_KILL
 		else
@@ -569,7 +534,7 @@
 		..()
 		return
 	else
-		parent.mingle_with_turf(loc, volume)
+		network.mingle_with_turf(loc, volume)
 	/*
 	if(!node1)
 		if(!nodealert)
@@ -580,18 +545,18 @@
 	*/
 
 
-/obj/machinery/atmospherics/pipe/vent/Destroy()
+/obj/machinery/networked/atmos/pipe/vent/Destroy()
 	if(node1)
 		node1.disconnect(src)
 
 	..()
 
 
-/obj/machinery/atmospherics/pipe/vent/pipeline_expansion()
+/obj/machinery/networked/atmos/pipe/vent/network_expansion()
 	return list(node1)
 
 
-/obj/machinery/atmospherics/pipe/vent/update_icon()
+/obj/machinery/networked/atmos/pipe/vent/update_icon()
 	if(node1)
 		icon_state = "intact"
 
@@ -601,18 +566,18 @@
 		icon_state = "exposed"
 
 
-/obj/machinery/atmospherics/pipe/vent/initialize()
+/obj/machinery/networked/atmos/pipe/vent/initialize()
 	var/connect_direction = dir
 
-	node1=findConnecting(connect_direction)
+	node1=findConnectingPipe(connect_direction)
 
 	update_icon()
 
 
-/obj/machinery/atmospherics/pipe/vent/disconnect(obj/machinery/atmospherics/reference)
+/obj/machinery/networked/atmos/pipe/vent/disconnect(obj/machinery/networked/atmos/reference)
 	if(reference == node1)
-		if(istype(node1, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node1, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node1 = null
 
 	update_icon()
@@ -620,14 +585,14 @@
 	return null
 
 
-/obj/machinery/atmospherics/pipe/vent/hide(var/i)
+/obj/machinery/networked/atmos/pipe/vent/hide(var/i)
 	if(node1)
 		icon_state = "[i == 1 && istype(loc, /turf/simulated) ? "h" : "" ]intact"
 		dir = get_dir(src, node1)
 	else
 		icon_state = "exposed"
 
-/obj/machinery/atmospherics/pipe/manifold
+/obj/machinery/networked/atmos/pipe/manifold
 	icon = 'icons/obj/atmospherics/pipe_manifold.dmi'
 	icon_state = "manifold"
 	baseicon = "manifold"
@@ -636,13 +601,13 @@
 	volume = 105
 	dir = SOUTH
 	initialize_directions = EAST|NORTH|WEST
-	var/obj/machinery/atmospherics/node1
-	var/obj/machinery/atmospherics/node2
-	var/obj/machinery/atmospherics/node3
+	var/obj/machinery/networked/atmos/node1
+	var/obj/machinery/networked/atmos/node2
+	var/obj/machinery/networked/atmos/node3
 	level = 1
 	layer = 2.4 //under wires with their 2.44
 
-/obj/machinery/atmospherics/pipe/manifold/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
+/obj/machinery/networked/atmos/pipe/manifold/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
 	dir = pipe.dir
 	initialize_directions = pipe.get_pipe_dir()
 	var/turf/T = loc
@@ -665,7 +630,7 @@
 	return 1
 
 
-/obj/machinery/atmospherics/pipe/manifold/New()
+/obj/machinery/networked/atmos/pipe/manifold/New()
 	switch(dir)
 		if(NORTH)
 			initialize_directions = EAST|SOUTH|WEST
@@ -679,34 +644,34 @@
 	..()
 
 
-/obj/machinery/atmospherics/pipe/manifold/hide(var/i)
+/obj/machinery/networked/atmos/pipe/manifold/hide(var/i)
 	if(level == 1 && istype(loc, /turf/simulated))
 		invisibility = i ? 101 : 0
 	update_icon()
 
 
-/obj/machinery/atmospherics/pipe/manifold/pipeline_expansion()
+/obj/machinery/networked/atmos/pipe/manifold/network_expansion()
 	return list(node1, node2, node3)
 
 
-/obj/machinery/atmospherics/pipe/manifold/process()
-	if(!parent)
+/obj/machinery/networked/atmos/pipe/manifold/process()
+	if(!network)
 		..()
 	else
 		. = PROCESS_KILL
 	/*
 	if(!node1)
-		parent.mingle_with_turf(loc, 70)
+		network.mingle_with_turf(loc, 70)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
 	else if(!node2)
-		parent.mingle_with_turf(loc, 70)
+		network.mingle_with_turf(loc, 70)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
 	else if(!node3)
-		parent.mingle_with_turf(loc, 70)
+		network.mingle_with_turf(loc, 70)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
@@ -715,7 +680,7 @@
 	*/
 
 
-/obj/machinery/atmospherics/pipe/manifold/Destroy()
+/obj/machinery/networked/atmos/pipe/manifold/Destroy()
 	if(node1)
 		node1.disconnect(src)
 	if(node2)
@@ -726,20 +691,20 @@
 	..()
 
 
-/obj/machinery/atmospherics/pipe/manifold/disconnect(obj/machinery/atmospherics/reference)
+/obj/machinery/networked/atmos/pipe/manifold/disconnect(obj/machinery/networked/atmos/reference)
 	if(reference == node1)
-		if(istype(node1, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node1, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node1 = null
 
 	if(reference == node2)
-		if(istype(node2, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node2, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node2 = null
 
 	if(reference == node3)
-		if(istype(node3, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node3, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node3 = null
 
 	update_icon()
@@ -747,7 +712,7 @@
 	..()
 
 
-/obj/machinery/atmospherics/pipe/manifold/update_icon()
+/obj/machinery/networked/atmos/pipe/manifold/update_icon()
 	alpha = invisibility ? 128 : 255
 	color = available_colors[_color]
 	overlays = 0
@@ -770,7 +735,7 @@
 	return
 
 
-/obj/machinery/atmospherics/pipe/manifold/initialize(var/skip_icon_update=0)
+/obj/machinery/networked/atmos/pipe/manifold/initialize(var/skip_icon_update=0)
 	var/connect_directions = (NORTH|SOUTH|EAST|WEST)&(~dir)
 
 	findAllConnections(connect_directions)
@@ -780,35 +745,35 @@
 	if(!skip_icon_update)
 		update_icon()
 
-/obj/machinery/atmospherics/pipe/manifold/scrubbers
+/obj/machinery/networked/atmos/pipe/manifold/scrubbers
 	name = "Scrubbers pipe"
 	_color = "red"
 	color=PIPE_COLOR_RED
-/obj/machinery/atmospherics/pipe/manifold/supply
+/obj/machinery/networked/atmos/pipe/manifold/supply
 	name = "Air supply pipe"
 	_color = "blue"
 	color=PIPE_COLOR_BLUE
-/obj/machinery/atmospherics/pipe/manifold/supplymain
+/obj/machinery/networked/atmos/pipe/manifold/supplymain
 	name = "Main air supply pipe"
 	_color = "purple"
 	color=PIPE_COLOR_PURPLE
-/obj/machinery/atmospherics/pipe/manifold/general
+/obj/machinery/networked/atmos/pipe/manifold/general
 	name = "Gas pipe"
 	_color = "gray"
 	color=PIPE_COLOR_GREY
-/obj/machinery/atmospherics/pipe/manifold/yellow
+/obj/machinery/networked/atmos/pipe/manifold/yellow
 	name = "Air supply pipe"
 	_color = "yellow"
 	color=PIPE_COLOR_YELLOW
-/obj/machinery/atmospherics/pipe/manifold/cyan
+/obj/machinery/networked/atmos/pipe/manifold/cyan
 	name = "Air supply pipe"
 	_color = "cyan"
 	color=PIPE_COLOR_CYAN
-/obj/machinery/atmospherics/pipe/manifold/filtering
+/obj/machinery/networked/atmos/pipe/manifold/filtering
 	name = "Air filtering pipe"
 	_color = "green"
 	color=PIPE_COLOR_GREEN
-/obj/machinery/atmospherics/pipe/manifold/insulated
+/obj/machinery/networked/atmos/pipe/manifold/insulated
 	name = "Insulated pipe"
 	//icon = 'icons/obj/atmospherics/red_pipe.dmi'
 	icon = 'icons/obj/atmospherics/insulated.dmi'
@@ -819,58 +784,58 @@
 		"red"=IPIPE_COLOR_RED,
 		"blue"=IPIPE_COLOR_BLUE
 	)
-/obj/machinery/atmospherics/pipe/manifold/scrubbers/visible
+/obj/machinery/networked/atmos/pipe/manifold/scrubbers/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold/scrubbers/hidden
+/obj/machinery/networked/atmos/pipe/manifold/scrubbers/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold/supply/visible
+/obj/machinery/networked/atmos/pipe/manifold/supply/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold/supply/hidden
+/obj/machinery/networked/atmos/pipe/manifold/supply/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold/supplymain/visible
+/obj/machinery/networked/atmos/pipe/manifold/supplymain/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold/supplymain/hidden
+/obj/machinery/networked/atmos/pipe/manifold/supplymain/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold/general/visible
+/obj/machinery/networked/atmos/pipe/manifold/general/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold/general/hidden
+/obj/machinery/networked/atmos/pipe/manifold/general/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold/insulated/visible
+/obj/machinery/networked/atmos/pipe/manifold/insulated/visible
 	level = 2
 	color=IPIPE_COLOR_RED
 	_color = "red"
-/obj/machinery/atmospherics/pipe/manifold/insulated/visible/blue
+/obj/machinery/networked/atmos/pipe/manifold/insulated/visible/blue
 	color=IPIPE_COLOR_BLUE
 	_color = "blue"
-/obj/machinery/atmospherics/pipe/manifold/insulated/hidden
+/obj/machinery/networked/atmos/pipe/manifold/insulated/hidden
 	level = 1
 	color=IPIPE_COLOR_RED
 	alpha=128
 	_color = "red"
-/obj/machinery/atmospherics/pipe/manifold/insulated/hidden/blue
+/obj/machinery/networked/atmos/pipe/manifold/insulated/hidden/blue
 	color=IPIPE_COLOR_BLUE
 	_color = "blue"
-/obj/machinery/atmospherics/pipe/manifold/yellow/visible
+/obj/machinery/networked/atmos/pipe/manifold/yellow/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold/yellow/hidden
+/obj/machinery/networked/atmos/pipe/manifold/yellow/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold/cyan/visible
+/obj/machinery/networked/atmos/pipe/manifold/cyan/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold/cyan/hidden
+/obj/machinery/networked/atmos/pipe/manifold/cyan/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold/filtering/visible
+/obj/machinery/networked/atmos/pipe/manifold/filtering/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold/filtering/hidden
+/obj/machinery/networked/atmos/pipe/manifold/filtering/hidden
 	level = 1
 	alpha=128
 
-/obj/machinery/atmospherics/pipe/manifold4w
+/obj/machinery/networked/atmos/pipe/manifold4w
 	icon = 'icons/obj/atmospherics/pipe_manifold.dmi'
 	icon_state = "manifold4w"
 	name = "4-way pipe manifold"
@@ -878,15 +843,15 @@
 	volume = 140
 	dir = SOUTH
 	initialize_directions = NORTH|SOUTH|EAST|WEST
-	var/obj/machinery/atmospherics/node1
-	var/obj/machinery/atmospherics/node2
-	var/obj/machinery/atmospherics/node3
-	var/obj/machinery/atmospherics/node4
+	var/obj/machinery/networked/atmos/node1
+	var/obj/machinery/networked/atmos/node2
+	var/obj/machinery/networked/atmos/node3
+	var/obj/machinery/networked/atmos/node4
 	level = 1
 	layer = 2.4 //under wires with their 2.44
 	baseicon="manifold4w"
 
-/obj/machinery/atmospherics/pipe/manifold4w/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
+/obj/machinery/networked/atmos/pipe/manifold4w/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
 	dir = pipe.dir
 	initialize_directions = pipe.get_pipe_dir()
 	var/turf/T = loc
@@ -912,34 +877,34 @@
 	return 1
 
 
-/obj/machinery/atmospherics/pipe/manifold4w/hide(var/i)
+/obj/machinery/networked/atmos/pipe/manifold4w/hide(var/i)
 	if(level == 1 && istype(loc, /turf/simulated))
 		invisibility = i ? 101 : 0
 	update_icon()
 
 
-/obj/machinery/atmospherics/pipe/manifold4w/pipeline_expansion()
+/obj/machinery/networked/atmos/pipe/manifold4w/network_expansion()
 	return list(node1, node2, node3, node4)
 
 
-/obj/machinery/atmospherics/pipe/manifold4w/process()
-	if(!parent)
+/obj/machinery/networked/atmos/pipe/manifold4w/process()
+	if(!network)
 		..()
 	else
 		. = PROCESS_KILL
 	/*
 	if(!node1)
-		parent.mingle_with_turf(loc, 70)
+		network.mingle_with_turf(loc, 70)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
 	else if(!node2)
-		parent.mingle_with_turf(loc, 70)
+		network.mingle_with_turf(loc, 70)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
 	else if(!node3)
-		parent.mingle_with_turf(loc, 70)
+		network.mingle_with_turf(loc, 70)
 		if(!nodealert)
 			//world << "Missing node from [src] at [src.x],[src.y],[src.z]"
 			nodealert = 1
@@ -948,7 +913,7 @@
 	*/
 
 
-/obj/machinery/atmospherics/pipe/manifold4w/Destroy()
+/obj/machinery/networked/atmos/pipe/manifold4w/Destroy()
 	if(node1)
 		node1.disconnect(src)
 	if(node2)
@@ -961,25 +926,25 @@
 	..()
 
 
-/obj/machinery/atmospherics/pipe/manifold4w/disconnect(obj/machinery/atmospherics/reference)
+/obj/machinery/networked/atmos/pipe/manifold4w/disconnect(obj/machinery/networked/atmos/reference)
 	if(reference == node1)
-		if(istype(node1, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node1, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node1 = null
 
 	if(reference == node2)
-		if(istype(node2, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node2, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node2 = null
 
 	if(reference == node3)
-		if(istype(node3, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node3, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node3 = null
 
 	if(reference == node4)
-		if(istype(node4, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node4, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node4 = null
 
 	update_icon()
@@ -987,7 +952,7 @@
 	..()
 
 
-/obj/machinery/atmospherics/pipe/manifold4w/update_icon()
+/obj/machinery/networked/atmos/pipe/manifold4w/update_icon()
 	overlays=0
 	alpha = invisibility ? 128 : 255
 	color = available_colors[_color]
@@ -1011,7 +976,7 @@
 	return
 
 
-/obj/machinery/atmospherics/pipe/manifold4w/initialize(var/skip_update_icon=0)
+/obj/machinery/networked/atmos/pipe/manifold4w/initialize(var/skip_update_icon=0)
 
 	findAllConnections(initialize_directions)
 
@@ -1020,31 +985,31 @@
 	if(!skip_update_icon)
 		update_icon()
 
-/obj/machinery/atmospherics/pipe/manifold4w/scrubbers
+/obj/machinery/networked/atmos/pipe/manifold4w/scrubbers
 	name = "Scrubbers pipe"
 	_color = "red"
 	color=PIPE_COLOR_RED
-/obj/machinery/atmospherics/pipe/manifold4w/supply
+/obj/machinery/networked/atmos/pipe/manifold4w/supply
 	name = "Air supply pipe"
 	_color = "blue"
 	color=PIPE_COLOR_BLUE
-/obj/machinery/atmospherics/pipe/manifold4w/supplymain
+/obj/machinery/networked/atmos/pipe/manifold4w/supplymain
 	name = "Main air supply pipe"
 	_color = "purple"
 	color=PIPE_COLOR_PURPLE
-/obj/machinery/atmospherics/pipe/manifold4w/general
+/obj/machinery/networked/atmos/pipe/manifold4w/general
 	name = "Air supply pipe"
 	_color = "gray"
 	color=PIPE_COLOR_GREY
-/obj/machinery/atmospherics/pipe/manifold4w/yellow
+/obj/machinery/networked/atmos/pipe/manifold4w/yellow
 	name = "Air supply pipe"
 	_color = "yellow"
 	color=PIPE_COLOR_YELLOW
-/obj/machinery/atmospherics/pipe/manifold4w/filtering
+/obj/machinery/networked/atmos/pipe/manifold4w/filtering
 	name = "Air filtering pipe"
 	_color = "green"
 	color=PIPE_COLOR_GREEN
-/obj/machinery/atmospherics/pipe/manifold4w/insulated
+/obj/machinery/networked/atmos/pipe/manifold4w/insulated
 	icon = 'icons/obj/atmospherics/insulated.dmi'
 	name = "Insulated pipe"
 	_color = "red"
@@ -1055,49 +1020,49 @@
 		"red"=IPIPE_COLOR_RED,
 		"blue"=IPIPE_COLOR_BLUE
 	)
-/obj/machinery/atmospherics/pipe/manifold4w/scrubbers/visible
+/obj/machinery/networked/atmos/pipe/manifold4w/scrubbers/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold4w/scrubbers/hidden
+/obj/machinery/networked/atmos/pipe/manifold4w/scrubbers/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold4w/supply/visible
+/obj/machinery/networked/atmos/pipe/manifold4w/supply/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold4w/supply/hidden
+/obj/machinery/networked/atmos/pipe/manifold4w/supply/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold4w/supplymain/visible
+/obj/machinery/networked/atmos/pipe/manifold4w/supplymain/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold4w/supplymain/hidden
+/obj/machinery/networked/atmos/pipe/manifold4w/supplymain/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold4w/general/visible
+/obj/machinery/networked/atmos/pipe/manifold4w/general/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold4w/general/hidden
+/obj/machinery/networked/atmos/pipe/manifold4w/general/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold4w/filtering/visible
+/obj/machinery/networked/atmos/pipe/manifold4w/filtering/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold4w/filtering/hidden
+/obj/machinery/networked/atmos/pipe/manifold4w/filtering/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold4w/yellow/visible
+/obj/machinery/networked/atmos/pipe/manifold4w/yellow/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold4w/yellow/hidden
+/obj/machinery/networked/atmos/pipe/manifold4w/yellow/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold4w/insulated/hidden
+/obj/machinery/networked/atmos/pipe/manifold4w/insulated/hidden
 	level = 1
 	alpha=128
-/obj/machinery/atmospherics/pipe/manifold4w/insulated/visible
+/obj/machinery/networked/atmos/pipe/manifold4w/insulated/visible
 	level = 2
-/obj/machinery/atmospherics/pipe/manifold4w/insulated/hidden/blue
+/obj/machinery/networked/atmos/pipe/manifold4w/insulated/hidden/blue
 	color=IPIPE_COLOR_BLUE
 	_color = "blue"
-/obj/machinery/atmospherics/pipe/manifold4w/insulated/visible/blue
+/obj/machinery/networked/atmos/pipe/manifold4w/insulated/visible/blue
 	color=IPIPE_COLOR_BLUE
 	_color = "blue"
 
-/obj/machinery/atmospherics/pipe/cap
+/obj/machinery/networked/atmos/pipe/cap
 	name = "pipe endcap"
 	desc = "An endcap for pipes"
 	icon = 'icons/obj/pipes.dmi'
@@ -1107,9 +1072,9 @@
 	volume = 35
 	dir = SOUTH
 	initialize_directions = NORTH
-	var/obj/machinery/atmospherics/node
+	var/obj/machinery/networked/atmos/node
 
-/obj/machinery/atmospherics/pipe/cap/New()
+/obj/machinery/networked/atmos/pipe/cap/New()
 	..()
 	switch(dir)
 		if(SOUTH)
@@ -1122,7 +1087,7 @@
 			initialize_directions = WEST
 
 
-/obj/machinery/atmospherics/pipe/cap/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
+/obj/machinery/networked/atmos/pipe/cap/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
 	dir = pipe.dir
 	initialize_directions = pipe.get_pipe_dir()
 	initialize()
@@ -1133,34 +1098,34 @@
 	return 1
 
 
-/obj/machinery/atmospherics/pipe/cap/hide(var/i)
+/obj/machinery/networked/atmos/pipe/cap/hide(var/i)
 	if(level == 1 && istype(loc, /turf/simulated))
 		invisibility = i ? 101 : 0
 	update_icon()
 
 
-/obj/machinery/atmospherics/pipe/cap/pipeline_expansion()
+/obj/machinery/networked/atmos/pipe/cap/network_expansion()
 	return list(node)
 
 
-/obj/machinery/atmospherics/pipe/cap/process()
-	if(!parent)
+/obj/machinery/networked/atmos/pipe/cap/process()
+	if(!network)
 		..()
 	else
 		. = PROCESS_KILL
 
 
-/obj/machinery/atmospherics/pipe/cap/Destroy()
+/obj/machinery/networked/atmos/pipe/cap/Destroy()
 	if(node)
 		node.disconnect(src)
 
 	..()
 
 
-/obj/machinery/atmospherics/pipe/cap/disconnect(obj/machinery/atmospherics/reference)
+/obj/machinery/networked/atmos/pipe/cap/disconnect(obj/machinery/networked/atmos/reference)
 	if(reference == node)
-		if(istype(node, /obj/machinery/atmospherics/pipe))
-			del(parent)
+		if(istype(node, /obj/machinery/networked/atmos/pipe))
+			del(network)
 		node = null
 
 	update_icon()
@@ -1168,7 +1133,7 @@
 	..()
 
 
-/obj/machinery/atmospherics/pipe/cap/update_icon()
+/obj/machinery/networked/atmos/pipe/cap/update_icon()
 	overlays = 0
 	alpha = invisibility ? 128 : 255
 	color = available_colors[_color]
@@ -1176,27 +1141,27 @@
 	return
 
 
-/obj/machinery/atmospherics/pipe/cap/initialize(var/skip_update_icon=0)
-	node = findConnecting(initialize_directions)
+/obj/machinery/networked/atmos/pipe/cap/initialize(var/skip_update_icon=0)
+	node = findConnectingPipe(initialize_directions)
 
 	var/turf/T = src.loc			// hide if turf is not intact
 	hide(T.intact)
 	if(!skip_update_icon)
 		update_icon()
 
-/obj/machinery/atmospherics/pipe/cap/visible
+/obj/machinery/networked/atmos/pipe/cap/visible
 	level = 2
 	icon_state = "cap"
-/obj/machinery/atmospherics/pipe/cap/hidden
+/obj/machinery/networked/atmos/pipe/cap/hidden
 	level = 1
 	alpha=128
 
-/obj/machinery/atmospherics/pipe/attackby(var/obj/item/weapon/W as obj, var/mob/user as mob)
+/obj/machinery/networked/atmos/pipe/attackby(var/obj/item/weapon/W as obj, var/mob/user as mob)
 	if(istype(W, /obj/item/weapon/pipe_dispenser) || istype(W, /obj/item/device/pipe_painter))
 		return // Coloring pipes.
-	if (istype(src, /obj/machinery/atmospherics/pipe/tank))
+	if (istype(src, /obj/machinery/networked/atmos/pipe/tank))
 		return ..()
-	if (istype(src, /obj/machinery/atmospherics/pipe/vent))
+	if (istype(src, /obj/machinery/networked/atmos/pipe/vent))
 		return ..()
 
 	if(istype(W, /obj/item/weapon/reagent_containers/glass/paint/red))

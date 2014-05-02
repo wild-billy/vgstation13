@@ -58,8 +58,6 @@
 
 	src.update_status()
 
-	makepowernets()
-
 	sun = new /datum/sun()
 	radio_controller = new /datum/controller/radio()
 	data_core = new /obj/effect/datacore()

@@ -184,7 +184,7 @@
 	//command_alert("Unidentified lifesigns detected coming aboard [station_name()]. Secure any exterior access, including ducting and ventilation.", "Lifesign Alert")
 	//world << sound('sound/AI/aliens.ogg')
 	var/list/vents = list()
-	for(var/obj/machinery/atmospherics/unary/vent_pump/temp_vent in machines)
+	for(var/obj/machinery/networked/atmos/unary/vent_pump/temp_vent in machines)
 		if(temp_vent.loc.z == 1 && !temp_vent.welded && temp_vent.network && temp_vent.canSpawnMice)
 			if(temp_vent.network.normal_members.len > 50) // Stops Aliens getting stuck in small networks. See: Security, Virology
 				vents += temp_vent
@@ -267,7 +267,7 @@
 		sleep(100)
 
 		for(var/area/A in areas)
-			for (var/obj/machinery/power/apc/temp_apc in A)
+			for (var/obj/machinery/networked/power/apc/temp_apc in A)
 				temp_apc.overload_lighting()
 
 			for (var/obj/structure/closet/secure_closet/brig/temp_closet in A)
@@ -319,11 +319,11 @@
 			return
 
 		for(var/obj/effect/landmark/epicentre in epicentreList)
-			for(var/obj/machinery/power/apc/apc in range(epicentre,lightsoutRange))
+			for(var/obj/machinery/networked/power/apc/apc in range(epicentre,lightsoutRange))
 				apc.overload_lighting()
 
 	else
-		for(var/obj/machinery/power/apc/apc in machines)
+		for(var/obj/machinery/networked/power/apc/apc in machines)
 			apc.overload_lighting()
 
 	return
@@ -449,14 +449,14 @@ Would like to add a law like "Law x is _______" where x = a number, and _____ is
 
 	spawn(0)
 		world << "Started processing APCs"
-		for (var/obj/machinery/power/apc/APC in world)
+		for (var/obj/machinery/networked/power/apc/APC in world)
 			if(APC.z == 1)
 				APC.ion_act()
 				apcnum++
 		world << "Finished processing APCs. Processed: [apcnum]"
 	spawn(0)
 		world << "Started processing SMES"
-		for (var/obj/machinery/power/smes/SMES in world)
+		for (var/obj/machinery/networked/power/smes/SMES in world)
 			if(SMES.z == 1)
 				SMES.ion_act()
 				smesnum++

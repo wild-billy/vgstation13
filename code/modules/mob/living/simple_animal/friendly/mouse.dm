@@ -80,9 +80,9 @@
 
 	if(src.stat != CONSCIOUS)	return
 
-	var/obj/machinery/atmospherics/unary/vent_pump/vent_found
+	var/obj/machinery/networked/atmos/unary/vent_pump/vent_found
 	var/welded = 0
-	for(var/obj/machinery/atmospherics/unary/vent_pump/v in range(1,src))
+	for(var/obj/machinery/networked/atmos/unary/vent_pump/v in range(1,src))
 		if(!v.welded)
 			vent_found = v
 			break
@@ -91,12 +91,12 @@
 	if(vent_found)
 		if(vent_found.network&&vent_found.network.normal_members.len)
 			var/list/vents = list()
-			for(var/obj/machinery/atmospherics/unary/vent_pump/temp_vent in vent_found.network.normal_members)
+			for(var/obj/machinery/networked/atmos/unary/vent_pump/temp_vent in vent_found.network.normal_members)
 				if(temp_vent.loc == loc)
 					continue
 				vents.Add(temp_vent)
 			var/list/choices = list()
-			for(var/obj/machinery/atmospherics/unary/vent_pump/vent in vents)
+			for(var/obj/machinery/networked/atmos/unary/vent_pump/vent in vents)
 				if(vent.loc.z != loc.z)
 					continue
 				var/atom/a = get_turf(vent)

@@ -373,14 +373,6 @@ Pressure: [env.return_pressure()]"}
 		message_admins("[key_name_admin(src)] has deleted all instances of [hsbitem].", 0)
 	feedback_add_details("admin_verb","DELA") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
-/client/proc/cmd_debug_make_powernets()
-	set category = "Debug"
-	set name = "Make Powernets"
-	makepowernets()
-	log_admin("[key_name(src)] has remade the powernet. makepowernets() called.")
-	message_admins("[key_name_admin(src)] has remade the powernets. makepowernets() called.", 0)
-	feedback_add_details("admin_verb","MPWN") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
-
 /client/proc/cmd_debug_tog_aliens()
 	set category = "Server"
 	set name = "Toggle Aliens"
@@ -468,7 +460,7 @@ Pressure: [env.return_pressure()]"}
 		if(!(A.type in areas_all))
 			areas_all.Add(A.type)
 
-	for(var/obj/machinery/power/apc/APC in world)
+	for(var/obj/machinery/networked/power/apc/APC in world)
 		var/area/A = get_area(APC)
 		if(!(A.type in areas_with_APC))
 			areas_with_APC.Add(A.type)
@@ -983,7 +975,7 @@ Pressure: [env.return_pressure()]"}
 	log_admin("[key_name(usr)] set up the singulo.")
 	message_admins("\blue [key_name_admin(usr)] set up the singulo.", 1)
 
-	for(var/obj/machinery/power/emitter/E in world)
+	for(var/obj/machinery/networked/power/emitter/E in world)
 		if(E.anchored)
 			E.active = 1
 
@@ -1009,7 +1001,7 @@ Pressure: [env.return_pressure()]"}
 				//S.dissipate_track = 0
 				//S.dissipate_strength = 10
 
-	for(var/obj/machinery/power/rad_collector/Rad in world)
+	for(var/obj/machinery/networked/power/rad_collector/Rad in world)
 		if(Rad.anchored)
 			if(!Rad.P)
 				var/obj/item/weapon/tank/plasma/Plasma = new/obj/item/weapon/tank/plasma(Rad)
@@ -1021,7 +1013,7 @@ Pressure: [env.return_pressure()]"}
 			if(!Rad.active)
 				Rad.toggle_power()
 
-	for(var/obj/machinery/power/smes/SMES in world)
+	for(var/obj/machinery/networked/power/smes/SMES in world)
 		if(SMES.anchored)
 			SMES.connect_to_network() // Just in case.
 			SMES.chargemode = 1
@@ -1039,10 +1031,10 @@ Pressure: [env.return_pressure()]"}
 	log_admin("[key_name(usr)] haxed the powergrid with magic SMES.")
 	message_admins("\blue [key_name_admin(usr)] haxed the powergrid with magic SMES.", 1)
 
-	for(var/obj/machinery/power/smes/SMES in world)
+	for(var/obj/machinery/networked/power/smes/SMES in world)
 		var/turf/T=SMES.loc
 		del(SMES)
-		var/obj/machinery/power/smes/magical/magic = new(T)
+		var/obj/machinery/networked/power/smes/magical/magic = new(T)
 		// Manually set up our powernets since stupid seems to reign in the powernet code.
 		magic.connect_to_network()
 		magic.output=200000 // AKA rape
@@ -1064,13 +1056,13 @@ Pressure: [env.return_pressure()]"}
 	log_admin("[key_name(usr)] haxed atmos.")
 	message_admins("\blue [key_name_admin(usr)] haxed atmos.", 1)
 
-	for(var/obj/machinery/atmospherics/binary/pump/P in world)
+	for(var/obj/machinery/networked/atmos/binary/pump/P in world)
 		//if(p.name == "Air to Distro")
 		P.target_pressure=4500
-	for(var/obj/machinery/atmospherics/unary/vent_pump/high_volume/P in world)
+	for(var/obj/machinery/networked/atmos/unary/vent_pump/high_volume/P in world)
 		if(P.id_tag=="air_out")
 			P.internal_pressure_bound=4500
-	for(var/obj/machinery/atmospherics/trinary/filter/F in world)
+	for(var/obj/machinery/networked/atmos/trinary/filter/F in world)
 		F.target_pressure=4500
 
 	//world << "<b>LET THERE BE AIR</b>"

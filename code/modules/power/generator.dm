@@ -1,5 +1,5 @@
 
-/obj/machinery/power/generator
+/obj/machinery/networked/power/generator
 	name = "thermoelectric generator"
 	desc = "It's a high efficiency thermoelectric generator."
 	icon_state = "teg"
@@ -9,13 +9,13 @@
 	use_power = 0
 	idle_power_usage = 100 //Watts, I hope.  Just enough to do the computer and display things.
 
-	var/obj/machinery/atmospherics/binary/circulator/circ1
-	var/obj/machinery/atmospherics/binary/circulator/circ2
+	var/obj/machinery/networked/atmos/binary/circulator/circ1
+	var/obj/machinery/networked/atmos/binary/circulator/circ2
 
 	var/lastgen = 0
 	var/lastgenlev = -1
 
-/obj/machinery/power/generator/New()
+/obj/machinery/networked/power/generator/New()
 	..()
 
 	spawn(1)
@@ -26,13 +26,13 @@
 //so a circulator to the NORTH of the generator connects first to the EAST, then to the WEST
 //and a circulator to the WEST of the generator connects first to the NORTH, then to the SOUTH
 //note that the circulator's outlet dir is it's always facing dir, and it's inlet is always the reverse
-/obj/machinery/power/generator/proc/reconnect()
+/obj/machinery/networked/power/generator/proc/reconnect()
 	circ1 = null
 	circ2 = null
 	if(src.loc && anchored)
 		if(src.dir & (EAST|WEST))
-			circ1 = locate(/obj/machinery/atmospherics/binary/circulator) in get_step(src,EAST)
-			circ2 = locate(/obj/machinery/atmospherics/binary/circulator) in get_step(src,WEST)
+			circ1 = locate(/obj/machinery/networked/atmos/binary/circulator) in get_step(src,EAST)
+			circ2 = locate(/obj/machinery/networked/atmos/binary/circulator) in get_step(src,WEST)
 
 			if(circ1 && circ2)
 				if(circ1.dir != SOUTH || circ2.dir != NORTH)
@@ -40,17 +40,17 @@
 					circ2 = null
 
 		else if(src.dir & (NORTH|SOUTH))
-			circ1 = locate(/obj/machinery/atmospherics/binary/circulator) in get_step(src,NORTH)
-			circ2 = locate(/obj/machinery/atmospherics/binary/circulator) in get_step(src,SOUTH)
+			circ1 = locate(/obj/machinery/networked/atmos/binary/circulator) in get_step(src,NORTH)
+			circ2 = locate(/obj/machinery/networked/atmos/binary/circulator) in get_step(src,SOUTH)
 
 			if(circ1 && circ2 && (circ1.dir != EAST || circ2.dir != WEST))
 				circ1 = null
 				circ2 = null
 
-/obj/machinery/power/generator/proc/operable()
+/obj/machinery/networked/power/generator/proc/operable()
 	return circ1 && circ2 && anchored && !(stat & (BROKEN|NOPOWER))
 
-/obj/machinery/power/generator/proc/updateicon()
+/obj/machinery/networked/power/generator/proc/updateicon()
 	overlays = 0
 
 	if(!operable())
@@ -59,7 +59,7 @@
 	if(lastgenlev != 0)
 		overlays += image('icons/obj/power.dmi', "teg-op[lastgenlev]")
 
-/obj/machinery/power/generator/process()
+/obj/machinery/networked/power/generator/process()
 	if(!operable())
 		return
 
@@ -111,12 +111,12 @@
 		updateicon()
 	add_avail(lastgen)
 
-/obj/machinery/power/generator/attack_ai(mob/user)
+/obj/machinery/networked/power/generator/attack_ai(mob/user)
 	src.add_hiddenprint(user)
 	if(stat & (BROKEN|NOPOWER)) return
 	interact(user)
 
-/obj/machinery/power/generator/attackby(obj/item/weapon/W as obj, mob/user as mob)
+/obj/machinery/networked/power/generator/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	if(istype(W, /obj/item/weapon/wrench))
 		anchored = !anchored
 		user << "\blue You [anchored ? "secure" : "unsecure"] the bolts holding [src] to the floor."
@@ -125,13 +125,13 @@
 	else
 		..()
 
-/obj/machinery/power/generator/attack_hand(mob/user)
+/obj/machinery/networked/power/generator/attack_hand(mob/user)
 	add_fingerprint(user)
 	if(stat & (BROKEN|NOPOWER) || !anchored) return
 	interact(user)
 
 
-/obj/machinery/power/generator/interact(mob/user)
+/obj/machinery/networked/power/generator/interact(mob/user)
 	if ( (get_dist(src, user) > 1 ) && (!istype(user, /mob/living/silicon/ai)))
 		user.unset_machine()
 		user << browse(null, "window=teg")
@@ -176,7 +176,7 @@ Outlet Temperature: [round(circ2.air2.temperature, 0.1)] K<BR>"}
 	return 1
 
 
-/obj/machinery/power/generator/Topic(href, href_list)
+/obj/machinery/networked/power/generator/Topic(href, href_list)
 	..()
 	if("close" in href_list)
 		usr << browse(null, "window=teg")
@@ -188,12 +188,12 @@ Outlet Temperature: [round(circ2.air2.temperature, 0.1)] K<BR>"}
 	return 1
 
 
-/obj/machinery/power/generator/power_change()
+/obj/machinery/networked/power/generator/power_change()
 	..()
 	updateicon()
 
 
-/obj/machinery/power/generator/verb/rotate_clock()
+/obj/machinery/networked/power/generator/verb/rotate_clock()
 	set category = "Object"
 	set name = "Rotate Generator (Clockwise)"
 	set src in view(1)
@@ -203,7 +203,7 @@ Outlet Temperature: [round(circ2.air2.temperature, 0.1)] K<BR>"}
 
 	src.dir = turn(src.dir, 90)
 
-/obj/machinery/power/generator/verb/rotate_anticlock()
+/obj/machinery/networked/power/generator/verb/rotate_anticlock()
 	set category = "Object"
 	set name = "Rotate Generator (Counterclockwise)"
 	set src in view(1)

@@ -13,7 +13,7 @@
 
 #define WARNING_DELAY 30 		//seconds between warnings.
 
-/obj/machinery/power/supermatter
+/obj/machinery/networked/power/supermatter
 	name = "Supermatter"
 	desc = "A strangely translucent and iridescent crystal. \red You get headaches just from looking at it."
 	icon = 'icons/obj/engine.dmi'
@@ -69,21 +69,21 @@
 		explosion_power = 3 //3,6,9,12? Or is that too small?
 
 
-/obj/machinery/power/supermatter/New()
+/obj/machinery/networked/power/supermatter/New()
 	. = ..()
 	radio = new (src)
 
 
-/obj/machinery/power/supermatter/Del()
+/obj/machinery/networked/power/supermatter/Del()
 	del radio
 	. = ..()
 
-/obj/machinery/power/supermatter/proc/explode()
+/obj/machinery/networked/power/supermatter/proc/explode()
 		explosion(get_turf(src), explosion_power, explosion_power * 2, explosion_power * 3, explosion_power * 4, 1)
 		del src
 		return
 
-/obj/machinery/power/supermatter/process()
+/obj/machinery/networked/power/supermatter/process()
 
 	var/turf/L = loc
 
@@ -193,7 +193,7 @@
 	return 1
 
 
-/obj/machinery/power/supermatter/bullet_act(var/obj/item/projectile/Proj)
+/obj/machinery/networked/power/supermatter/bullet_act(var/obj/item/projectile/Proj)
 	var/turf/L = loc
 	if(!istype(L))		// We don't run process() when we are in space
 		return 0	// This stops people from being able to really power up the supermatter
@@ -207,11 +207,11 @@
 	return 0
 
 
-/obj/machinery/power/supermatter/attack_paw(mob/user as mob)
+/obj/machinery/networked/power/supermatter/attack_paw(mob/user as mob)
 	return attack_hand(user)
 
 
-/obj/machinery/power/supermatter/attack_robot(mob/user as mob)
+/obj/machinery/networked/power/supermatter/attack_robot(mob/user as mob)
 	if(Adjacent(user))
 		return attack_hand(user)
 	else
@@ -219,26 +219,26 @@
 	return
 
 // /vg/: Don't let ghosts fuck with this.
-/obj/machinery/power/supermatter/attack_ghost(mob/user as mob)
+/obj/machinery/networked/power/supermatter/attack_ghost(mob/user as mob)
 	src.examine()
 
-/obj/machinery/power/supermatter/attack_ai(mob/user as mob)
+/obj/machinery/networked/power/supermatter/attack_ai(mob/user as mob)
 	user << "<span class = \"warning\">You attempt to interface with the control circuits but find they are not connected to your network.  Maybe in a future firmware update.</span>"
 
-/obj/machinery/power/supermatter/attack_hand(mob/user as mob)
+/obj/machinery/networked/power/supermatter/attack_hand(mob/user as mob)
 	user.visible_message("<span class=\"warning\">\The [user] reaches out and touches \the [src], inducing a resonance... \his body starts to glow and bursts into flames before flashing into ash.</span>",\
 		"<span class=\"danger\">You reach out and touch \the [src]. Everything starts burning and all you can hear is ringing. Your last thought is \"That was not a wise decision.\"</span>",\
 		"<span class=\"warning\">You hear an uneartly ringing, then what sounds like a shrilling kettle as you are washed with a wave of heat.</span>")
 
 	Consume(user)
 
-/obj/machinery/power/supermatter/proc/transfer_energy()
-	for(var/obj/machinery/power/rad_collector/R in rad_collectors)
+/obj/machinery/networked/power/supermatter/proc/transfer_energy()
+	for(var/obj/machinery/networked/power/rad_collector/R in rad_collectors)
 		if(get_dist(R, src) <= 15) // Better than using orange() every process
 			R.receive_pulse(power)
 	return
 
-/obj/machinery/power/supermatter/attackby(obj/item/weapon/W as obj, mob/living/user as mob)
+/obj/machinery/networked/power/supermatter/attackby(obj/item/weapon/W as obj, mob/living/user as mob)
 	user.visible_message("<span class=\"warning\">\The [user] touches \a [W] to \the [src] as a silence fills the room...</span>",\
 		"<span class=\"danger\">You touch \the [W] to \the [src] when everything suddenly goes silent.\"</span>\n<span class=\"notice\">\The [W] flashes into dust as you flinch away from \the [src].</span>",\
 		"<span class=\"warning\">Everything suddenly goes silent.</span>")
@@ -249,7 +249,7 @@
 	user.apply_effect(150, IRRADIATE)
 
 
-/obj/machinery/power/supermatter/Bumped(atom/AM as mob|obj)
+/obj/machinery/networked/power/supermatter/Bumped(atom/AM as mob|obj)
 	if(istype(AM, /mob/living))
 		AM.visible_message("<span class=\"warning\">\The [AM] slams into \the [src] inducing a resonance... \his body starts to glow and catch flame before flashing into ash.</span>",\
 		"<span class=\"danger\">You slam into \the [src] as your ears are filled with unearthly ringing. Your last thought is \"Oh, fuck.\"</span>",\
@@ -261,7 +261,7 @@
 	Consume(AM)
 
 
-/obj/machinery/power/supermatter/proc/Consume(var/mob/living/user)
+/obj/machinery/networked/power/supermatter/proc/Consume(var/mob/living/user)
 	if(istype(user))
 		user.dust()
 		power += 200

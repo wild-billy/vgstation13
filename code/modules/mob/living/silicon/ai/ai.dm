@@ -44,7 +44,7 @@ var/list/ai_list = list()
 	var/control_disabled = 0 // Set to 1 to stop AI from interacting via Click() -- TLE
 	var/malfhacking = 0 // More or less a copy of the above var, so that malf AIs can hack and still get new cyborgs -- NeoFite
 
-	var/obj/machinery/power/apc/malfhack = null
+	var/obj/machinery/networked/power/apc/malfhack = null
 	var/explosive = 0 //does the AI explode when it dies?
 
 	var/mob/living/silicon/ai/parent = null
@@ -676,7 +676,7 @@ var/list/ai_list = list()
 	set category = "Malfunction"
 	set name = "Return to Main Core"
 
-	var/obj/machinery/power/apc/apc = src.loc
+	var/obj/machinery/networked/power/apc/apc = src.loc
 	if(!istype(apc))
 		src << "\blue You are already in your Main Core."
 		return

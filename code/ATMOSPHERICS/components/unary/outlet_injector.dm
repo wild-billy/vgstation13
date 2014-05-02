@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/unary/outlet_injector
+/obj/machinery/networked/atmos/unary/outlet_injector
 	icon = 'icons/obj/atmospherics/outlet_injector.dmi'
 	icon_state = "off"
 	use_power = 1

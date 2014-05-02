@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/unary/vent_scrubber
+/obj/machinery/networked/atmos/unary/vent_scrubber
 	icon = 'icons/obj/atmospherics/vent_scrubber.dmi'
 	icon_state = "off"
 
@@ -315,7 +315,7 @@
 		</ul>
 		"}
 
-/obj/machinery/atmospherics/unary/vent_scrubber/Topic(href, href_list)
+/obj/machinery/networked/atmos/unary/vent_scrubber/Topic(href, href_list)
 	if(..())
 		return
 
@@ -347,7 +347,7 @@
 
 	update_multitool_menu(usr)
 
-/obj/machinery/atmospherics/unary/vent_scrubber/Destroy()
+/obj/machinery/networked/atmos/unary/vent_scrubber/Destroy()
 	if(initial_loc)
 		initial_loc.air_scrub_info -= id_tag
 		initial_loc.air_scrub_names -= id_tag

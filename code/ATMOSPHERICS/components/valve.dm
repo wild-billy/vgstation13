@@ -1,4 +1,4 @@
-obj/machinery/atmospherics/valve
+obj/machinery/networked/atmos/valve
 	icon = 'icons/obj/atmospherics/valve.dmi'
 	icon_state = "valve0"
 
@@ -11,11 +11,11 @@ obj/machinery/atmospherics/valve
 	var/open = 0
 	var/openDuringInit = 0
 
-	var/obj/machinery/atmospherics/node1
-	var/obj/machinery/atmospherics/node2
+	var/obj/machinery/networked/atmos/node1
+	var/obj/machinery/networked/atmos/node2
 
-	var/datum/pipe_network/network_node1
-	var/datum/pipe_network/network_node2
+	var/datum/network/atmos/network_node1
+	var/datum/network/atmos/network_node2
 
 	open
 		open = 1
@@ -52,7 +52,7 @@ obj/machinery/atmospherics/valve
 			node2.build_network()
 		return 1
 
-	network_expand(datum/pipe_network/new_network, obj/machinery/atmospherics/pipe/reference)
+	network_expand(datum/network/atmos/new_network, obj/machinery/networked/atmos/pipe/reference)
 		if(reference == node1)
 			network_node1 = new_network
 			if(open)
@@ -185,17 +185,17 @@ obj/machinery/atmospherics/valve
 
 	build_network()
 		if(!network_node1 && node1)
-			network_node1 = new /datum/pipe_network()
+			network_node1 = new /datum/network/atmos()
 			network_node1.normal_members += src
 			network_node1.build_network(node1, src)
 
 		if(!network_node2 && node2)
-			network_node2 = new /datum/pipe_network()
+			network_node2 = new /datum/network/atmos()
 			network_node2.normal_members += src
 			network_node2.build_network(node2, src)
 
 
-	return_network(obj/machinery/atmospherics/reference)
+	return_network(obj/machinery/networked/atmos/reference)
 		build_network()
 
 		if(reference==node1)
@@ -206,7 +206,7 @@ obj/machinery/atmospherics/valve
 
 		return null
 
-	reassign_network(datum/pipe_network/old_network, datum/pipe_network/new_network)
+	reassign_network(datum/network/atmos/old_network, datum/network/atmos/new_network)
 		if(network_node1 == old_network)
 			network_node1 = new_network
 		if(network_node2 == old_network)
@@ -217,7 +217,7 @@ obj/machinery/atmospherics/valve
 	return_network_air(datum/network/reference)
 		return null
 
-	disconnect(obj/machinery/atmospherics/reference)
+	disconnect(obj/machinery/networked/atmos/reference)
 		if(reference==node1)
 			del(network_node1)
 			node1 = null
@@ -337,7 +337,7 @@ obj/machinery/atmospherics/valve
 	attackby(var/obj/item/weapon/W as obj, var/mob/user as mob)
 		if (!istype(W, /obj/item/weapon/wrench))
 			return ..()
-		if (istype(src,/obj/machinery/atmospherics/valve/digital) && src:frequency)
+		if (istype(src,/obj/machinery/networked/atmos/valve/digital) && src:frequency)
 			user << "\red You cannot unwrench this [src], it's digitally connected to another device."
 			return 1
 		var/turf/T = src.loc

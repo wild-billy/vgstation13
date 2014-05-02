@@ -1,4 +1,4 @@
-obj/machinery/atmospherics/binary
+obj/machinery/networked/atmos/binary
 	dir = SOUTH
 	initialize_directions = SOUTH|NORTH
 	use_power = 1
@@ -6,11 +6,11 @@ obj/machinery/atmospherics/binary
 	var/datum/gas_mixture/air1
 	var/datum/gas_mixture/air2
 
-	var/obj/machinery/atmospherics/node1
-	var/obj/machinery/atmospherics/node2
+	var/obj/machinery/networked/atmos/node1
+	var/obj/machinery/networked/atmos/node2
 
-	var/datum/pipe_network/network1
-	var/datum/pipe_network/network2
+	var/datum/physical_network/atmos/network1
+	var/datum/physical_network/atmos/network2
 
 	New()
 		..()
@@ -47,7 +47,7 @@ obj/machinery/atmospherics/binary
 		return 1
 
 // Housekeeping and pipe network stuff below
-	network_expand(datum/pipe_network/new_network, obj/machinery/atmospherics/pipe/reference)
+	network_expand(datum/network/atmos/new_network, obj/machinery/networked/atmos/pipe/reference)
 		if(reference == node1)
 			network1 = new_network
 
@@ -79,24 +79,24 @@ obj/machinery/atmospherics/binary
 	initialize()
 		if(node1 && node2) return
 
-		node1 = findConnecting(turn(dir, 180))
-		node2 = findConnecting(dir)
+		node1 = findConnectingPipe(turn(dir, 180))
+		node2 = findConnectingPipe(dir)
 
 		update_icon()
 
 	build_network()
 		if(!network1 && node1)
-			network1 = new /datum/pipe_network()
+			network1 = new /datum/network/atmos()
 			network1.normal_members += src
 			network1.build_network(node1, src)
 
 		if(!network2 && node2)
-			network2 = new /datum/pipe_network()
+			network2 = new /datum/network/atmos()
 			network2.normal_members += src
 			network2.build_network(node2, src)
 
 
-	return_network(obj/machinery/atmospherics/reference)
+	return_network(obj/machinery/networked/atmos/reference)
 		build_network()
 
 		if(reference==node1)
@@ -107,7 +107,7 @@ obj/machinery/atmospherics/binary
 
 		return null
 
-	reassign_network(datum/pipe_network/old_network, datum/pipe_network/new_network)
+	reassign_network(datum/network/atmos/old_network, datum/network/atmos/new_network)
 		if(network1 == old_network)
 			network1 = new_network
 		if(network2 == old_network)
@@ -115,7 +115,7 @@ obj/machinery/atmospherics/binary
 
 		return 1
 
-	return_network_air(datum/pipe_network/reference)
+	return_network_air(datum/network/atmos/reference)
 		var/list/results = list()
 
 		if(network1 == reference)
@@ -125,7 +125,7 @@ obj/machinery/atmospherics/binary
 
 		return results
 
-	disconnect(obj/machinery/atmospherics/reference)
+	disconnect(obj/machinery/networked/atmos/reference)
 		if(reference==node1)
 			del(network1)
 			node1 = null

@@ -31,7 +31,7 @@
 	if (A.get_apc())
 		usr << "\red This area already has an APC."
 		return //only one APC per area
-	for(var/obj/machinery/power/terminal/T in loc)
+	for(var/obj/machinery/networked/power/terminal/T in loc)
 		if (T.master)
 			usr << "\red There is another network terminal here."
 			return
@@ -40,7 +40,7 @@
 			C.amount = 10
 			usr << "You cut the cables and disassemble the unused power terminal."
 			del(T)
-	new /obj/machinery/power/apc(loc, ndir, 1)
+	new /obj/machinery/networked/power/apc(loc, ndir, 1)
 	del(src)
 
 ///////////////

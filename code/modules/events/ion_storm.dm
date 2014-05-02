@@ -182,14 +182,14 @@ Would like to add a law like "Law x is _______" where x = a number, and _____ is
 
 	spawn(0)
 		world << "Started processing APCs"
-		for (var/obj/machinery/power/apc/APC in world)
+		for (var/obj/machinery/networked/power/apc/APC in world)
 			if(APC.z == 1)
 				APC.ion_act()
 				apcnum++
 		world << "Finished processing APCs. Processed: [apcnum]"
 	spawn(0)
 		world << "Started processing SMES"
-		for (var/obj/machinery/power/smes/SMES in world)
+		for (var/obj/machinery/networked/power/smes/SMES in world)
 			if(SMES.z == 1)
 				SMES.ion_act()
 				smesnum++

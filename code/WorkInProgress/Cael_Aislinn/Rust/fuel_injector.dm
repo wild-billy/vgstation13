@@ -1,5 +1,5 @@
 
-/obj/machinery/power/rust_fuel_injector
+/obj/machinery/networked/power/rust_fuel_injector
 	name = "Fuel Injector"
 	icon = 'code/WorkInProgress/Cael_Aislinn/Rust/rust.dmi'
 	icon_state = "injector0"
@@ -24,7 +24,7 @@
 	var/cached_power_avail = 0
 	var/emergency_insert_ready = 0
 
-/obj/machinery/power/rust_fuel_injector/process()
+/obj/machinery/networked/power/rust_fuel_injector/process()
 	if(injecting)
 		if(stat & (BROKEN|NOPOWER))
 			StopInjecting()
@@ -33,7 +33,7 @@
 
 	cached_power_avail = avail()
 
-/obj/machinery/power/rust_fuel_injector/attackby(obj/item/W, mob/user)
+/obj/machinery/networked/power/rust_fuel_injector/attackby(obj/item/W, mob/user)
 
 	if(istype(W, /obj/item/weapon/wrench))
 		if(injecting)
@@ -124,14 +124,14 @@
 	..()
 	return
 
-/obj/machinery/power/rust_fuel_injector/attack_ai(mob/user)
+/obj/machinery/networked/power/rust_fuel_injector/attack_ai(mob/user)
 	attack_hand(user)
 
-/obj/machinery/power/rust_fuel_injector/attack_hand(mob/user)
+/obj/machinery/networked/power/rust_fuel_injector/attack_hand(mob/user)
 	add_fingerprint(user)
 	interact(user)
 
-/obj/machinery/power/rust_fuel_injector/interact(mob/user)
+/obj/machinery/networked/power/rust_fuel_injector/interact(mob/user)
 	if(stat & BROKEN)
 		user.unset_machine()
 		user << browse(null, "window=fuel_injector")
@@ -178,7 +178,7 @@
 	onclose(user, "fuel_injector")
 	user.set_machine(src)
 
-/obj/machinery/power/rust_fuel_injector/Topic(href, href_list)
+/obj/machinery/networked/power/rust_fuel_injector/Topic(href, href_list)
 	..()
 
 	if( href_list["modify_tag"] )
@@ -225,19 +225,19 @@
 
 	updateDialog()
 
-/obj/machinery/power/rust_fuel_injector/proc/BeginInjecting()
+/obj/machinery/networked/power/rust_fuel_injector/proc/BeginInjecting()
 	if(!injecting && cur_assembly)
 		icon_state = "injector1"
 		injecting = 1
 		use_power = 1
 
-/obj/machinery/power/rust_fuel_injector/proc/StopInjecting()
+/obj/machinery/networked/power/rust_fuel_injector/proc/StopInjecting()
 	if(injecting)
 		injecting = 0
 		icon_state = "injector0"
 		use_power = 0
 
-/obj/machinery/power/rust_fuel_injector/proc/Inject()
+/obj/machinery/networked/power/rust_fuel_injector/proc/Inject()
 	if(!injecting)
 		return
 	if(cur_assembly)
@@ -266,7 +266,7 @@
 	else
 		StopInjecting()
 
-/obj/machinery/power/rust_fuel_injector/proc/attempt_fuel_swap()
+/obj/machinery/networked/power/rust_fuel_injector/proc/attempt_fuel_swap()
 	var/rev_dir = reverse_direction(dir)
 	var/turf/mid = get_step(src, rev_dir)
 	var/success = 0
@@ -293,7 +293,7 @@
 	else
 		src.visible_message("\red \icon[src] a red light flashes on [src].")
 
-/obj/machinery/power/rust_fuel_injector/verb/rotate_clock()
+/obj/machinery/networked/power/rust_fuel_injector/verb/rotate_clock()
 	set category = "Object"
 	set name = "Rotate Generator (Clockwise)"
 	set src in view(1)
@@ -303,7 +303,7 @@
 
 	src.dir = turn(src.dir, 90)
 
-/obj/machinery/power/rust_fuel_injector/verb/rotate_anticlock()
+/obj/machinery/networked/power/rust_fuel_injector/verb/rotate_anticlock()
 	set category = "Object"
 	set name = "Rotate Generator (Counterclockwise)"
 	set src in view(1)

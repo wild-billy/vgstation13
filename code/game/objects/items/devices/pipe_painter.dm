@@ -15,9 +15,9 @@
 	var/mode = "grey"
 
 /obj/item/device/pipe_painter/afterattack(atom/A, mob/user as mob)
-	if(!istype(A,/obj/machinery/atmospherics/pipe) || istype(A,/obj/machinery/atmospherics/pipe/tank) || istype(A,/obj/machinery/atmospherics/pipe/vent) || istype(A,/obj/machinery/atmospherics/pipe/simple/heat_exchanging) || istype(A,/obj/machinery/atmospherics/pipe/simple/insulated))
+	if(!istype(A,/obj/machinery/networked/atmos/pipe) || istype(A,/obj/machinery/networked/atmos/pipe/tank) || istype(A,/obj/machinery/networked/atmos/pipe/vent) || istype(A,/obj/machinery/networked/atmos/pipe/simple/heat_exchanging) || istype(A,/obj/machinery/networked/atmos/pipe/simple/insulated))
 		return
-	var/obj/machinery/atmospherics/pipe/P = A
+	var/obj/machinery/networked/atmos/pipe/P = A
 	if(!(mode in P.available_colors))
 		user << "\red This [P] can't be painted [mode]. Available colors: [english_list(P.available_colors)]"
 		return

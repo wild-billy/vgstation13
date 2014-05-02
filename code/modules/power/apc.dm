@@ -43,7 +43,7 @@
 //NOTE: STUFF STOLEN FROM AIRLOCK.DM thx
 
 
-/obj/machinery/power/apc
+/obj/machinery/networked/power/apc
 	name = "area power controller"
 	desc = "A control terminal for the area electrical systems."
 
@@ -70,7 +70,7 @@
 	var/coverlocked = 1
 	var/aidisabled = 0
 	var/tdir = null
-	var/obj/machinery/power/terminal/terminal = null
+	var/obj/machinery/networked/power/terminal/terminal = null
 	var/lastused_light = 0
 	var/lastused_equip = 0
 	var/lastused_environ = 0
@@ -97,12 +97,12 @@
 	var/global/list/status_overlays_lighting
 	var/global/list/status_overlays_environ
 
-/obj/machinery/power/apc/updateDialog()
+/obj/machinery/networked/power/apc/updateDialog()
 	if (stat & (BROKEN|MAINT))
 		return
 	..()
 
-/obj/machinery/power/apc/New(turf/loc, var/ndir, var/building=0)
+/obj/machinery/networked/power/apc/New(turf/loc, var/ndir, var/building=0)
 	..()
 	wires = new(src)
 	// offset 24 pixels in direction of dir
@@ -144,14 +144,14 @@
 		spawn(5)
 			src.update()
 
-/obj/machinery/power/apc/proc/make_terminal()
+/obj/machinery/networked/power/apc/proc/make_terminal()
 	// create a terminal object at the same position as original turf loc
 	// wires will attach to this
-	terminal = new/obj/machinery/power/terminal(src.loc)
+	terminal = new/obj/machinery/networked/power/terminal(src.loc)
 	terminal.dir = tdir
 	terminal.master = src
 
-/obj/machinery/power/apc/proc/init()
+/obj/machinery/networked/power/apc/proc/init()
 	has_electronics = 2 //installed and secured
 	// is starting with a power cell installed, create it and set its charge level
 	if(cell_type)
@@ -174,7 +174,7 @@
 	spawn(5)
 		src.update()
 
-/obj/machinery/power/apc/examine()
+/obj/machinery/networked/power/apc/examine()
 	set src in oview(1)
 
 	if(usr /*&& !usr.stat*/)
@@ -200,7 +200,7 @@
 			else
 				usr << "The cover is closed."
 
-/obj/machinery/power/apc/update_icon()
+/obj/machinery/networked/power/apc/update_icon()
 	if (!status_overlays)
 		status_overlays = 1
 		status_overlays_lock = new
@@ -284,7 +284,7 @@
 				overlays += status_overlays_environ[environ+1]
 
 
-/obj/machinery/power/apc/proc/check_updates()
+/obj/machinery/networked/power/apc/proc/check_updates()
 
 	var/last_update_state = update_state
 	var/last_update_overlay = update_overlay
@@ -358,7 +358,7 @@
 
 
 // Used in process so it doesn't update the icon too much
-/obj/machinery/power/apc/proc/queue_icon_update()
+/obj/machinery/networked/power/apc/proc/queue_icon_update()
 
 	if(!updating_icon)
 		updating_icon = 1
@@ -367,7 +367,7 @@
 			update_icon()
 			updating_icon = 0
 
-/obj/machinery/power/apc/proc/spookify()
+/obj/machinery/networked/power/apc/proc/spookify()
 	if(spooky) return // Fuck you we're already spooky
 	spooky=1
 	update_icon()
@@ -376,7 +376,7 @@
 		update_icon()
 
 //attack with an item - open/close cover, insert cell, or (un)lock interface
-/obj/machinery/power/apc/attackby(obj/item/W, mob/user)
+/obj/machinery/networked/power/apc/attackby(obj/item/W, mob/user)
 
 	if (istype(user, /mob/living/silicon) && get_dist(src,user)>1)
 		return src.attack_hand(user)
@@ -614,7 +614,7 @@
 
 // attack with hand - remove cell (if cover open) or interact with the APC
 
-/obj/machinery/power/apc/attack_hand(mob/user)
+/obj/machinery/networked/power/apc/attack_hand(mob/user)
 //	if (!can_use(user)) This already gets called in interact() and in topic()
 //		return
 	if(!user)
@@ -648,7 +648,7 @@
 	user.set_machine(src)
 	src.interact(user)
 
-/obj/machinery/power/apc/attack_alien(mob/living/carbon/alien/humanoid/user)
+/obj/machinery/networked/power/apc/attack_alien(mob/living/carbon/alien/humanoid/user)
 	if(!user)
 		return
 	user.visible_message("\red [user.name] slashes at the [src.name]!", "\blue You slash at the [src.name]!")
@@ -670,7 +670,7 @@
 	return
 
 
-/obj/machinery/power/apc/interact(mob/user)
+/obj/machinery/networked/power/apc/interact(mob/user)
 	if(!user)
 		return
 
@@ -680,12 +680,12 @@
 	return ui_interact(user)
 
 
-/obj/machinery/power/apc/proc/get_malf_status(mob/user)
+/obj/machinery/networked/power/apc/proc/get_malf_status(mob/user)
 	if (ticker && ticker.mode && (user.mind in ticker.mode.malf_ai) && istype(user, /mob/living/silicon/ai))
 		if (src.malfai == (user:parent ? user:parent : user))
 			if (src.occupant == user)
 				return 3 // 3 = User is shunted in this APC
-			else if (istype(user.loc, /obj/machinery/power/apc))
+			else if (istype(user.loc, /obj/machinery/networked/power/apc))
 				return 4 // 4 = User is shunted in another APC
 			else
 				return 2 // 2 = APC hacked by user, and user is in its core.
@@ -694,7 +694,7 @@
 	else
 		return 0 // 0 = User is not a Malf AI
 
-/obj/machinery/power/apc/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null)
+/obj/machinery/networked/power/apc/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null)
 	if(!user)
 		return
 
@@ -757,10 +757,10 @@
 		// auto update every Master Controller tick
 		ui.set_auto_update(1)
 
-/obj/machinery/power/apc/proc/report()
+/obj/machinery/networked/power/apc/proc/report()
 	return "[area.name] : [equipment]/[lighting]/[environ] ([lastused_equip+lastused_light+lastused_environ]) : [cell? cell.percent() : "N/C"] ([charging])"
 
-/obj/machinery/power/apc/proc/update()
+/obj/machinery/networked/power/apc/proc/update()
 	if(operating && !shorted)
 		area.power_light = (lighting > 1)
 		area.power_equip = (equipment > 1)
@@ -776,11 +776,11 @@
 //			world << "[area.power_equip]"
 	area.power_change()
 
-/obj/machinery/power/apc/proc/isWireCut(var/wireIndex)
+/obj/machinery/networked/power/apc/proc/isWireCut(var/wireIndex)
 	return wires.IsIndexCut(wireIndex)
 
 
-/obj/machinery/power/apc/proc/can_use(mob/user as mob, var/loud = 0) //used by attack_hand() and Topic()
+/obj/machinery/networked/power/apc/proc/can_use(mob/user as mob, var/loud = 0) //used by attack_hand() and Topic()
 	if (user.stat && !isobserver(user))
 		user << "\red You must be conscious to use this [src]!"
 		return 0
@@ -839,7 +839,7 @@
 			return 0
 	return 1
 
-/obj/machinery/power/apc/Topic(href, href_list)
+/obj/machinery/networked/power/apc/Topic(href, href_list)
 	if(..())
 		return 0
 
@@ -923,7 +923,7 @@
 
 	return 1
 
-/obj/machinery/power/apc/proc/toggle_breaker()
+/obj/machinery/networked/power/apc/proc/toggle_breaker()
 	operating = !operating
 
 	if(malfai)
@@ -934,10 +934,10 @@
 	src.update()
 	update_icon()
 
-/obj/machinery/power/apc/proc/malfoccupy(var/mob/living/silicon/ai/malf)
+/obj/machinery/networked/power/apc/proc/malfoccupy(var/mob/living/silicon/ai/malf)
 	if(!istype(malf))
 		return
-	if(istype(malf.loc, /obj/machinery/power/apc)) // Already in an APC
+	if(istype(malf.loc, /obj/machinery/networked/power/apc)) // Already in an APC
 		malf << "<span class='warning'>You must evacuate your current apc first.</span>"
 		return
 	if(!malf.can_shunt)
@@ -965,7 +965,7 @@
 			point.the_disk = src //the pinpointer will detect the shunted AI
 
 
-/obj/machinery/power/apc/proc/malfvacate(var/forced)
+/obj/machinery/networked/power/apc/proc/malfvacate(var/forced)
 	if(!src.occupant)
 		return
 	if(src.occupant.parent && src.occupant.parent.stat != 2)
@@ -990,7 +990,7 @@
 				point.the_disk = null //the pinpointer will go back to pointing at the nuke disc.
 
 
-/obj/machinery/power/apc/proc/ion_act()
+/obj/machinery/networked/power/apc/proc/ion_act()
 	//intended to be exactly the same as an AI malf attack
 	if(!src.malfhack && src.z == 1)
 		if(prob(3))
@@ -1012,23 +1012,23 @@
 					M.show_message("\red The [src.name] suddenly lets out a blast of smoke and some sparks!", 3, "\red You hear sizzling electronics.", 2)
 
 
-/obj/machinery/power/apc/surplus()
+/obj/machinery/networked/power/apc/surplus()
 	if(terminal)
 		return terminal.surplus()
 	else
 		return 0
 
-/obj/machinery/power/apc/add_load(var/amount)
+/obj/machinery/networked/power/apc/add_load(var/amount)
 	if(terminal && terminal.powernet)
 		terminal.powernet.newload += amount
 
-/obj/machinery/power/apc/avail()
+/obj/machinery/networked/power/apc/avail()
 	if(terminal)
 		return terminal.avail()
 	else
 		return 0
 
-/obj/machinery/power/apc/process()
+/obj/machinery/networked/power/apc/process()
 
 	if(stat & (BROKEN|MAINT))
 		return
@@ -1192,7 +1192,7 @@
 // val 0=off, 1=off(auto) 2=on 3=on(auto)
 // on 0=off, 1=on, 2=autooff
 
-obj/machinery/power/apc/proc/autoset(var/val, var/on)
+obj/machinery/networked/power/apc/proc/autoset(var/val, var/on)
 	if(on==0)
 		if(val==2)			// if on, return off
 			return 0
@@ -1211,12 +1211,12 @@ obj/machinery/power/apc/proc/autoset(var/val, var/on)
 
 // damage and destruction acts
 
-/obj/machinery/power/apc/meteorhit(var/obj/O as obj)
+/obj/machinery/networked/power/apc/meteorhit(var/obj/O as obj)
 
 	set_broken()
 	return
 
-/obj/machinery/power/apc/emp_act(severity)
+/obj/machinery/networked/power/apc/emp_act(severity)
 	if(cell)
 		cell.emp_act(severity)
 	if(occupant)
@@ -1229,7 +1229,7 @@ obj/machinery/power/apc/proc/autoset(var/val, var/on)
 		environ = 3
 	..()
 
-/obj/machinery/power/apc/ex_act(severity)
+/obj/machinery/networked/power/apc/ex_act(severity)
 
 	switch(severity)
 		if(1.0)
@@ -1250,13 +1250,13 @@ obj/machinery/power/apc/proc/autoset(var/val, var/on)
 					cell.ex_act(3.0)
 	return
 
-/obj/machinery/power/apc/blob_act()
+/obj/machinery/networked/power/apc/blob_act()
 	if (prob(75))
 		set_broken()
 		if (cell && prob(5))
 			cell.blob_act()
 
-/obj/machinery/power/apc/proc/set_broken()
+/obj/machinery/networked/power/apc/proc/set_broken()
 	if(malfai && operating)
 		if (ticker.mode.config_tag == "malfunction")
 			if (src.z == 1) //if (is_type_in_list(get_area(src), the_station_areas))
@@ -1270,7 +1270,7 @@ obj/machinery/power/apc/proc/autoset(var/val, var/on)
 
 // overload all the lights in this APC area
 
-/obj/machinery/power/apc/proc/overload_lighting()
+/obj/machinery/networked/power/apc/proc/overload_lighting()
 	if(/* !get_connection() || */ !operating || shorted)
 		return
 	if( cell && cell.charge>=20)
@@ -1282,7 +1282,7 @@ obj/machinery/power/apc/proc/autoset(var/val, var/on)
 					L.broken()
 					sleep(1)
 
-/obj/machinery/power/apc/Destroy()
+/obj/machinery/networked/power/apc/Destroy()
 	if(malfai && operating)
 		if (ticker.mode.config_tag == "malfunction")
 			if (src.z == 1) //if (is_type_in_list(get_area(src), the_station_areas))
@@ -1295,7 +1295,7 @@ obj/machinery/power/apc/proc/autoset(var/val, var/on)
 		malfvacate(1)
 	..()
 
-/obj/machinery/power/apc/proc/shock(mob/user, prb)
+/obj/machinery/networked/power/apc/proc/shock(mob/user, prb)
 	if(!prob(prb))
 		return 0
 	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
@@ -1308,7 +1308,7 @@ obj/machinery/power/apc/proc/autoset(var/val, var/on)
 	else
 		return 0
 
-/obj/machinery/power/apc/proc/setsubsystem(val)
+/obj/machinery/networked/power/apc/proc/setsubsystem(val)
 	if(cell && cell.charge > 0)
 		return (val==1) ? 0 : val
 	else if(val == 3)

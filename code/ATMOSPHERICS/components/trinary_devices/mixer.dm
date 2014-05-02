@@ -1,4 +1,4 @@
-obj/machinery/atmospherics/trinary/mixer
+obj/machinery/networked/atmos/trinary/mixer
 	icon = 'icons/obj/atmospherics/mixer.dmi'
 	icon_state = "intact_off"
 	density = 1

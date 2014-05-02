@@ -160,7 +160,7 @@ datum/controller/game_controller/proc/process()
 			sleep(breather_ticks)
 
 			spawn(0)
-				for(var/datum/pipe_network/network in pipe_networks)
+				for(var/datum/network/atmos/network in pipe_networks)
 					network.process()
 				networks_ready = 1
 			sleep(breather_ticks)

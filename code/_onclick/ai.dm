@@ -118,7 +118,7 @@
 	else
 		Topic("aiDisable=4", list("aiDisable"="4"), 1)
 
-/obj/machinery/power/apc/AICtrlClick() // turns off APCs.
+/obj/machinery/networked/power/apc/AICtrlClick() // turns off APCs.
 	Topic("breaker=1", list("breaker"="1"), 0) // 0 meaning no window (consistency! wait...)
 
 

@@ -144,7 +144,7 @@
 	connected_port.connected_device = src
 
 	//Actually enforce the air sharing
-	var/datum/pipe_network/network = connected_port.return_network(src)
+	var/datum/network/atmos/network = connected_port.return_network(src)
 	if(network && !(internal_tank.return_air() in network.gases))
 		network.gases += internal_tank.return_air()
 		network.update = 1
@@ -155,7 +155,7 @@
 	if(!connected_port)
 		return 0
 
-	var/datum/pipe_network/network = connected_port.return_network(src)
+	var/datum/network/atmos/network = connected_port.return_network(src)
 	if(network)
 		network.gases -= internal_tank.return_air()
 

@@ -1120,12 +1120,12 @@ var/global/list/obj/item/device/pda/PDAs = list()
 				else
 					user << "\blue Tank is empty!"
 
-			if (istype(A, /obj/machinery/atmospherics/pipe/tank))
+			if (istype(A, /obj/machinery/networked/atmos/pipe/tank))
 				var/obj/icon = A
 				for (var/mob/O in viewers(user, null))
 					O << "\red [user] has used [src] on \icon[icon] [A]"
 
-				var/obj/machinery/atmospherics/pipe/tank/T = A
+				var/obj/machinery/networked/atmos/pipe/tank/T = A
 				var/pressure = T.parent.air.return_pressure()
 				var/total_moles = T.parent.air.total_moles()
 

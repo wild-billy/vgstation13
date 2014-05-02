@@ -1,7 +1,7 @@
 //node1, air1, network1 correspond to input
 //node2, air2, network2 correspond to output
 
-/obj/machinery/atmospherics/binary/circulator
+/obj/machinery/networked/atmos/binary/circulator
 	name = "circulator/heat exchanger"
 	desc = "A gas circulator pump and heat exchanger."
 	icon = 'icons/obj/pipes.dmi'
@@ -16,11 +16,11 @@
 
 	density = 1
 
-/obj/machinery/atmospherics/binary/circulator/New()
+/obj/machinery/networked/atmos/binary/circulator/New()
 	..()
 	desc = initial(desc) + "  Its outlet port is to the [dir2text(dir)]."
 
-/obj/machinery/atmospherics/binary/circulator/proc/return_transfer_air()
+/obj/machinery/networked/atmos/binary/circulator/proc/return_transfer_air()
 	var/datum/gas_mixture/removed
 	if(anchored && !(stat&BROKEN) )
 		var/input_starting_pressure = air1.return_pressure()
@@ -50,14 +50,14 @@
 		update_icon()
 		return removed
 
-/obj/machinery/atmospherics/binary/circulator/process()
+/obj/machinery/networked/atmos/binary/circulator/process()
 	..()
 
 	if(last_worldtime_transfer < world.time - 50)
 		recent_moles_transferred = 0
 		update_icon()
 
-/obj/machinery/atmospherics/binary/circulator/update_icon()
+/obj/machinery/networked/atmos/binary/circulator/update_icon()
 	if(stat & (BROKEN|NOPOWER) || !anchored)
 		icon_state = "circ-p"
 	else if(last_pressure_delta > 0 && recent_moles_transferred > 0)
@@ -70,7 +70,7 @@
 
 	return 1
 
-/obj/machinery/atmospherics/binary/circulator/attackby(obj/item/weapon/W as obj, mob/user as mob)
+/obj/machinery/networked/atmos/binary/circulator/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	if(istype(W, /obj/item/weapon/wrench))
 		anchored = !anchored
 		user << "\blue You [anchored ? "secure" : "unsecure"] the bolts holding [src] to the floor."
@@ -103,7 +103,7 @@
 	else
 		..()
 
-/obj/machinery/atmospherics/binary/circulator/verb/rotate_clockwise()
+/obj/machinery/networked/atmos/binary/circulator/verb/rotate_clockwise()
 	set category = "Object"
 	set name = "Rotate Circulator (Clockwise)"
 	set src in view(1)
@@ -115,7 +115,7 @@
 	desc = initial(desc) + " Its outlet port is to the [dir2text(dir)]."
 
 
-/obj/machinery/atmospherics/binary/circulator/verb/rotate_anticlockwise()
+/obj/machinery/networked/atmos/binary/circulator/verb/rotate_anticlockwise()
 	set category = "Object"
 	set name = "Rotate Circulator (Counterclockwise)"
 	set src in view(1)

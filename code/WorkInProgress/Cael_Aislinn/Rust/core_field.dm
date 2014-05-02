@@ -17,7 +17,7 @@ Deuterium-tritium fusion: 4.5 x 10^7 K
 	var/size = 1			//diameter in tiles
 	var/volume_covered = 0	//atmospheric volume covered
 	//
-	var/obj/machinery/power/rust_core/owned_core
+	var/obj/machinery/networked/power/rust_core/owned_core
 	var/list/dormant_reactant_quantities = new
 	//luminosity = 1
 	layer = 3.1
@@ -43,7 +43,7 @@ Deuterium-tritium fusion: 4.5 x 10^7 K
 		radiator = new()
 
 	//make sure there's a field generator
-	for(var/obj/machinery/power/rust_core/core in loc)
+	for(var/obj/machinery/networked/power/rust_core/core in loc)
 		owned_core = core
 
 	if(!owned_core)

@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/unary/cold_sink
+/obj/machinery/networked/atmos/unary/cold_sink
 	icon = 'icons/obj/atmospherics/cold_sink.dmi'
 	icon_state = "on_cool"
 	density = 1

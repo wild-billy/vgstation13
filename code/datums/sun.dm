@@ -54,20 +54,20 @@
 		dy = c / abs(s)
 
 
-	for(var/obj/machinery/power/M in solars_list)
+	for(var/obj/machinery/networked/power/M in solars_list)
 
 		if(!M.powernet)
 			solars_list.Remove(M)
 			continue
 
 		// Solar Tracker
-		if(istype(M, /obj/machinery/power/tracker))
-			var/obj/machinery/power/tracker/T = M
+		if(istype(M, /obj/machinery/networked/power/tracker))
+			var/obj/machinery/networked/power/tracker/T = M
 			T.set_angle(angle)
 
 		// Solar Panel
-		else if(istype(M, /obj/machinery/power/solar))
-			var/obj/machinery/power/solar/S = M
+		else if(istype(M, /obj/machinery/networked/power/solar))
+			var/obj/machinery/networked/power/solar/S = M
 			if(S.control)
 				occlusion(S)
 
@@ -75,7 +75,7 @@
 
 // for a solar panel, trace towards sun to see if we're in shadow
 
-/datum/sun/proc/occlusion(var/obj/machinery/power/solar/S)
+/datum/sun/proc/occlusion(var/obj/machinery/networked/power/solar/S)
 
 	var/ax = S.x		// start at the solar panel
 	var/ay = S.y

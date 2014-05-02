@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/unary/heat_reservoir
+/obj/machinery/networked/atmos/unary/heat_reservoir
 //currently the same code as cold_sink but anticipating process() changes
 
 	icon = 'icons/obj/atmospherics/cold_sink.dmi'

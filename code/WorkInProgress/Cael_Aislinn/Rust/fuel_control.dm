@@ -38,7 +38,7 @@
 	stage_status["SCRAM"] = 0
 
 	spawn(0)
-		for(var/obj/machinery/power/rust_fuel_injector/Injector in world)
+		for(var/obj/machinery/networked/power/rust_fuel_injector/Injector in world)
 			if(Injector.stage in fuel_injectors)
 				var/list/targetlist = fuel_injectors[Injector.stage]
 				targetlist.Add(Injector)*/
@@ -88,7 +88,7 @@
 		<td></td>
 		</tr>"}
 	// END AUTOFIX
-	for(var/obj/machinery/power/rust_fuel_injector/I in connected_injectors)
+	for(var/obj/machinery/networked/power/rust_fuel_injector/I in connected_injectors)
 
 		// AUTOFIXED BY fix_string_idiocy.py
 		// C:\Users\Rob\Documents\Projects\vgstation13\code\WorkInProgress\Cael_Aislinn\Rust\fuel_control.dm:89: dat += "<tr>"
@@ -134,7 +134,7 @@
 
 	if( href_list["scan"] )
 		connected_injectors = list()
-		for(var/obj/machinery/power/rust_fuel_injector/I in range(scan_range, src))
+		for(var/obj/machinery/networked/power/rust_fuel_injector/I in range(scan_range, src))
 			if(check_injector_status(I))
 				connected_injectors.Add(I)
 
@@ -142,23 +142,23 @@
 		var/cur_stage = href_list["toggle_stage"]
 		if(active_stages.Find(cur_stage))
 			active_stages.Remove(cur_stage)
-			for(var/obj/machinery/power/rust_fuel_injector/I in connected_injectors)
+			for(var/obj/machinery/networked/power/rust_fuel_injector/I in connected_injectors)
 				if(I.id_tag == cur_stage && check_injector_status(I))
 					I.StopInjecting()
 		else
 			active_stages.Add(cur_stage)
-			for(var/obj/machinery/power/rust_fuel_injector/I in connected_injectors)
+			for(var/obj/machinery/networked/power/rust_fuel_injector/I in connected_injectors)
 				if(I.id_tag == cur_stage && check_injector_status(I))
 					I.BeginInjecting()
 
 	if( href_list["cooldown"] )
-		for(var/obj/machinery/power/rust_fuel_injector/I in connected_injectors)
+		for(var/obj/machinery/networked/power/rust_fuel_injector/I in connected_injectors)
 			if(check_injector_status(I))
 				I.StopInjecting()
 		active_stages = list()
 
 	if( href_list["warmup"] )
-		for(var/obj/machinery/power/rust_fuel_injector/I in connected_injectors)
+		for(var/obj/machinery/networked/power/rust_fuel_injector/I in connected_injectors)
 			if(check_injector_status(I))
 				I.BeginInjecting()
 			if(!active_stages.Find(I.id_tag))
@@ -194,7 +194,7 @@
 
 	updateDialog()
 
-/obj/machinery/computer/rust_fuel_control/proc/check_injector_status(var/obj/machinery/power/rust_fuel_injector/I)
+/obj/machinery/computer/rust_fuel_control/proc/check_injector_status(var/obj/machinery/networked/power/rust_fuel_injector/I)
 	if(!I)
 		return 0
 

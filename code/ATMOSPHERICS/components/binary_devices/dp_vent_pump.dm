@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/binary/dp_vent_pump
+/obj/machinery/networked/atmos/binary/dp_vent_pump
 	icon = 'icons/obj/atmospherics/dp_vent_pump.dmi'
 	icon_state = "off"
 

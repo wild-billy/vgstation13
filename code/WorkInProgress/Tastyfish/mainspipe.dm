@@ -22,7 +22,7 @@ obj/machinery/atmospherics/pipe/mains_component
 
 		else return 1
 
-	pipeline_expansion()
+	network_expansion()
 		return nodes
 
 	disconnect(obj/machinery/atmospherics/reference)
@@ -347,8 +347,8 @@ obj/machinery/atmospherics/mains_pipe/split
 		// bind them
 		spawn(5)
 			if(node3 && split_node)
-				var/datum/pipe_network/N1 = node3.return_network(src)
-				var/datum/pipe_network/N2 = split_node.return_network(split_node)
+				var/datum/network/atmos/N1 = node3.return_network(src)
+				var/datum/network/atmos/N2 = split_node.return_network(split_node)
 				if(N1 && N2)
 					N1.merge(N2)
 
@@ -458,18 +458,18 @@ obj/machinery/atmospherics/mains_pipe/split3
 		// bind them
 		spawn(5)
 			if(supply_node)
-				var/datum/pipe_network/N1 = supply_node.return_network(src)
-				var/datum/pipe_network/N2 = supply.return_network(supply)
+				var/datum/network/atmos/N1 = supply_node.return_network(src)
+				var/datum/network/atmos/N2 = supply.return_network(supply)
 				if(N1 && N2)
 					N1.merge(N2)
 			if(scrubbers_node)
-				var/datum/pipe_network/N1 = scrubbers_node.return_network(src)
-				var/datum/pipe_network/N2 = scrubbers.return_network(scrubbers)
+				var/datum/network/atmos/N1 = scrubbers_node.return_network(src)
+				var/datum/network/atmos/N2 = scrubbers.return_network(scrubbers)
 				if(N1 && N2)
 					N1.merge(N2)
 			if(aux_node)
-				var/datum/pipe_network/N1 = aux_node.return_network(src)
-				var/datum/pipe_network/N2 = aux.return_network(aux)
+				var/datum/network/atmos/N1 = aux_node.return_network(src)
+				var/datum/network/atmos/N2 = aux.return_network(aux)
 				if(N1 && N2)
 					N1.merge(N2)
 

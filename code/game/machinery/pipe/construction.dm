@@ -68,7 +68,7 @@ Buildable meters
 	w_class = 3
 	level = 2
 
-/obj/item/pipe/New(var/loc, var/pipe_type as num, var/dir as num, var/obj/machinery/atmospherics/make_from = null)
+/obj/item/pipe/New(var/loc, var/pipe_type as num, var/dir as num, var/obj/machinery/networked/atmos/make_from = null)
 	..()
 	if (make_from)
 		src.dir = make_from.dir
@@ -78,49 +78,49 @@ Buildable meters
 			is_bent = 0
 		else
 			is_bent = 1
-		if     (istype(make_from, /obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction))
+		if     (istype(make_from, /obj/machinery/networked/atmos/pipe/simple/heat_exchanging/junction))
 			src.pipe_type = PIPE_JUNCTION
-		else if(istype(make_from, /obj/machinery/atmospherics/pipe/simple/heat_exchanging))
+		else if(istype(make_from, /obj/machinery/networked/atmos/pipe/simple/heat_exchanging))
 			src.pipe_type = PIPE_HE_STRAIGHT + is_bent
-		else if(istype(make_from, /obj/machinery/atmospherics/pipe/simple/insulated))
+		else if(istype(make_from, /obj/machinery/networked/atmos/pipe/simple/insulated))
 			src.pipe_type = PIPE_INSULATED_STRAIGHT + is_bent
-		else if(istype(make_from, /obj/machinery/atmospherics/pipe/simple))
+		else if(istype(make_from, /obj/machinery/networked/atmos/pipe/simple))
 			src.pipe_type = PIPE_SIMPLE_STRAIGHT + is_bent
-		else if(istype(make_from, /obj/machinery/atmospherics/portables_connector))
+		else if(istype(make_from, /obj/machinery/networked/atmos/portables_connector))
 			src.pipe_type = PIPE_CONNECTOR
-		else if(istype(make_from, /obj/machinery/atmospherics/pipe/manifold))
+		else if(istype(make_from, /obj/machinery/networked/atmos/pipe/manifold))
 			src.pipe_type = PIPE_MANIFOLD
-		else if(istype(make_from, /obj/machinery/atmospherics/unary/vent_pump))
+		else if(istype(make_from, /obj/machinery/networked/atmos/unary/vent_pump))
 			src.pipe_type = PIPE_UVENT
-		else if(istype(make_from, /obj/machinery/atmospherics/valve/digital))
+		else if(istype(make_from, /obj/machinery/networked/atmos/valve/digital))
 			src.pipe_type = PIPE_DVALVE
-		else if(istype(make_from, /obj/machinery/atmospherics/valve))
+		else if(istype(make_from, /obj/machinery/networked/atmos/valve))
 			src.pipe_type = PIPE_MVALVE
-		else if(istype(make_from, /obj/machinery/atmospherics/binary/pump))
+		else if(istype(make_from, /obj/machinery/networked/atmos/binary/pump))
 			src.pipe_type = PIPE_PUMP
-		else if(istype(make_from, /obj/machinery/atmospherics/trinary/filter))
+		else if(istype(make_from, /obj/machinery/networked/atmos/trinary/filter))
 			src.pipe_type = PIPE_GAS_FILTER
-		else if(istype(make_from, /obj/machinery/atmospherics/trinary/mixer))
+		else if(istype(make_from, /obj/machinery/networked/atmos/trinary/mixer))
 			src.pipe_type = PIPE_GAS_MIXER
-		else if(istype(make_from, /obj/machinery/atmospherics/unary/vent_scrubber))
+		else if(istype(make_from, /obj/machinery/networked/atmos/unary/vent_scrubber))
 			src.pipe_type = PIPE_SCRUBBER
-		else if(istype(make_from, /obj/machinery/atmospherics/binary/passive_gate))
+		else if(istype(make_from, /obj/machinery/networked/atmos/binary/passive_gate))
 			src.pipe_type = PIPE_PASSIVE_GATE
-		else if(istype(make_from, /obj/machinery/atmospherics/binary/volume_pump))
+		else if(istype(make_from, /obj/machinery/networked/atmos/binary/volume_pump))
 			src.pipe_type = PIPE_VOLUME_PUMP
-		else if(istype(make_from, /obj/machinery/atmospherics/unary/heat_exchanger))
+		else if(istype(make_from, /obj/machinery/networked/atmos/unary/heat_exchanger))
 			src.pipe_type = PIPE_HEAT_EXCHANGE
-		else if(istype(make_from, /obj/machinery/atmospherics/tvalve))
+		else if(istype(make_from, /obj/machinery/networked/atmos/tvalve))
 			src.pipe_type = PIPE_MTVALVE
-		else if(istype(make_from, /obj/machinery/atmospherics/pipe/manifold4w))
+		else if(istype(make_from, /obj/machinery/networked/atmos/pipe/manifold4w))
 			src.pipe_type = PIPE_MANIFOLD4W
-		else if(istype(make_from, /obj/machinery/atmospherics/pipe/cap))
+		else if(istype(make_from, /obj/machinery/networked/atmos/pipe/cap))
 			src.pipe_type = PIPE_CAP
-		else if(istype(make_from, /obj/machinery/atmospherics/unary/thermal_plate))
+		else if(istype(make_from, /obj/machinery/networked/atmos/unary/thermal_plate))
 			src.pipe_type = PIPE_THERMAL_PLATE
-		else if(istype(make_from, /obj/machinery/atmospherics/unary/outlet_injector))
+		else if(istype(make_from, /obj/machinery/networked/atmos/unary/outlet_injector))
 			src.pipe_type = PIPE_INJECTOR
-		else if(istype(make_from, /obj/machinery/atmospherics/binary/dp_vent_pump))
+		else if(istype(make_from, /obj/machinery/networked/atmos/binary/dp_vent_pump))
 			src.pipe_type = PIPE_DP_VENT
 	else
 		src.pipe_type = pipe_type
@@ -314,79 +314,79 @@ var/global/list/pipeID2State = list(
 		dir = 2
 	var/pipe_dir = get_pipe_dir()
 
-	for(var/obj/machinery/atmospherics/M in src.loc)
+	for(var/obj/machinery/networked/atmos/M in src.loc)
 		if(M.initialize_directions & pipe_dir)	// matches at least one direction on either type of pipe
 			user << "\red There is already a pipe at that location."
 			return 1
 	// no conflicts found
 
-	var/obj/machinery/atmospherics/P
+	var/obj/machinery/networked/atmos/P
 	switch(pipe_type)
 		if(PIPE_SIMPLE_STRAIGHT, PIPE_SIMPLE_BENT)
-			P=new/obj/machinery/atmospherics/pipe/simple(loc)
+			P=new/obj/machinery/networked/atmos/pipe/simple(loc)
 
 		if(PIPE_HE_STRAIGHT, PIPE_HE_BENT)
-			P=new/obj/machinery/atmospherics/pipe/simple/heat_exchanging(loc)
+			P=new/obj/machinery/networked/atmos/pipe/simple/heat_exchanging(loc)
 
 		if(PIPE_CONNECTOR)		// connector
-			P=new/obj/machinery/atmospherics/portables_connector(loc)
+			P=new/obj/machinery/networked/atmos/portables_connector(loc)
 
 		if(PIPE_MANIFOLD)		//manifold
-			P=new /obj/machinery/atmospherics/pipe/manifold(loc)
+			P=new /obj/machinery/networked/atmos/pipe/manifold(loc)
 
 		if(PIPE_MANIFOLD4W)		//4-way manifold
-			P=new /obj/machinery/atmospherics/pipe/manifold4w(loc)
+			P=new /obj/machinery/networked/atmos/pipe/manifold4w(loc)
 
 		if(PIPE_JUNCTION)
-			P=new /obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction( src.loc )
+			P=new /obj/machinery/networked/atmos/pipe/simple/heat_exchanging/junction( src.loc )
 
 		if(PIPE_UVENT)		//unary vent
-			P=new /obj/machinery/atmospherics/unary/vent_pump( src.loc )
+			P=new /obj/machinery/networked/atmos/unary/vent_pump( src.loc )
 
 		if(PIPE_MVALVE)		//manual valve
-			P=new /obj/machinery/atmospherics/valve( src.loc )
+			P=new /obj/machinery/networked/atmos/valve( src.loc )
 
 		if(PIPE_DVALVE)		//digital valve
-			P=new /obj/machinery/atmospherics/valve/digital( src.loc )
+			P=new /obj/machinery/networked/atmos/valve/digital( src.loc )
 
 		if(PIPE_PUMP)		//gas pump
-			P=new /obj/machinery/atmospherics/binary/pump( src.loc )
+			P=new /obj/machinery/networked/atmos/binary/pump( src.loc )
 
 		if(PIPE_GAS_FILTER)		//gas filter
-			P=new /obj/machinery/atmospherics/trinary/filter( src.loc )
+			P=new /obj/machinery/networked/atmos/trinary/filter( src.loc )
 
 		if(PIPE_GAS_MIXER)		//gas mixer
-			P=new /obj/machinery/atmospherics/trinary/mixer( src.loc )
+			P=new /obj/machinery/networked/atmos/trinary/mixer( src.loc )
 
 		if(PIPE_SCRUBBER)		//scrubber
-			P=new /obj/machinery/atmospherics/unary/vent_scrubber( src.loc )
+			P=new /obj/machinery/networked/atmos/unary/vent_scrubber( src.loc )
 
 		if(PIPE_INSULATED_STRAIGHT, PIPE_INSULATED_BENT)
-			P=new /obj/machinery/atmospherics/pipe/simple/insulated( src.loc )
+			P=new /obj/machinery/networked/atmos/pipe/simple/insulated( src.loc )
 
 		if(PIPE_MTVALVE)		//manual t-valve
-			P=new /obj/machinery/atmospherics/tvalve(src.loc)
+			P=new /obj/machinery/networked/atmos/tvalve(src.loc)
 
 		if(PIPE_CAP)
-			P=new /obj/machinery/atmospherics/pipe/cap(src.loc)
+			P=new /obj/machinery/networked/atmos/pipe/cap(src.loc)
 
 		if(PIPE_PASSIVE_GATE)		//passive gate
-			P=new /obj/machinery/atmospherics/binary/passive_gate(src.loc)
+			P=new /obj/machinery/networked/atmos/binary/passive_gate(src.loc)
 
 		if(PIPE_VOLUME_PUMP)		//volume pump
-			P=new /obj/machinery/atmospherics/binary/volume_pump(src.loc)
+			P=new /obj/machinery/networked/atmos/binary/volume_pump(src.loc)
 
 		if(PIPE_HEAT_EXCHANGE)		// heat exchanger
-			P=new /obj/machinery/atmospherics/unary/heat_exchanger( src.loc )
+			P=new /obj/machinery/networked/atmos/unary/heat_exchanger( src.loc )
 
 		if(PIPE_THERMAL_PLATE)		//unary vent
-			P=new /obj/machinery/atmospherics/unary/thermal_plate( src.loc )
+			P=new /obj/machinery/networked/atmos/unary/thermal_plate( src.loc )
 
 		if(PIPE_INJECTOR)		//unary vent
-			P=new /obj/machinery/atmospherics/unary/outlet_injector( src.loc )
+			P=new /obj/machinery/networked/atmos/unary/outlet_injector( src.loc )
 
 		if(PIPE_DP_VENT)		//volume pump
-			P=new /obj/machinery/atmospherics/binary/dp_vent_pump(src.loc)
+			P=new /obj/machinery/networked/atmos/binary/dp_vent_pump(src.loc)
 
 	if(P.buildFrom(usr,src))
 		playsound(get_turf(src), 'sound/items/Ratchet.ogg', 50, 1)
@@ -418,7 +418,7 @@ var/global/list/pipeID2State = list(
 
 	if (!istype(W, /obj/item/weapon/wrench))
 		return ..()
-	if(!locate(/obj/machinery/atmospherics/pipe, src.loc))
+	if(!locate(/obj/machinery/networked/atmos/pipe, src.loc))
 		user << "\red You need to fasten it to a pipe"
 		return 1
 	new/obj/machinery/meter( src.loc )

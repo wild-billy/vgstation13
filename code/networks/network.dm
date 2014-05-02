@@ -1,7 +1,7 @@
 /**************************
 * High-level network object
 *
-* Code stolen from older /datum/pipeline, made generic
+* Code stolen from older /datum/physical_network/atmos, made generic
 */
 
 /datum/network
@@ -11,215 +11,73 @@
 	// Physical network
 	var/datum/physical_network/network
 
-	Del()
-		if(network)
-			del(network)
-		/*
-		if(air && air.volume)
-			temporarily_store_air()
-			del(air)
-		*/
-		..()
+/datum/network/Del()
+	if(network)
+		del(network)
+	..()
 
-	proc/process()//This use to be called called from the pipe networks
-		/*
-		//Check to see if pressure is within acceptable limits
-		var/pressure = air.return_pressure()
-		if(pressure > alert_pressure)
-			for(var/obj/machinery/atmospherics/pipe/member in members)
-				if(!member.check_pressure(pressure))
-					break //Only delete 1 pipe per process
+// API Crap
+/datum/network/proc/process()
+	return
 
-		//Allow for reactions
-		//air.react() //Should be handled by pipe_network now
-		*/
-	/*
-	proc/temporarily_store_air()
-		//Update individual gas_mixtures by volume ratio
+/datum/network/proc/OnPreBuild(var/obj/machinery/networked/base)
+	return
 
-		for(var/obj/machinery/atmospherics/pipe/member in members)
-			member.air_temporary = new
-			member.air_temporary.volume = member.volume
+/datum/network/proc/OnPostBuild(var/obj/machinery/networked/base)
+	return
 
-			member.air_temporary.oxygen = air.oxygen*member.volume/air.volume
-			member.air_temporary.nitrogen = air.nitrogen*member.volume/air.volume
-			member.air_temporary.toxins = air.toxins*member.volume/air.volume
-			member.air_temporary.carbon_dioxide = air.carbon_dioxide*member.volume/air.volume
+/datum/network/proc/OnBuildAddedMember(var/obj/machinery/networked/newmember)
+	return
 
-			member.air_temporary.temperature = air.temperature
+/datum/network/proc/build_network(var/obj/machinery/networked/base)
+	var/list/possible_expansions = list(base)
+	members = list(base)
+	edges = list()
 
-			if(air.trace_gases.len)
-				for(var/datum/gas/trace_gas in air.trace_gases)
-					var/datum/gas/corresponding = new trace_gas.type()
-					member.air_temporary.trace_gases += corresponding
+	base.network = src
+	OnPreBuild(base)
 
-					corresponding.moles = trace_gas.moles*member.volume/air.volume
-			member.air_temporary.update_values()
-	*/
-	proc/build_network(var/obj/machinery/networked/base)
-		//air = new
+	while(possible_expansions.len>0)
+		for(var/obj/machinery/networked/atmos/pipe/borderline in possible_expansions)
 
-		var/list/possible_expansions = list(base)
-		members = list(base)
-		edges = list()
+			var/list/result = borderline.network_expansion(src)
+			var/edge_check = result.len
 
-		//var/volume = base.volume
-		base.parent = src
-		/*
-		alert_pressure = base.alert_pressure
+			if(edge_check>0)
+				for(var/obj/machinery/networked/item in result)
+					if(!members.Find(item))
+						members += item
+						possible_expansions += item
+						OnBuildAddedMember(item)
+					edge_check--
 
-		if(base.air_temporary)
-			air = base.air_temporary
-			base.air_temporary = null
-		else
-			air = new
-		*/
-		while(possible_expansions.len>0)
-			for(var/obj/machinery/atmospherics/pipe/borderline in possible_expansions)
+			if(edge_check>0)
+				edges += borderline
 
-				var/list/result = borderline.network_expansion()
-				var/edge_check = result.len
+			possible_expansions -= borderline
+	OnPostBuild(base)
 
-				if(result.len>0)
-					for(var/obj/machinery/atmospherics/pipe/item in result)
-						if(!members.Find(item))
-							members += item
-							possible_expansions += item
+/datum/network/proc/network_expand(var/datum/network/new_network, var/obj/machinery/networked/reference)
+	if(new_network.line_members.Find(src))
+		return 0
 
-							//volume += item.volume
-							//item.parent = src
+	new_network.line_members += src
 
-							//alert_pressure = min(alert_pressure, item.alert_pressure)
+	network = new_network
 
-							//if(item.air_temporary)
-							//	air.merge(item.air_temporary)
+	for(var/obj/machinery/networked/edge in edges)
+		for(var/obj/machinery/networked/result in edge.network_expansion())
+			if(!istype(result) && (result!=reference))
+				result.network_expand(new_network, edge)
 
-						edge_check--
+	return 1
 
-				if(edge_check>0)
-					edges += borderline
+/datum/network/proc/return_network(var/obj/machinery/networked/reference)
+	if(!network)
+		network = new /datum/network/atmos()
+		network.build_network(src, null)
+			//technically passing these parameters should not be allowed
+			//however pipe_network.build_network(..) and pipeline.network_extend(...)
+			//		were setup to properly handle this case
 
-				possible_expansions -= borderline
-
-		//air.volume = volume
-
-	proc/network_expand(var/datum/network/new_network, var/obj/machinery/networked/reference)
-
-		if(new_network.line_members.Find(src))
-			return 0
-
-		new_network.line_members += src
-
-		network = new_network
-
-		for(var/obj/machinery/atmospherics/pipe/edge in edges)
-			for(var/obj/machinery/atmospherics/result in edge.pipeline_expansion())
-				if(!istype(result,/obj/machinery/atmospherics/pipe) && (result!=reference))
-					result.network_expand(new_network, edge)
-
-		return 1
-
-	proc/return_network(var/obj/machinery/networked/reference)
-		if(!network)
-			network = new /datum/pipe_network()
-			network.build_network(src, null)
-				//technically passing these parameters should not be allowed
-				//however pipe_network.build_network(..) and pipeline.network_extend(...)
-				//		were setup to properly handle this case
-
-		return network
-/*
-	proc/mingle_with_turf(var/turf/simulated/target, mingle_volume)
-		var/datum/gas_mixture/air_sample = air.remove_ratio(mingle_volume/air.volume)
-		air_sample.volume = mingle_volume
-
-		if(istype(target) && target.zone && !iscatwalk(target))
-			//Have to consider preservation of group statuses
-			var/datum/gas_mixture/turf_copy = new
-
-			turf_copy.copy_from(target.zone.air)
-			turf_copy.volume = target.zone.air.volume //Copy a good representation of the turf from parent group
-
-			equalize_gases(list(air_sample, turf_copy))
-			air.merge(air_sample)
-
-			turf_copy.subtract(target.zone.air)
-
-			target.zone.air.merge(turf_copy)
-
-		else
-			var/datum/gas_mixture/turf_air = target.return_air()
-
-			equalize_gases(list(air_sample, turf_air))
-			air.merge(air_sample)
-			//turf_air already modified by equalize_gases()
-
-		/*
-		if(istype(target) && !target.processing && !iscatwalk(target))
-			if(target.air)
-				if(target.air.check_tile_graphic())
-					target.update_visuals(target.air)
-		*/
-		if(network)
-			network.update = 1
-
-	proc/temperature_interact(turf/target, share_volume, thermal_conductivity)
-		var/total_heat_capacity = air.heat_capacity()
-		var/partial_heat_capacity = total_heat_capacity*(share_volume/air.volume)
-
-		if(istype(target, /turf/simulated))
-			var/turf/simulated/modeled_location = target
-
-			if(modeled_location.blocks_air)
-
-				if((modeled_location.heat_capacity>0) && (partial_heat_capacity>0))
-					var/delta_temperature = air.temperature - modeled_location.temperature
-
-					var/heat = thermal_conductivity*delta_temperature* \
-						(partial_heat_capacity*modeled_location.heat_capacity/(partial_heat_capacity+modeled_location.heat_capacity))
-
-					air.temperature -= heat/total_heat_capacity
-					modeled_location.temperature += heat/modeled_location.heat_capacity
-
-			else
-				var/delta_temperature = 0
-				var/sharer_heat_capacity = 0
-
-				if(modeled_location.zone)
-					delta_temperature = (air.temperature - modeled_location.zone.air.temperature)
-					sharer_heat_capacity = modeled_location.zone.air.heat_capacity()
-				else
-					delta_temperature = (air.temperature - modeled_location.air.temperature)
-					sharer_heat_capacity = modeled_location.air.heat_capacity()
-
-				var/self_temperature_delta = 0
-				var/sharer_temperature_delta = 0
-
-				if((sharer_heat_capacity>0) && (partial_heat_capacity>0))
-					var/heat = thermal_conductivity*delta_temperature* \
-						(partial_heat_capacity*sharer_heat_capacity/(partial_heat_capacity+sharer_heat_capacity))
-
-					self_temperature_delta = -heat/total_heat_capacity
-					sharer_temperature_delta = heat/sharer_heat_capacity
-				else
-					return 1
-
-				air.temperature += self_temperature_delta
-
-				if(modeled_location.zone)
-					modeled_location.zone.air.temperature += sharer_temperature_delta/modeled_location.zone.air.group_multiplier
-				else
-					modeled_location.air.temperature += sharer_temperature_delta
-
-
-		else
-			if((target.heat_capacity>0) && (partial_heat_capacity>0))
-				var/delta_temperature = air.temperature - target.temperature
-
-				var/heat = thermal_conductivity*delta_temperature* \
-					(partial_heat_capacity*target.heat_capacity/(partial_heat_capacity+target.heat_capacity))
-
-				air.temperature -= heat/total_heat_capacity
-		if(network)
-			network.update = 1
-*/
+	return network

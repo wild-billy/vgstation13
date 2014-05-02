@@ -322,7 +322,7 @@
 	proc/breathe()
 		if(reagents.has_reagent("lexorin")) return
 		if(M_NO_BREATH in mutations) return // No breath mutation means no breathing.
-		if(istype(loc, /obj/machinery/atmospherics/unary/cryo_cell)) return
+		if(istype(loc, /obj/machinery/networked/atmos/unary/cryo_cell)) return
 		if(species && species.flags & NO_BREATHE) return
 
 		var/datum/organ/internal/lungs/L = internal_organs["lungs"]
@@ -601,7 +601,7 @@
 		if(istype(loc, /obj/spacepod))
 			var/obj/spacepod/S = loc
 			loc_temp = S.return_temperature()
-		else if(istype(loc, /obj/machinery/atmospherics/unary/cryo_cell))
+		else if(istype(loc, /obj/machinery/networked/atmos/unary/cryo_cell))
 			loc_temp = loc:air_contents.temperature
 		else
 			loc_temp = environment.temperature
@@ -648,7 +648,7 @@
 		else if(bodytemperature < BODYTEMP_COLD_DAMAGE_LIMIT)
 			fire_alert = max(fire_alert, 1)
 			if(status_flags & GODMODE)	return 1	//godmode
-			if(!istype(loc, /obj/machinery/atmospherics/unary/cryo_cell))
+			if(!istype(loc, /obj/machinery/networked/atmos/unary/cryo_cell))
 				if(dna.mutantrace == "slime")
 					adjustToxLoss(round(BODYTEMP_HEAT_DAMAGE_LIMIT - bodytemperature))
 					fire_alert = max(fire_alert, 1)

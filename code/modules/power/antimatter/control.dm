@@ -1,4 +1,4 @@
-/obj/machinery/power/am_control_unit
+/obj/machinery/networked/power/am_control_unit
 	name = "antimatter control unit"
 	desc = "This device injects antimatter into connected shielding units, the more antimatter injected the more power produced.  Wrench the device to set it up."
 	//icon = 'icons/obj/machines/antimatter.dmi'
@@ -33,19 +33,19 @@
 	var/stored_power = 0//Power to deploy per tick
 
 
-/obj/machinery/power/am_control_unit/New()
+/obj/machinery/networked/power/am_control_unit/New()
 	..()
 	linked_shielding = list()
 	linked_cores = list()
 
 
-/obj/machinery/power/am_control_unit/Destroy()//Perhaps damage and run stability checks rather than just del on the others
+/obj/machinery/networked/power/am_control_unit/Destroy()//Perhaps damage and run stability checks rather than just del on the others
 	for(var/obj/machinery/am_shielding/AMS in linked_shielding)
 		del(AMS)
 	..()
 
 
-/obj/machinery/power/am_control_unit/process()
+/obj/machinery/networked/power/am_control_unit/process()
 	if(exploding && !exploded)
 		message_admins("AME explosion at ([x],[y],[z] - <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>) - Last touched by [fingerprintslast]",0,1)
 		exploded=1
@@ -77,7 +77,7 @@
 	return
 
 
-/obj/machinery/power/am_control_unit/proc/produce_power()
+/obj/machinery/networked/power/am_control_unit/proc/produce_power()
 	playsound(get_turf(src), 'sound/effects/bang.ogg', 25, 1)
 	var/core_power = reported_core_efficiency//Effectively how much fuel we can safely deal with
 	if(core_power <= 0) return 0//Something is wrong
@@ -98,7 +98,7 @@
 	return
 
 
-/obj/machinery/power/am_control_unit/emp_act(severity)
+/obj/machinery/networked/power/am_control_unit/emp_act(severity)
 	switch(severity)
 		if(1)
 			if(active)	toggle_power()
@@ -110,7 +110,7 @@
 	return 0
 
 
-/obj/machinery/power/am_control_unit/blob_act()
+/obj/machinery/networked/power/am_control_unit/blob_act()
 	stability -= 20
 	if(prob(100-stability))//Might infect the rest of the machine
 		for(var/obj/machinery/am_shielding/AMS in linked_shielding)
@@ -123,7 +123,7 @@
 	return
 
 
-/obj/machinery/power/am_control_unit/ex_act(severity)
+/obj/machinery/networked/power/am_control_unit/ex_act(severity)
 	switch(severity)
 		if(1.0)
 			stability -= 60
@@ -135,27 +135,27 @@
 	return
 
 
-/obj/machinery/power/am_control_unit/bullet_act(var/obj/item/projectile/Proj)
+/obj/machinery/networked/power/am_control_unit/bullet_act(var/obj/item/projectile/Proj)
 	if(Proj.flag != "bullet")
 		stability -= Proj.force
 	return 0
 
 
-/obj/machinery/power/am_control_unit/power_change()
+/obj/machinery/networked/power/am_control_unit/power_change()
 	..()
 	if(stat & NOPOWER && active)
 		toggle_power()
 	return
 
 
-/obj/machinery/power/am_control_unit/update_icon()
+/obj/machinery/networked/power/am_control_unit/update_icon()
 	if(active)
 		icon_state = "control_[icon_mod]"
 	else icon_state = "control"
 	//No other icons for it atm
 
 
-/obj/machinery/power/am_control_unit/attackby(obj/item/W, mob/user)
+/obj/machinery/networked/power/am_control_unit/attackby(obj/item/W, mob/user)
 	if(!istype(W) || !user) return
 	if(istype(W, /obj/item/weapon/wrench))
 		if(!anchored)
@@ -199,13 +199,13 @@
 	return
 
 
-/obj/machinery/power/am_control_unit/attack_hand(mob/user as mob)
+/obj/machinery/networked/power/am_control_unit/attack_hand(mob/user as mob)
 	if(anchored)
 		interact(user)
 	return
 
 
-/obj/machinery/power/am_control_unit/proc/add_shielding(var/obj/machinery/am_shielding/AMS, var/AMS_linking = 0)
+/obj/machinery/networked/power/am_control_unit/proc/add_shielding(var/obj/machinery/am_shielding/AMS, var/AMS_linking = 0)
 	if(!istype(AMS)) return 0
 	if(!anchored) return 0
 	if(!AMS_linking && !AMS.link_control(src)) return 0
@@ -214,7 +214,7 @@
 	return 1
 
 
-/obj/machinery/power/am_control_unit/proc/remove_shielding(var/obj/machinery/am_shielding/AMS)
+/obj/machinery/networked/power/am_control_unit/proc/remove_shielding(var/obj/machinery/am_shielding/AMS)
 	if(!istype(AMS)) return 0
 	linked_shielding.Remove(AMS)
 	update_shield_icons = 2
@@ -222,13 +222,13 @@
 	return 1
 
 
-/obj/machinery/power/am_control_unit/proc/check_stability()//TODO: make it break when low also might want to add a way to fix it like a part or such that can be replaced
+/obj/machinery/networked/power/am_control_unit/proc/check_stability()//TODO: make it break when low also might want to add a way to fix it like a part or such that can be replaced
 	if(stability <= 0)
 		del(src)
 	return
 
 
-/obj/machinery/power/am_control_unit/proc/toggle_power()
+/obj/machinery/networked/power/am_control_unit/proc/toggle_power()
 	active = !active
 	if(active)
 		use_power = 2
@@ -242,7 +242,7 @@
 	return
 
 
-/obj/machinery/power/am_control_unit/proc/check_shield_icons()//Forces icon_update for all shields
+/obj/machinery/networked/power/am_control_unit/proc/check_shield_icons()//Forces icon_update for all shields
 	if(shield_icon_delay) return
 	shield_icon_delay = 1
 	if(update_shield_icons == 2)//2 means to clear everything and rebuild
@@ -261,7 +261,7 @@
 	return
 
 
-/obj/machinery/power/am_control_unit/proc/check_core_stability()
+/obj/machinery/networked/power/am_control_unit/proc/check_core_stability()
 	//if(stored_core_stability_delay || linked_cores.len <= 0)	return
 	if(linked_cores.len <=0) return
 	//stored_core_stability_delay = 1
@@ -285,7 +285,7 @@
 	return
 
 
-/obj/machinery/power/am_control_unit/interact(mob/user)
+/obj/machinery/networked/power/am_control_unit/interact(mob/user)
 	if((get_dist(src, user) > 1) || (stat & (BROKEN|NOPOWER)))
 		if(!istype(user, /mob/living/silicon/ai))
 			user.unset_machine()
@@ -295,7 +295,7 @@
 
 
 
-/obj/machinery/power/am_control_unit/ui_interact(mob/user, ui_key = "main")
+/obj/machinery/networked/power/am_control_unit/ui_interact(mob/user, ui_key = "main")
 	if(!user)
 		return
 
@@ -334,7 +334,7 @@
 		return
 
 
-/obj/machinery/power/am_control_unit/Topic(href, href_list)
+/obj/machinery/networked/power/am_control_unit/Topic(href, href_list)
 	..()
 	//Ignore input if we are broken or guy is not touching us, AI can control from a ways away
 	if(stat & (BROKEN|NOPOWER) || (get_dist(src, usr) > 1 && !istype(usr, /mob/living/silicon/ai)))

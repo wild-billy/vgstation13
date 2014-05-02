@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/unary/cold_sink/freezer
+/obj/machinery/networked/atmos/unary/cold_sink/freezer
 	name = "Freezer"
 	icon = 'icons/obj/Cryogenic2.dmi'
 	icon_state = "freezer_0"
@@ -10,8 +10,8 @@
 	current_heat_capacity = 1000
 
 	var/list/rotate_verbs=list(
-		/obj/machinery/atmospherics/unary/cold_sink/freezer/verb/rotate,
-		/obj/machinery/atmospherics/unary/cold_sink/freezer/verb/rotate_ccw,
+		/obj/machinery/networked/atmos/unary/cold_sink/freezer/verb/rotate,
+		/obj/machinery/networked/atmos/unary/cold_sink/freezer/verb/rotate_ccw,
 	)
 
 	New()
@@ -169,7 +169,7 @@
 		src.updateUsrDialog()
 
 
-/obj/machinery/atmospherics/unary/cold_sink/freezer/verb/rotate()
+/obj/machinery/networked/atmos/unary/cold_sink/freezer/verb/rotate()
 	set name = "Rotate Clockwise"
 	set category = "Object"
 	set src in oview(1)
@@ -180,7 +180,7 @@
 	src.dir = turn(src.dir, 270)
 	return 1
 
-/obj/machinery/atmospherics/unary/cold_sink/freezer/verb/rotate_ccw()
+/obj/machinery/networked/atmos/unary/cold_sink/freezer/verb/rotate_ccw()
 	set name = "Rotate Counter Clockwise"
 	set category = "Object"
 	set src in oview(1)
@@ -192,7 +192,7 @@
 	return 1
 
 
-/obj/machinery/atmospherics/unary/heat_reservoir/heater
+/obj/machinery/networked/atmos/unary/heat_reservoir/heater
 	name = "Heater"
 	icon = 'icons/obj/Cryogenic2.dmi'
 	icon_state = "freezer_0"
@@ -204,8 +204,8 @@
 	current_heat_capacity = 1000
 
 	var/list/rotate_verbs=list(
-		/obj/machinery/atmospherics/unary/heat_reservoir/heater/verb/rotate,
-		/obj/machinery/atmospherics/unary/heat_reservoir/heater/verb/rotate_ccw,
+		/obj/machinery/networked/atmos/unary/heat_reservoir/heater/verb/rotate,
+		/obj/machinery/networked/atmos/unary/heat_reservoir/heater/verb/rotate_ccw,
 	)
 
 	New()
@@ -361,7 +361,7 @@
 
 
 
-/obj/machinery/atmospherics/unary/heat_reservoir/heater/verb/rotate()
+/obj/machinery/networked/atmos/unary/heat_reservoir/heater/verb/rotate()
 	set name = "Rotate Clockwise"
 	set category = "Object"
 	set src in oview(1)
@@ -372,7 +372,7 @@
 	src.dir = turn(src.dir, 270)
 	return 1
 
-/obj/machinery/atmospherics/unary/heat_reservoir/heater/verb/rotate_ccw()
+/obj/machinery/networked/atmos/unary/heat_reservoir/heater/verb/rotate_ccw()
 	set name = "Rotate Counter Clockwise"
 	set category = "Object"
 	set src in oview(1)

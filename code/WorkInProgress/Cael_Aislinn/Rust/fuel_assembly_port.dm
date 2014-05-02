@@ -46,7 +46,7 @@
 	if(cur_assembly)
 		var/turf/check_turf = get_step(get_turf(src), src.dir)
 		check_turf = get_step(check_turf, src.dir)
-		for(var/obj/machinery/power/rust_fuel_injector/I in check_turf)
+		for(var/obj/machinery/networked/power/rust_fuel_injector/I in check_turf)
 			if(I.stat & (BROKEN|NOPOWER))
 				break
 			if(I.cur_assembly)
@@ -74,7 +74,7 @@
 	if(!cur_assembly)
 		var/turf/check_turf = get_step(get_turf(src), src.dir)
 		check_turf = get_step(check_turf, src.dir)
-		for(var/obj/machinery/power/rust_fuel_injector/I in check_turf)
+		for(var/obj/machinery/networked/power/rust_fuel_injector/I in check_turf)
 			if(I.stat & (BROKEN|NOPOWER))
 				break
 			if(!I.cur_assembly)

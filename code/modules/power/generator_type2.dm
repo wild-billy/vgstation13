@@ -1,4 +1,4 @@
-/obj/machinery/power/generator/type2
+/obj/machinery/networked/power/generator/type2
 	name = "thermoelectric generator"
 	desc = "It's a high efficiency thermoelectric generator."
 	icon_state = "teg"
@@ -6,26 +6,26 @@
 	density = 1
 	use_power = 0
 
-	var/obj/machinery/atmospherics/unary/generator_input/input1
-	var/obj/machinery/atmospherics/unary/generator_input/input2
+	var/obj/machinery/networked/atmos/unary/generator_input/input1
+	var/obj/machinery/networked/atmos/unary/generator_input/input2
 
 	var/input1_dir=NORTH
 	var/input2_dir=SOUTH
 
 
-/obj/machinery/power/generator/type2/reconnect()
+/obj/machinery/networked/power/generator/type2/reconnect()
 	input1_dir = turn(dir, 90)
 	input2_dir = turn(dir, -90)
-	input1 = locate(/obj/machinery/atmospherics/unary/generator_input) in get_step(src,input1_dir)
-	input2 = locate(/obj/machinery/atmospherics/unary/generator_input) in get_step(src,input2_dir)
+	input1 = locate(/obj/machinery/networked/atmos/unary/generator_input) in get_step(src,input1_dir)
+	input2 = locate(/obj/machinery/networked/atmos/unary/generator_input) in get_step(src,input2_dir)
 	updateicon()
 
-/obj/machinery/power/generator/type2/operable()
+/obj/machinery/networked/power/generator/type2/operable()
 	return !(stat & (NOPOWER|BROKEN) || !anchored || !input1 || !input2)
 
 #define GENRATE 800		// generator output coefficient from Q
 
-/obj/machinery/power/generator/type2/process()
+/obj/machinery/networked/power/generator/type2/process()
 	if(!input1 || !input2 || !anchored || stat & (NOPOWER|BROKEN))
 		return
 
@@ -76,17 +76,17 @@
 	src.updateDialog()
 
 
-/obj/machinery/power/generator/type2/attack_ai(mob/user)
+/obj/machinery/networked/power/generator/type2/attack_ai(mob/user)
 	src.add_hiddenprint(user)
 	if(stat & (BROKEN|NOPOWER)) return
 	interact(user)
 
-/obj/machinery/power/generator/type2/attack_hand(mob/user)
+/obj/machinery/networked/power/generator/type2/attack_hand(mob/user)
 	add_fingerprint(user)
 	if(stat & (BROKEN|NOPOWER)) return
 	interact(user)
 
-/obj/machinery/power/generator/type2/proc/get_loop_state(var/loop_name,var/loop_dir,var/obj/machinery/atmospherics/unary/generator_input/loop)
+/obj/machinery/networked/power/generator/type2/proc/get_loop_state(var/loop_name,var/loop_dir,var/obj/machinery/networked/atmos/unary/generator_input/loop)
 	if(!loop)
 		return "<b>[loop_name] Loop</b> ([dir2text(loop_dir)], <span style=\"color:red;font-weight:bold;\">UNCONNECTED</span>)<br />"
 	else
@@ -96,7 +96,7 @@
 	<li><b>Pressure:</b> [round(loop.air_contents.return_pressure(), 0.1)] kPa</li>
 </ul>"}
 
-/obj/machinery/power/generator/type2/interact(mob/user)
+/obj/machinery/networked/power/generator/type2/interact(mob/user)
 	if ( (get_dist(src, user) > 1 ) && (!istype(user, /mob/living/silicon/ai)))
 		user.unset_machine()
 		user << browse(null, "window=teg")

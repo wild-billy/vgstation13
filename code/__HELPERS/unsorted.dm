@@ -1416,7 +1416,7 @@ proc/is_hot(obj/item/W as obj)
 Checks if that loc and dir has a item on the wall
 */
 var/list/WALLITEMS = list(
-	"/obj/machinery/power/apc", "/obj/machinery/alarm", "/obj/item/device/radio/intercom",
+	"/obj/machinery/networked/power/apc", "/obj/machinery/alarm", "/obj/item/device/radio/intercom",
 	"/obj/structure/extinguisher_cabinet", "/obj/structure/reagent_dispensers/peppertank",
 	"/obj/machinery/status_display", "/obj/machinery/requests_console", "/obj/machinery/light_switch", "/obj/effect/sign",
 	"/obj/machinery/newscaster", "/obj/machinery/firealarm", "/obj/structure/noticeboard", "/obj/machinery/door_control",

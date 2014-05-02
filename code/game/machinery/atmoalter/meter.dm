@@ -3,7 +3,7 @@
 	desc = "It measures something."
 	icon = 'icons/obj/meter.dmi'
 	icon_state = "meterX"
-	var/obj/machinery/atmospherics/pipe/target = null
+	var/obj/machinery/networked/atmos/pipe/target = null
 	anchored = 1.0
 	power_channel = ENVIRON
 	var/frequency = 0
@@ -14,12 +14,12 @@
 
 /obj/machinery/meter/New()
 	..()
-	src.target = locate(/obj/machinery/atmospherics/pipe) in loc
+	src.target = locate(/obj/machinery/networked/atmos/pipe) in loc
 	return 1
 
 /obj/machinery/meter/initialize()
 	if (!target)
-		src.target = locate(/obj/machinery/atmospherics/pipe) in loc
+		src.target = locate(/obj/machinery/networked/atmos/pipe) in loc
 
 /obj/machinery/meter/process()
 	if(!target)

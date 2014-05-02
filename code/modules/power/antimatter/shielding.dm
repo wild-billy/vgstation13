@@ -21,7 +21,7 @@ proc/cardinalrange(var/center)
 	idle_power_usage = 0
 	active_power_usage = 0
 
-	var/obj/machinery/power/am_control_unit/control_unit = null
+	var/obj/machinery/networked/power/am_control_unit/control_unit = null
 	var/processing = 0//To track if we are in the update list or not, we need to be when we are damaged and if we ever
 	var/stability = 100//If this gets low bad things tend to happen
 	var/efficiency = 1//How many cores this core counts for when doing power processing, plasma in the air and stability could affect this
@@ -54,7 +54,7 @@ proc/cardinalrange(var/center)
 
 	if(!control_unit)//No other guys nearby, look for a control unit
 		for(var/direction in cardinal)
-		for(var/obj/machinery/power/am_control_unit/AMC in cardinalrange(src))
+		for(var/obj/machinery/networked/power/am_control_unit/AMC in cardinalrange(src))
 			if(AMC.add_shielding(src))
 				break
 
@@ -138,7 +138,7 @@ proc/cardinalrange(var/center)
 
 			// Detect cores, shielding, and control boxen.
 			if(direction in cardinal)
-				if((istype(machine, /obj/machinery/am_shielding) && machine:control_unit == control_unit) || (istype(machine, /obj/machinery/power/am_control_unit) && machine == control_unit))
+				if((istype(machine, /obj/machinery/am_shielding) && machine:control_unit == control_unit) || (istype(machine, /obj/machinery/networked/power/am_control_unit) && machine == control_unit))
 					dirs |= direction
 
 	// If we're next to a core, set the prefix.
@@ -168,7 +168,7 @@ proc/cardinalrange(var/center)
 
 
 //Call this to link a detected shilding unit to the controller
-/obj/machinery/am_shielding/proc/link_control(var/obj/machinery/power/am_control_unit/AMC)
+/obj/machinery/am_shielding/proc/link_control(var/obj/machinery/networked/power/am_control_unit/AMC)
 	if(!istype(AMC))	return 0
 	if(control_unit && control_unit != AMC) return 0//Already have one
 	control_unit = AMC
@@ -183,7 +183,7 @@ proc/cardinalrange(var/center)
 		for(var/obj/machinery/machine in get_step(loc, direction))
 			if(!machine)
 				continue
-			if(istype(machine, /obj/machinery/am_shielding) || istype(machine, /obj/machinery/power/am_control_unit))
+			if(istype(machine, /obj/machinery/am_shielding) || istype(machine, /obj/machinery/networked/power/am_control_unit))
 				found_am_device=1
 				break
 		if(!found_am_device)

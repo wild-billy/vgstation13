@@ -7,7 +7,7 @@ var/list/solars_list = list()
 
 // This will choose whether to get the solar list from the powernet or the powernet nodes,
 // depending on the size of the nodes.
-/obj/machinery/power/proc/get_solars_powernet()
+/obj/machinery/networked/power/proc/get_solars_powernet()
 	if(!powernet)
 		return list()
 	if(solars_list.len < powernet.nodes)
@@ -15,7 +15,7 @@ var/list/solars_list = list()
 	else
 		return powernet.nodes
 
-/obj/machinery/power/solar
+/obj/machinery/networked/power/solar
 	name = "solar panel"
 	desc = "A solar electrical generator."
 	icon = 'icons/obj/power.dmi'
@@ -33,25 +33,25 @@ var/list/solars_list = list()
 	var/adir = SOUTH
 	var/ndir = SOUTH
 	var/turn_angle = 0
-	var/obj/machinery/power/solar_control/control = null
+	var/obj/machinery/networked/power/solar_control/control = null
 
-/obj/machinery/power/solar/New(var/turf/loc, var/obj/item/solar_assembly/S, var/process = 1)
+/obj/machinery/networked/power/solar/New(var/turf/loc, var/obj/item/solar_assembly/S, var/process = 1)
 	..(loc)
 	Make(S)
 	connect_to_network(process)
 
 
-/obj/machinery/power/solar/disconnect_from_network()
+/obj/machinery/networked/power/solar/disconnect_from_network()
 	..()
 	solars_list.Remove(src)
 
-/obj/machinery/power/solar/connect_to_network(var/process)
+/obj/machinery/networked/power/solar/connect_to_network(var/process)
 	..()
 	if(process)
 		solars_list.Add(src)
 
 
-/obj/machinery/power/solar/proc/Make(var/obj/item/solar_assembly/S)
+/obj/machinery/networked/power/solar/proc/Make(var/obj/item/solar_assembly/S)
 	if(!S)
 		S = new /obj/item/solar_assembly(src)
 		S.glass_type = /obj/item/stack/sheet/glass
@@ -61,7 +61,7 @@ var/list/solars_list = list()
 
 
 
-/obj/machinery/power/solar/attackby(obj/item/weapon/W, mob/user)
+/obj/machinery/networked/power/solar/attackby(obj/item/weapon/W, mob/user)
 
 	if(iscrowbar(W))
 		playsound(get_turf(src), 'sound/machines/click.ogg', 50, 1)
@@ -81,13 +81,13 @@ var/list/solars_list = list()
 	..()
 
 
-/obj/machinery/power/solar/blob_act()
+/obj/machinery/networked/power/solar/blob_act()
 	src.health--
 	src.healthcheck()
 	return
 
 
-/obj/machinery/power/solar/proc/healthcheck()
+/obj/machinery/networked/power/solar/proc/healthcheck()
 	if (src.health <= 0)
 		if(!(stat & BROKEN))
 			broken()
@@ -99,7 +99,7 @@ var/list/solars_list = list()
 	return
 
 
-/obj/machinery/power/solar/update_icon()
+/obj/machinery/networked/power/solar/update_icon()
 	..()
 	overlays.Cut()
 	if(stat & BROKEN)
@@ -110,7 +110,7 @@ var/list/solars_list = list()
 	return
 
 
-/obj/machinery/power/solar/proc/update_solar_exposure()
+/obj/machinery/networked/power/solar/proc/update_solar_exposure()
 	if(!sun)
 		return
 	if(obscured)
@@ -123,7 +123,7 @@ var/list/solars_list = list()
 	sunfrac = cos(p_angle) ** 2
 
 
-/obj/machinery/power/solar/process()//TODO: remove/add this from machines to save on processing as needed ~Carn PRIORITY
+/obj/machinery/networked/power/solar/process()//TODO: remove/add this from machines to save on processing as needed ~Carn PRIORITY
 	if(stat & BROKEN)	return
 	if(!control)	return
 
@@ -141,20 +141,20 @@ var/list/solars_list = list()
 			control.gen += sgen
 
 
-/obj/machinery/power/solar/proc/broken()
+/obj/machinery/networked/power/solar/proc/broken()
 	stat |= BROKEN
 	update_icon()
 	return
 
 
-/obj/machinery/power/solar/meteorhit()
+/obj/machinery/networked/power/solar/meteorhit()
 	if(stat & !BROKEN)
 		broken()
 	else
 		del(src)
 
 
-/obj/machinery/power/solar/ex_act(severity)
+/obj/machinery/networked/power/solar/ex_act(severity)
 	switch(severity)
 		if(1.0)
 			qdel(src)
@@ -174,16 +174,16 @@ var/list/solars_list = list()
 	return
 
 
-/obj/machinery/power/solar/blob_act()
+/obj/machinery/networked/power/solar/blob_act()
 	if(prob(75))
 		broken()
 		src.density = 0
 
 
-/obj/machinery/power/solar/fake/New(var/turf/loc, var/obj/item/solar_assembly/S)
+/obj/machinery/networked/power/solar/fake/New(var/turf/loc, var/obj/item/solar_assembly/S)
 	..(loc, S, 0)
 
-/obj/machinery/power/solar/fake/process()
+/obj/machinery/networked/power/solar/fake/process()
 	. = PROCESS_KILL
 	return
 
@@ -238,9 +238,9 @@ var/list/solars_list = list()
 				playsound(get_turf(src), 'sound/machines/click.ogg', 50, 1)
 				user.visible_message("<span class='notice'>[user] places the glass on the solar assembly.</span>")
 				if(tracker)
-					new /obj/machinery/power/tracker(get_turf(src), src)
+					new /obj/machinery/networked/power/tracker(get_turf(src), src)
 				else
-					new /obj/machinery/power/solar(get_turf(src), src)
+					new /obj/machinery/networked/power/solar(get_turf(src), src)
 			return 1
 
 	if(!tracker)
@@ -262,7 +262,7 @@ var/list/solars_list = list()
 // Solar Control Computer
 //
 
-/obj/machinery/power/solar_control
+/obj/machinery/networked/power/solar_control
 	name = "solar panel control"
 	desc = "A controller for solar panel arrays."
 	icon = 'icons/obj/computer.dmi'
@@ -283,27 +283,27 @@ var/list/solars_list = list()
 	var/nexttime = 0		// Next clock time that manual tracking will move the array
 
 
-/obj/machinery/power/solar_control/New()
+/obj/machinery/networked/power/solar_control/New()
 	..()
 	if(ticker)
 		initialize()
 	connect_to_network()
 
-/obj/machinery/power/solar_control/disconnect_from_network()
+/obj/machinery/networked/power/solar_control/disconnect_from_network()
 	..()
 	solars_list.Remove(src)
 
-/obj/machinery/power/solar_control/connect_to_network()
+/obj/machinery/networked/power/solar_control/connect_to_network()
 	..()
 	if(powernet)
 		solars_list.Add(src)
 
-/obj/machinery/power/solar_control/initialize()
+/obj/machinery/networked/power/solar_control/initialize()
 	..()
 	if(!powernet) return
 	set_panels(cdir)
 
-/obj/machinery/power/solar_control/update_icon()
+/obj/machinery/networked/power/solar_control/update_icon()
 	if(stat & BROKEN)
 		icon_state = "broken"
 		overlays.Cut()
@@ -319,20 +319,20 @@ var/list/solars_list = list()
 	return
 
 
-/obj/machinery/power/solar_control/attack_ai(mob/user)
+/obj/machinery/networked/power/solar_control/attack_ai(mob/user)
 	src.add_hiddenprint(user)
 	add_fingerprint(user)
 	if(stat & (BROKEN | NOPOWER)) return
 	interact(user)
 
 
-/obj/machinery/power/solar_control/attack_hand(mob/user)
+/obj/machinery/networked/power/solar_control/attack_hand(mob/user)
 	add_fingerprint(user)
 	if(stat & (BROKEN | NOPOWER)) return
 	interact(user)
 
 
-/obj/machinery/power/solar_control/attackby(I as obj, user as mob)
+/obj/machinery/networked/power/solar_control/attackby(I as obj, user as mob)
 	if(istype(I, /obj/item/weapon/screwdriver))
 		playsound(get_turf(src), 'sound/items/Screwdriver.ogg', 50, 1)
 		if(do_after(user, 20))
@@ -364,7 +364,7 @@ var/list/solars_list = list()
 	return
 
 
-/obj/machinery/power/solar_control/process()
+/obj/machinery/networked/power/solar_control/process()
 	lastgen = gen
 	gen = 0
 
@@ -384,7 +384,7 @@ var/list/solars_list = list()
 
 
 // called by solar tracker when sun position changes
-/obj/machinery/power/solar_control/proc/tracker_update(var/angle)
+/obj/machinery/networked/power/solar_control/proc/tracker_update(var/angle)
 	if(track != 2 || stat & (NOPOWER | BROKEN))
 		return
 	cdir = angle
@@ -393,7 +393,7 @@ var/list/solars_list = list()
 	src.updateDialog()
 
 
-/obj/machinery/power/solar_control/interact(mob/user)
+/obj/machinery/networked/power/solar_control/interact(mob/user)
 	if(stat & (BROKEN | NOPOWER)) return
 	if ( (get_dist(src, user) > 1 ))
 		if (!istype(user, /mob/living/silicon/ai))
@@ -441,7 +441,7 @@ Manual Tracking Direction:"}
 	return
 
 
-/obj/machinery/power/solar_control/Topic(href, href_list)
+/obj/machinery/networked/power/solar_control/Topic(href, href_list)
 	if(..())
 		usr << browse(null, "window=solcon")
 		usr.unset_machine()
@@ -472,7 +472,7 @@ Manual Tracking Direction:"}
 		if(powernet && (track == 2))
 			if(!solars_list.Find(src,1,0))
 				solars_list.Add(src)
-			for(var/obj/machinery/power/tracker/T in get_solars_powernet())
+			for(var/obj/machinery/networked/power/tracker/T in get_solars_powernet())
 				if(powernet.nodes[T])
 					cdir = T.sun_angle
 					break
@@ -486,9 +486,9 @@ Manual Tracking Direction:"}
 	return
 
 
-/obj/machinery/power/solar_control/proc/set_panels(var/cdir)
+/obj/machinery/networked/power/solar_control/proc/set_panels(var/cdir)
 	if(!powernet) return
-	for(var/obj/machinery/power/solar/S in get_solars_powernet())
+	for(var/obj/machinery/networked/power/solar/S in get_solars_powernet())
 		if(powernet.nodes[S])
 			if(get_dist(S, src) < SOLAR_MAX_DIST)
 				if(!S.control)
@@ -496,7 +496,7 @@ Manual Tracking Direction:"}
 				S.ndir = cdir
 
 
-/obj/machinery/power/solar_control/power_change()
+/obj/machinery/networked/power/solar_control/power_change()
 	if(powered())
 		stat &= ~NOPOWER
 		update_icon()
@@ -506,17 +506,17 @@ Manual Tracking Direction:"}
 			update_icon()
 
 
-/obj/machinery/power/solar_control/proc/broken()
+/obj/machinery/networked/power/solar_control/proc/broken()
 	stat |= BROKEN
 	update_icon()
 
 
-/obj/machinery/power/solar_control/meteorhit()
+/obj/machinery/networked/power/solar_control/meteorhit()
 	broken()
 	return
 
 
-/obj/machinery/power/solar_control/ex_act(severity)
+/obj/machinery/networked/power/solar_control/ex_act(severity)
 	switch(severity)
 		if(1.0)
 			//SN src = null
@@ -531,7 +531,7 @@ Manual Tracking Direction:"}
 	return
 
 
-/obj/machinery/power/solar_control/blob_act()
+/obj/machinery/networked/power/solar_control/blob_act()
 	if (prob(75))
 		broken()
 		src.density = 0

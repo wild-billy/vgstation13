@@ -1,4 +1,4 @@
-obj/machinery/atmospherics/trinary/filter
+/obj/machinery/networked/atmos/trinary/filter
 	icon = 'icons/obj/atmospherics/filter.dmi'
 	icon_state = "intact_off"
 	density = 1
@@ -160,7 +160,7 @@ Filter types:
 			del(src)
 
 
-obj/machinery/atmospherics/trinary/filter/attack_hand(user as mob) // -- TLE
+obj/machinery/networked/atmos/trinary/filter/attack_hand(user as mob) // -- TLE
 	if(..())
 		return
 
@@ -213,7 +213,7 @@ obj/machinery/atmospherics/trinary/filter/attack_hand(user as mob) // -- TLE
 	onclose(user, "atmo_filter")
 	return
 
-obj/machinery/atmospherics/trinary/filter/Topic(href, href_list) // -- TLE
+obj/machinery/networked/atmos/trinary/filter/Topic(href, href_list) // -- TLE
 	if(..())
 		return
 	usr.set_machine(src)

@@ -1,5 +1,4 @@
-
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging
 	icon = 'icons/obj/pipes/heat.dmi'
 	icon_state = "intact"
 	level = 2
@@ -9,16 +8,16 @@
 	thermal_conductivity = OPEN_HEAT_TRANSFER_COEFFICIENT
 
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/getNodeType(var/node_id)
-	return PIPE_TYPE_HE
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/getNodeType(var/node_id)
+	return NETTYPE_ATMOS_HE
 
 	// BubbleWrap
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/New()
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/New()
 	..()
 	initialize_directions_he = initialize_directions	// The auto-detection from /pipe is good enough for a simple HE pipe
 	// BubbleWrap END
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
 	dir = pipe.dir
 	initialize_directions = 0
 	initialize_directions_he = pipe.get_pipe_dir()
@@ -36,7 +35,7 @@
 		node2.build_network()
 	return 1
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/initialize(var/suppress_icon_check=0)
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/initialize(var/suppress_icon_check=0)
 	normalize_dir()
 
 	findAllConnections(initialize_directions_he)
@@ -45,8 +44,8 @@
 		update_icon()
 	return node1 || node2
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/process()
-	if(!parent)
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/process()
+	if(!network)
 		..()
 	else
 		var/environment_temperature = 0
@@ -60,16 +59,16 @@
 			environment_temperature = loc:temperature
 		var/datum/gas_mixture/pipe_air = return_air()
 		if(abs(environment_temperature-pipe_air.temperature) > minimum_temperature_difference)
-			parent.temperature_interact(loc, volume, thermal_conductivity)
+			network.temperature_interact(loc, volume, thermal_conductivity)
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/hidden
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/hidden
 	level=1
 	icon_state="intact-f"
 
 /////////////////////////////////
 // JUNCTION
 /////////////////////////////////
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/junction
 	icon = 'icons/obj/pipes/junction.dmi'
 	icon_state = "intact"
 	level = 2
@@ -77,7 +76,7 @@
 	thermal_conductivity = WALL_HEAT_TRANSFER_COEFFICIENT
 
 	// BubbleWrap
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction/New()
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/junction/New()
 	.. ()
 	switch ( dir )
 		if ( SOUTH )
@@ -94,7 +93,7 @@
 			initialize_directions_he = WEST
 	// BubbleWrap END
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/junction/buildFrom(var/mob/usr,var/obj/item/pipe/pipe)
 	dir = pipe.dir
 	initialize_directions = pipe.get_pdir()
 	initialize_directions_he = pipe.get_hdir()
@@ -110,7 +109,7 @@
 		node2.build_network()
 	return 1
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction/update_icon()
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/junction/update_icon()
 	if(node1&&node2)
 		icon_state = "intact[invisibility ? "-f" : "" ]"
 	else
@@ -121,15 +120,15 @@
 	if(!node1&&!node2)
 		qdel(src)
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction/initialize(var/suppress_icon_check=0)
-	node1 = findConnecting(initialize_directions)
-	node2 = findConnectingHE(initialize_directions_he)
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/junction/initialize(var/suppress_icon_check=0)
+	node1 = findConnectingPipe(initialize_directions)
+	node2 = findConnectingPipeHE(initialize_directions_he)
 
 	if(!suppress_icon_check)
 		update_icon()
 
 	return node1 || node2
 
-/obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction/hidden
+/obj/machinery/networked/atmos/pipe/simple/heat_exchanging/junction/hidden
 	level=1
 	icon_state="intact-f"

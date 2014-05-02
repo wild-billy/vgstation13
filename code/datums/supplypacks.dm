@@ -490,8 +490,8 @@ var/list/all_supply_groups = list("Supplies","Clothing","Security","Hospitality"
 
 /datum/supply_packs/engine
 	name = "Emitter crate"
-	contains = list(/obj/machinery/power/emitter,
-					/obj/machinery/power/emitter)
+	contains = list(/obj/machinery/networked/power/emitter,
+					/obj/machinery/networked/power/emitter)
 	cost = 10
 	containertype = /obj/structure/closet/crate/secure/engisec
 	containername = "Emitter crate"
@@ -517,9 +517,9 @@ var/list/all_supply_groups = list("Supplies","Clothing","Security","Hospitality"
 
 /datum/supply_packs/engine/collector
 	name = "Collector crate"
-	contains = list(/obj/machinery/power/rad_collector,
-					/obj/machinery/power/rad_collector,
-					/obj/machinery/power/rad_collector)
+	contains = list(/obj/machinery/networked/power/rad_collector,
+					/obj/machinery/networked/power/rad_collector,
+					/obj/machinery/networked/power/rad_collector)
 	containername = "Collector crate"
 	group = "Engineering"
 
@@ -878,7 +878,7 @@ var/list/all_supply_groups = list("Supplies","Clothing","Security","Hospitality"
 
 /datum/supply_packs/engine/amrcontrol
 	name = "Antimatter control unit crate"
-	contains = list(/obj/machinery/power/am_control_unit)
+	contains = list(/obj/machinery/networked/power/am_control_unit)
 	cost = 30
 	containertype = /obj/structure/closet/crate/secure/engisec
 	containername = "Antimatter Control Unit crate"
@@ -976,7 +976,7 @@ var/list/all_supply_groups = list("Supplies","Clothing","Security","Hospitality"
 	group = "Clothing"
 
 /datum/supply_packs/rust_injector
-	contains = list(/obj/machinery/power/rust_fuel_injector)
+	contains = list(/obj/machinery/networked/power/rust_fuel_injector)
 	name = "RUST fuel injector"
 	cost = 25
 	containertype = /obj/structure/closet/crate/secure/large
@@ -1003,7 +1003,7 @@ var/list/all_supply_groups = list("Supplies","Clothing","Security","Hospitality"
 	access = access_engine
 
 /datum/supply_packs/rust_core
-	contains = list(/obj/machinery/power/rust_core)
+	contains = list(/obj/machinery/networked/power/rust_core)
 	name = "RUST Tokamak Core"
 	cost = 50
 	containertype = /obj/structure/closet/crate/secure/large
@@ -1038,7 +1038,7 @@ var/list/all_supply_groups = list("Supplies","Clothing","Security","Hospitality"
 	group = "Supplies"
 
 /datum/supply_packs/teg
-	contains = list(/obj/machinery/power/generator)
+	contains = list(/obj/machinery/networked/power/generator)
 	name = "Mark I Thermoelectric Generator"
 	cost = 75
 	containertype = /obj/structure/closet/crate/secure/large
@@ -1047,7 +1047,7 @@ var/list/all_supply_groups = list("Supplies","Clothing","Security","Hospitality"
 	access = access_engine
 
 /datum/supply_packs/circulator
-	contains = list(/obj/machinery/atmospherics/binary/circulator)
+	contains = list(/obj/machinery/networked/atmos/binary/circulator)
 	name = "Binary atmospheric circulator"
 	cost = 60
 	containertype = /obj/structure/closet/crate/secure/large
@@ -1118,7 +1118,7 @@ var/list/all_supply_groups = list("Supplies","Clothing","Security","Hospitality"
 	group = "Science"
 
 /datum/supply_packs/supermatter_shard
-	contains = list(/obj/machinery/power/supermatter/shard)
+	contains = list(/obj/machinery/networked/power/supermatter/shard)
 	name = "Supermatter Shard"
 	cost = 100 //So cargo thinks twice before killing themselves with it
 	containertype = /obj/structure/closet/crate/secure/engisec

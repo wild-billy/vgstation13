@@ -104,17 +104,17 @@ datum/controller/game_controller/proc/setup_objects()
 
 	world << "\red \b Initializing pipe networks"
 	sleep(-1)
-	for(var/obj/machinery/atmospherics/machine in machines)
+	for(var/obj/machinery/networked/atmos/machine in machines)
 		machine.build_network()
 
 	world << "\red \b Initializing atmos machinery."
 	sleep(-1)
-	for(var/obj/machinery/atmospherics/unary/U in machines)
-		if(istype(U, /obj/machinery/atmospherics/unary/vent_pump))
-			var/obj/machinery/atmospherics/unary/vent_pump/T = U
+	for(var/obj/machinery/networked/atmos/unary/U in machines)
+		if(istype(U, /obj/machinery/networked/atmos/unary/vent_pump))
+			var/obj/machinery/networked/atmos/unary/vent_pump/T = U
 			T.broadcast_status()
-		else if(istype(U, /obj/machinery/atmospherics/unary/vent_scrubber))
-			var/obj/machinery/atmospherics/unary/vent_scrubber/T = U
+		else if(istype(U, /obj/machinery/networked/atmos/unary/vent_scrubber))
+			var/obj/machinery/networked/atmos/unary/vent_scrubber/T = U
 			T.broadcast_status()
 
 	world << "\red \b Initializations complete."
@@ -299,9 +299,9 @@ datum/controller/game_controller/proc/processMobs()
 		processing_objects -= Object
 
 /datum/controller/game_controller/proc/processPipenets()
-	last_thing_processed = /datum/pipe_network
+	last_thing_processed = /datum/network/atmos
 
-	for (var/datum/pipe_network/Pipe_Network in pipe_networks)
+	for (var/datum/network/atmos/Pipe_Network in pipe_networks)
 		if(Pipe_Network)
 			Pipe_Network.process()
 			continue

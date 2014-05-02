@@ -1,6 +1,6 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:33
 
-/obj/machinery/power/emitter
+/obj/machinery/networked/power/emitter
 	name = "Emitter"
 	desc = "A heavy duty industrial laser"
 	icon = 'icons/obj/singularity.dmi'
@@ -22,7 +22,7 @@
 	var/locked = 0
 
 
-/obj/machinery/power/emitter/verb/rotate()
+/obj/machinery/networked/power/emitter/verb/rotate()
 	set name = "Rotate"
 	set category = "Object"
 	set src in oview(1)
@@ -33,26 +33,26 @@
 	src.dir = turn(src.dir, 90)
 	return 1
 
-/obj/machinery/power/emitter/initialize()
+/obj/machinery/networked/power/emitter/initialize()
 	..()
 	if(state == 2 && anchored)
 		connect_to_network()
 		src.directwired = 1
 
-/obj/machinery/power/emitter/Destroy()
+/obj/machinery/networked/power/emitter/Destroy()
 	message_admins("Emitter deleted at ([x],[y],[z] - <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>)",0,1)
 	log_game("Emitter deleted at ([x],[y],[z])")
 	investigate_log("<font color='red'>deleted</font> at ([x],[y],[z])","singulo")
 	..()
 
-/obj/machinery/power/emitter/update_icon()
+/obj/machinery/networked/power/emitter/update_icon()
 	if (active && powernet && avail(active_power_usage))
 		icon_state = "emitter_+a"
 	else
 		icon_state = "emitter"
 
 
-/obj/machinery/power/emitter/attack_hand(mob/user as mob)
+/obj/machinery/networked/power/emitter/attack_hand(mob/user as mob)
 	// Require consciousness
 	if(user.stat && !isAdminGhost(user))
 		return
@@ -84,7 +84,7 @@
 		return 1
 
 
-/obj/machinery/power/emitter/emp_act(var/severity)//Emitters are hardened but still might have issues
+/obj/machinery/networked/power/emitter/emp_act(var/severity)//Emitters are hardened but still might have issues
 //	add_load(1000)
 /*	if((severity == 1)&&prob(1)&&prob(1))
 		if(src.active)
@@ -95,7 +95,7 @@
 /obj/machinery/containment_field/meteorhit()
 	return 0
 
-/obj/machinery/power/emitter/process()
+/obj/machinery/networked/power/emitter/process()
 	if(stat & (BROKEN))
 		return
 	if(src.state != 2 || (!powernet && active_power_usage))
@@ -147,7 +147,7 @@
 		A.process()	//TODO: Carn: check this out
 
 
-/obj/machinery/power/emitter/attackby(obj/item/W, mob/user)
+/obj/machinery/networked/power/emitter/attackby(obj/item/W, mob/user)
 
 	if(istype(W, /obj/item/weapon/wrench))
 		if(active)

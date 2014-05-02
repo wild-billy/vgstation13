@@ -246,7 +246,7 @@ to destroy them and players will be able to make replacements.
 
 /obj/item/weapon/circuitboard/pacman
 	name = "Circuit Board (PACMAN-type Generator)"
-	build_path = "/obj/machinery/power/port_gen/pacman"
+	build_path = "/obj/machinery/networked/power/port_gen/pacman"
 	board_type = "machine"
 	origin_tech = "programming=3;powerstorage=3;plasmatech=3;engineering=3"
 	frame_desc = "Requires 1 Matter Bin, 1 Micro-Laser, and 1 Capacitor."
@@ -257,12 +257,12 @@ to destroy them and players will be able to make replacements.
 
 /obj/item/weapon/circuitboard/pacman/super
 	name = "Circuit Board (SUPERPACMAN-type Generator)"
-	build_path = "/obj/machinery/power/port_gen/pacman/super"
+	build_path = "/obj/machinery/networked/power/port_gen/pacman/super"
 	origin_tech = "programming=3;powerstorage=4;engineering=4"
 
 /obj/item/weapon/circuitboard/pacman/mrs
 	name = "Circuit Board (MRSPACMAN-type Generator)"
-	build_path = "/obj/machinery/power/port_gen/pacman/mrs"
+	build_path = "/obj/machinery/networked/power/port_gen/pacman/mrs"
 	origin_tech = "programming=3;powerstorage=5;engineering=5"
 
 /obj/item/weapon/circuitboard/air_alarm
@@ -322,7 +322,7 @@ obj/item/weapon/circuitboard/rdserver
 
 /obj/item/weapon/circuitboard/smes
 	name = "Circuit Board (SMES)"
-	build_path = "/obj/machinery/power/smes"
+	build_path = "/obj/machinery/networked/power/smes"
 	board_type = "machine"
 	origin_tech = "powerstorage=4;engineering=4;programming=4"
 	frame_desc = "Requires 4 matter bins, 3 manipulators, 3 micro-lasers, and 2 console screens."
@@ -392,7 +392,7 @@ obj/item/weapon/circuitboard/rdserver
 
 /obj/item/weapon/circuitboard/heater
 	name = "Circuit Board (Heater)"
-	build_path = "/obj/machinery/atmospherics/unary/heat_reservoir/heater"
+	build_path = "/obj/machinery/networked/atmos/unary/heat_reservoir/heater"
 	board_type = "machine"
 	origin_tech = "powerstorage=3;engineering=5;biotech=4"
 	frame_desc = "Requires 3 manipulators, 2 scanning modules, 1 micro-laser, and 1 console screen."
@@ -404,7 +404,7 @@ obj/item/weapon/circuitboard/rdserver
 
 /obj/item/weapon/circuitboard/freezer
 	name = "Circuit Board (Freezer)"
-	build_path = "/obj/machinery/atmospherics/unary/cold_sink/freezer"
+	build_path = "/obj/machinery/networked/atmos/unary/cold_sink/freezer"
 	board_type = "machine"
 	origin_tech = "powerstorage=3;engineering=4;biotech=4"
 	frame_desc = "Requires 3 manipulators, 2 scanning modules, 1 micro-laser, and 1 console screen."
@@ -428,7 +428,7 @@ obj/item/weapon/circuitboard/rdserver
 
 /obj/item/weapon/circuitboard/cryo
 	name = "Circuit Board (Cryo)"
-	build_path = "/obj/machinery/atmospherics/unary/cryo_cell"
+	build_path = "/obj/machinery/networked/atmos/unary/cryo_cell"
 	board_type = "machine"
 	origin_tech = "programming=3;biotech=3;engineering=2"
 	frame_desc = "Requires 3 Manipulators, 2 Scanning Modules, and 1 Console Screen."

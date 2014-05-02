@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/unary/cryo_cell
+/obj/machinery/networked/atmos/unary/cryo_cell
 	name = "cryo cell"
 	icon = 'icons/obj/cryogenics.dmi'
 	icon_state = "cell-off"
@@ -14,7 +14,7 @@
 
 	var/current_heat_capacity = 50
 
-/obj/machinery/atmospherics/unary/cryo_cell/New()
+/obj/machinery/networked/atmos/unary/cryo_cell/New()
 	..()
 	component_parts = list()
 	component_parts += new /obj/item/weapon/circuitboard/cryo
@@ -28,14 +28,14 @@
 
 	initialize_directions = dir
 
-/obj/machinery/atmospherics/unary/cryo_cell/Destroy()
+/obj/machinery/networked/atmos/unary/cryo_cell/Destroy()
 	go_out()
 	var/obj/item/weapon/reagent_containers/glass/B = beaker
 	if(beaker)
 		B.loc = get_step(loc, SOUTH) //Beaker is carefully ejected from the wreckage of the cryotube
 	..()
 
-/obj/machinery/atmospherics/unary/cryo_cell/MouseDrop_T(atom/movable/O as mob|obj, mob/user as mob)
+/obj/machinery/networked/atmos/unary/cryo_cell/MouseDrop_T(atom/movable/O as mob|obj, mob/user as mob)
 	if(O.loc == user) //no you can't pull things out of your ass
 		return
 	if(user.restrained() || user.stat || user.weakened || user.stunned || user.paralysis || user.resting) //are you cuffed, dying, lying, stunned or other
@@ -75,7 +75,7 @@
 		else
 			visible_message("[user] puts [L.name] into the cryo cell.", 3)
 
-/obj/machinery/atmospherics/unary/cryo_cell/process()
+/obj/machinery/networked/atmos/unary/cryo_cell/process()
 	..()
 	if(!node)
 		return
@@ -99,17 +99,17 @@
 	return 1
 
 
-/obj/machinery/atmospherics/unary/cryo_cell/allow_drop()
+/obj/machinery/networked/atmos/unary/cryo_cell/allow_drop()
 	return 0
 
 
-/obj/machinery/atmospherics/unary/cryo_cell/relaymove(mob/user as mob)
+/obj/machinery/networked/atmos/unary/cryo_cell/relaymove(mob/user as mob)
 	if(user.stat)
 		return
 	go_out()
 	return
 
-/obj/machinery/atmospherics/unary/cryo_cell/examine()
+/obj/machinery/networked/atmos/unary/cryo_cell/examine()
 	..()
 
 	if(in_range(usr, src))
@@ -123,7 +123,7 @@
 	else
 		usr << "<span class='notice'>Too far away to view contents.</span>"
 
-/obj/machinery/atmospherics/unary/cryo_cell/attack_hand(mob/user)
+/obj/machinery/networked/atmos/unary/cryo_cell/attack_hand(mob/user)
 	ui_interact(user)
 
  /**
@@ -137,7 +137,7 @@
   *
   * @return nothing
   */
-/obj/machinery/atmospherics/unary/cryo_cell/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null)
+/obj/machinery/networked/atmos/unary/cryo_cell/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null)
 
 	if(user == occupant || (user.stat && !isobserver(user)))
 		return
@@ -197,7 +197,7 @@
 		// auto update every Master Controller tick
 		ui.set_auto_update(1)
 
-/obj/machinery/atmospherics/unary/cryo_cell/Topic(href, href_list)
+/obj/machinery/networked/atmos/unary/cryo_cell/Topic(href, href_list)
 	if(usr == occupant)
 		return 0 // don't update UIs attached to this object
 
@@ -225,7 +225,7 @@
 	add_fingerprint(usr)
 	return 1 // update UIs attached to this object
 
-/obj/machinery/atmospherics/unary/cryo_cell/attackby(var/obj/item/weapon/G as obj, var/mob/user as mob)
+/obj/machinery/networked/atmos/unary/cryo_cell/attackby(var/obj/item/weapon/G as obj, var/mob/user as mob)
 	if(istype(G, /obj/item/weapon/reagent_containers/glass))
 		if(beaker)
 			user << "\red A beaker is already loaded into the machine."
@@ -284,7 +284,7 @@
 	updateUsrDialog()
 	return
 
-/obj/machinery/atmospherics/unary/cryo_cell/update_icon()
+/obj/machinery/networked/atmos/unary/cryo_cell/update_icon()
 	if(on)
 		if(occupant)
 			icon_state = "cell-occupied"
@@ -293,7 +293,7 @@
 		return
 	icon_state = "cell-off"
 
-/obj/machinery/atmospherics/unary/cryo_cell/proc/process_occupant()
+/obj/machinery/networked/atmos/unary/cryo_cell/proc/process_occupant()
 	if(air_contents.total_moles() < 10)
 		return
 	if(occupant)
@@ -323,7 +323,7 @@
 			beaker.reagents.trans_to(occupant, 1, 1)
 			beaker.reagents.reaction(occupant)
 
-/obj/machinery/atmospherics/unary/cryo_cell/proc/heat_gas_contents()
+/obj/machinery/networked/atmos/unary/cryo_cell/proc/heat_gas_contents()
 	if(air_contents.total_moles() < 1)
 		return
 	var/air_heat_capacity = air_contents.heat_capacity()
@@ -332,7 +332,7 @@
 		var/combined_energy = T20C*current_heat_capacity + air_heat_capacity*air_contents.temperature
 		air_contents.temperature = combined_energy/combined_heat_capacity
 
-/obj/machinery/atmospherics/unary/cryo_cell/proc/expel_gas()
+/obj/machinery/networked/atmos/unary/cryo_cell/proc/expel_gas()
 	if(air_contents.total_moles() < 1)
 		return
 //	var/datum/gas_mixture/expel_gas = new
@@ -343,7 +343,7 @@
 	//expel_gas.temperature = T20C // Lets expel hot gas and see if that helps people not die as they are removed
 	//loc.assume_air(expel_gas)
 
-/obj/machinery/atmospherics/unary/cryo_cell/proc/go_out()
+/obj/machinery/networked/atmos/unary/cryo_cell/proc/go_out()
 	if(!( occupant ))
 		return
 	//for(var/obj/O in src)
@@ -358,7 +358,7 @@
 	occupant = null
 	update_icon()
 	return
-/obj/machinery/atmospherics/unary/cryo_cell/proc/put_mob(mob/living/carbon/M as mob)
+/obj/machinery/networked/atmos/unary/cryo_cell/proc/put_mob(mob/living/carbon/M as mob)
 	if (!istype(M))
 		usr << "\red <B>The cryo cell cannot handle such a lifeform!</B>"
 		return
@@ -385,7 +385,7 @@
 	M.ExtinguishMob()
 	return 1
 
-/obj/machinery/atmospherics/unary/cryo_cell/verb/move_eject()
+/obj/machinery/networked/atmos/unary/cryo_cell/verb/move_eject()
 	set name = "Eject occupant"
 	set category = "Object"
 	set src in oview(1)
@@ -404,7 +404,7 @@
 	add_fingerprint(usr)
 	return
 
-/obj/machinery/atmospherics/unary/cryo_cell/verb/move_inside()
+/obj/machinery/networked/atmos/unary/cryo_cell/verb/move_inside()
 	set name = "Move Inside"
 	set category = "Object"
 	set src in oview(1)

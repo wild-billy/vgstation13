@@ -5,7 +5,7 @@
 	icon_state = "compressor"
 	anchored = 1
 	density = 1
-	var/obj/machinery/power/turbine/turbine
+	var/obj/machinery/networked/power/turbine/turbine
 	var/datum/gas_mixture/gas_contained
 	var/turf/simulated/inturf
 	var/starter = 0
@@ -14,7 +14,7 @@
 	var/capacity = 1e6
 	var/comp_id = 0
 
-/obj/machinery/power/turbine
+/obj/machinery/networked/power/turbine
 	name = "gas turbine generator"
 	desc = "A gas turbine used for backup power generation."
 	icon = 'icons/obj/pipes.dmi'
@@ -94,7 +94,7 @@
 		overlays += image('icons/obj/pipes.dmi', "comp-o1", FLY_LAYER)
 	 //TODO: DEFERRED
 
-/obj/machinery/power/turbine/New()
+/obj/machinery/networked/power/turbine/New()
 	..()
 
 	outturf = get_step(src, dir)
@@ -110,7 +110,7 @@
 #define TURBGENQ 20000
 #define TURBGENG 0.8
 
-/obj/machinery/power/turbine/process()
+/obj/machinery/networked/power/turbine/process()
 	if(!compressor.starter)
 		return
 	overlays.Cut()
@@ -142,7 +142,7 @@
 			src.interact(M)
 	AutoUpdateAI(src)
 
-/obj/machinery/power/turbine/interact(mob/user)
+/obj/machinery/networked/power/turbine/interact(mob/user)
 
 	if ( (get_dist(src, user) > 1 ) || (stat & (NOPOWER|BROKEN)) && (!istype(user, /mob/living/silicon/ai)) )
 		user.machine = null
@@ -167,7 +167,7 @@
 
 	return
 
-/obj/machinery/power/turbine/Topic(href, href_list)
+/obj/machinery/networked/power/turbine/Topic(href, href_list)
 	..()
 	if(stat & BROKEN)
 		return

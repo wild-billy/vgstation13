@@ -200,7 +200,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 		location.hotspot_expose(700, 5)
 	if(reagents && reagents.total_volume)	//	check if it has any reagents at all
 		if(iscarbon(M) && (src == M:wear_mask)) // if it's in the human/monkey mouth, transfer reagents to the mob
-			if(M.reagents.has_reagent("lexorin") || M_NO_BREATH in M.mutations || istype(M, /obj/machinery/atmospherics/unary/cryo_cell))
+			if(M.reagents.has_reagent("lexorin") || M_NO_BREATH in M.mutations || istype(M, /obj/machinery/networked/atmos/unary/cryo_cell))
 				reagents.remove_any(REAGENTS_METABOLISM)
 			else
 				if(prob(25)) // so it's not an instarape in case of acid

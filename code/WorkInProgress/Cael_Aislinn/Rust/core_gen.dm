@@ -45,7 +45,7 @@ max volume of plasma storeable by the field = the total volume of a number of ti
 #define MAX_FIELD_STR 1000
 #define MIN_FIELD_STR 1
 
-/obj/machinery/power/rust_core
+/obj/machinery/networked/power/rust_core
 	name = "RUST Tokamak core"
 	desc = "Enormous solenoid for generating extremely high power electromagnetic fields"
 	icon = 'code/WorkInProgress/Cael_Aislinn/Rust/rust.dmi'
@@ -68,7 +68,7 @@ max volume of plasma storeable by the field = the total volume of a number of ti
 	var/locked = 1
 	var/remote_access_enabled = 1
 
-/obj/machinery/power/rust_core/process()
+/obj/machinery/networked/power/rust_core/process()
 	if(stat & BROKEN || !powernet)
 		Shutdown()
 
@@ -76,7 +76,7 @@ max volume of plasma storeable by the field = the total volume of a number of ti
 	//luminosity = round(owned_field.field_strength/10)
 	//luminosity = max(luminosity,1)
 
-/obj/machinery/power/rust_core/attackby(obj/item/W, mob/user)
+/obj/machinery/networked/power/rust_core/attackby(obj/item/W, mob/user)
 
 	if(istype(W, /obj/item/weapon/wrench))
 		if(owned_field)
@@ -163,14 +163,14 @@ max volume of plasma storeable by the field = the total volume of a number of ti
 	..()
 	return
 
-/obj/machinery/power/rust_core/attack_ai(mob/user)
+/obj/machinery/networked/power/rust_core/attack_ai(mob/user)
 	attack_hand(user)
 
-/obj/machinery/power/rust_core/attack_hand(mob/user)
+/obj/machinery/networked/power/rust_core/attack_hand(mob/user)
 	add_fingerprint(user)
 	interact(user)
 
-/obj/machinery/power/rust_core/interact(mob/user)
+/obj/machinery/networked/power/rust_core/interact(mob/user)
 	if(stat & BROKEN)
 		user.unset_machine()
 		user << browse(null, "window=core_gen")
@@ -223,7 +223,7 @@ max volume of plasma storeable by the field = the total volume of a number of ti
 	onclose(user, "core_gen")
 	user.set_machine(src)
 
-/obj/machinery/power/rust_core/Topic(href, href_list)
+/obj/machinery/networked/power/rust_core/Topic(href, href_list)
 	if(href_list["str"])
 		var/dif = text2num(href_list["str"])
 		field_strength = min(max(field_strength + dif, MIN_FIELD_STR), MAX_FIELD_STR)
@@ -259,7 +259,7 @@ max volume of plasma storeable by the field = the total volume of a number of ti
 
 	src.updateDialog()
 
-/obj/machinery/power/rust_core/proc/Startup()
+/obj/machinery/networked/power/rust_core/proc/Startup()
 	if(owned_field)
 		return
 	owned_field = new(src.loc)
@@ -270,7 +270,7 @@ max volume of plasma storeable by the field = the total volume of a number of ti
 	use_power = 2
 	return 1
 
-/obj/machinery/power/rust_core/proc/Shutdown()
+/obj/machinery/networked/power/rust_core/proc/Shutdown()
 	//todo: safety checks for field status
 	if(owned_field)
 		icon_state = "core0"
@@ -278,13 +278,13 @@ max volume of plasma storeable by the field = the total volume of a number of ti
 		luminosity = 0
 		use_power = 1
 
-/obj/machinery/power/rust_core/proc/AddParticles(var/name, var/quantity = 1)
+/obj/machinery/networked/power/rust_core/proc/AddParticles(var/name, var/quantity = 1)
 	if(owned_field)
 		owned_field.AddParticles(name, quantity)
 		return 1
 	return 0
 
-/obj/machinery/power/rust_core/bullet_act(var/obj/item/projectile/Proj)
+/obj/machinery/networked/power/rust_core/bullet_act(var/obj/item/projectile/Proj)
 	if(owned_field)
 		return owned_field.bullet_act(Proj)
 	return 0

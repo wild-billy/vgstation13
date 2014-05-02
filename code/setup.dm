@@ -856,3 +856,12 @@ var/list/RESTRICTED_CAMERA_NETWORKS = list( //Those networks can only be accesse
 ////////////////
 // job.info_flags
 #define JINFO_SILICON 1 // Silicon job
+
+///////////////////////////
+// NETWORKING
+///////////////////////////
+
+#define NETTYPE_ATMOS          0
+#define NETTYPE_ATMOS_HE       1
+#define NETTYPE_POWER          2
+#define NETTYPE_FIBER          3

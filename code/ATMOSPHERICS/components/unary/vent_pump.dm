@@ -1,4 +1,4 @@
-/obj/machinery/atmospherics/unary/vent_pump
+/obj/machinery/networked/atmos/unary/vent_pump
 	icon = 'icons/obj/atmospherics/vent_pump.dmi'
 	icon_state = "off"
 
@@ -191,7 +191,7 @@
 	receive_signal(datum/signal/signal)
 		if(stat & (NOPOWER|BROKEN))
 			return
-		//log_admin("DEBUG \[[world.timeofday]\]: /obj/machinery/atmospherics/unary/vent_pump/receive_signal([signal.debug_print()])")
+		//log_admin("DEBUG \[[world.timeofday]\]: /obj/machinery/networked/atmos/unary/vent_pump/receive_signal([signal.debug_print()])")
 		if(!signal.data["tag"] || (signal.data["tag"] != id_tag) || (signal.data["sigtype"]!="command"))
 			return 0
 
@@ -361,14 +361,14 @@
 			new /obj/item/pipe(loc, make_from=src)
 			del(src)
 
-/obj/machinery/atmospherics/unary/vent_pump/Destroy()
+/obj/machinery/networked/atmos/unary/vent_pump/Destroy()
 	if(initial_loc)
 		initial_loc.air_vent_info -= id_tag
 		initial_loc.air_vent_names -= id_tag
 	..()
 	return
 
-/obj/machinery/atmospherics/unary/vent_pump/Topic(href, href_list)
+/obj/machinery/networked/atmos/unary/vent_pump/Topic(href, href_list)
 	if(..())
 		return
 

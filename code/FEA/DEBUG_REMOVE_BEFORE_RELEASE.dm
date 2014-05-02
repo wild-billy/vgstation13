@@ -2,7 +2,7 @@
 
 datum/air_group/var/marker
 datum/air_group/var/debugging = 0
-datum/pipe_network/var/marker
+datum/network/atmos/var/marker
 
 datum/gas_mixture
 	var/turf/parent
@@ -358,19 +358,19 @@ mob
 		flag_all_pipe_networks()
 			set category = "Debug"
 
-			for(var/datum/pipe_network/network in pipe_networks)
+			for(var/datum/network/atmos/network in pipe_networks)
 				network.update = 1
 
 		mark_pipe_networks()
 			set category = "Debug"
 
-			for(var/datum/pipe_network/network in pipe_networks)
+			for(var/datum/network/atmos/network in pipe_networks)
 				network.marker = rand(1,4)
 
 			for(var/obj/machinery/atmospherics/pipe/P in world)
 				P.overlays.Cut()
 
-				var/datum/pipe_network/master = P.return_network()
+				var/datum/network/atmos/master = P.return_network()
 				if(master)
 					P.overlays += icon('icons/Testing/atmos_testing.dmi',"marker[master.marker]")
 				else
