@@ -8,8 +8,7 @@
 * By N3X15 for /vg/station.
 */
 
-// Old code, reorganized
-// Here for mappers.
+// Our "overlay"
 /obj/structure/cable
 	level = 1
 	anchored =1
@@ -17,13 +16,18 @@
 	desc = "A flexible superconducting cable for heavy-duty power transfer"
 	//icon = 'icons/obj/power_cond_red.dmi'
 	icon_state = "0-1"
+
 	var/d1 = 0
 	var/d2 = 1
-	layer = 2.44 //Just below unary stuff, which is at 2.45 and above pipes, which are at 2.4
+	var/coil_type = /obj/item/weapon/cable_coil
+	var/obj/machinery/networked/power/cable/cable
 	var/_color = "red"
+
+	level = 1
+	anchored = 1
+	layer = 2.44 //Just below unary stuff, which is at 2.45 and above pipes, which are at 2.4
 	icon = 'icons/obj/power_cond_white.dmi' // 500+ color :V
 	color = "#FF0000"
-	var/coil_type = /obj/item/weapon/cable_coil
 
 /obj/structure/cable/yellow
 	_color = "yellow"
@@ -71,77 +75,30 @@
 
 /obj/structure/cable/initialize()
 	var/turf/T = get_turf(src)
-	var/obj/machinery/networked/power/cable/C = locate(/obj/machinery/networked/power/cable) in T
-	if(!C)
-		C = new(T)
-	C.MakeNewLink(d1,d2,color)
-	del(src)
+	if(!T.cable)
+		T.cable = new(T)
+	cable = T.cable
+	cable.addLink(src)
 
-
-/datum/cablepart
-	var/color = "#FFFFFF"
-	var/dir1 = 0
-	var/dir2 = 0
-	var/image/overlay
-
-	proc/update_icon()
-		overlay = image('icons/obj/power_cond_white.dmi',icon_state="[dir1]-[dir2]")
-		overlay.color = color
-
-/obj/machinery/networked/power/cable
-	name = "power cable"
-	desc = "A flexible superconducting cable for heavy-duty power transfer"
-
-	icon = 'icons/obj/power.dmi' // 500+ color :V
-	icon_state = "cable"
-
-	var/list/parts = list() // Our components
-	var/lengths = 0         // Cached lengths in this cable.  Used when exploded or cut.
-	var/coil_type = /obj/item/weapon/cable_coil
-
-	level = 1
-	anchored = 1
-
-/obj/machinery/networked/power/cable/hide(var/i)
-	if(level == 1 && istype(loc, /turf))
-		invisibility = i ? 101 : 0
-	update_icon()
-
-/obj/machinery/networked/power/cable/update_icon(var/rebuild=0)
-	overlays = 0
-	for(var/i=1;i<=parts.len;i++)
-		var/datum/cablepart/P = parts[i]
-		if(rebuild && P.overlay)
-			P.update_icon()
-		P.overlay.alpha = invisibility?255:128
-		overlays += P.overlay
-
-/obj/machinery/networked/power/cable/rebuild_connections()
-	var/connections=0
-	for(var/i=1;i<=parts.len;i++)
-		var/datum/cablepart/P = parts[i]
-		connections |= P.dir1 | P.dir2
-	initialize_directions = connections
+/obj/structure/cable/Destroy()
+	cable.rmLink(src)
 	..()
 
-/obj/machinery/networked/power/cable/attack_tk(var/mob/user)
+/obj/structure/cable/update_icon()
+	icon_state="[d1]-[d2]"
+
+/obj/structure/cable/attack_tk(var/mob/user)
 	return
 
-/obj/machinery/networked/power/Destroy()
-	for(var/obj/machinery/networked/power/node in nodes)
-		if(node)
-			node.disconnect(src)
-	..()
-
-/obj/machinery/networked/power/cable/attackby(var/obj/item/W, var/mob/user)
+/obj/structure/cable/attackby(var/obj/item/W, var/mob/user)
 	var/turf/T = src.loc
 	if(T.intact)
 		return
 	if(istype(W, /obj/item/weapon/wirecutters))
-		if (shock(user, 50))
+		if (cable.shock(user, 50))
 			return
 
-		new coil_type(T, lengths)
+		new coil_type(T, d1 ? 2 : 1)
 
 		for(var/mob/O in viewers(src, null))
 			O.show_message("\red [user] cuts the [src].", 1)
@@ -168,31 +125,25 @@
 		coil.cable_join(src, user)
 
 	else if(istype(W, /obj/item/device/multitool))
-		if(network && (network.avail > 0))		// is it powered?
-			user << "\red [network.avail]W in power network."
+		if(cable.network && (cable.network.avail > 0))		// is it powered?
+			user << "\red [cable.network.avail]W in power network."
 		else
 			user << "\red The [src] is not powered."
 
-		shock(user, 5, 0.2)
+		cable.shock(user, 5, 0.2)
 	else
 		if (W.flags & CONDUCT)
-			shock(user, 50, 0.7)
+			cable.shock(user, 50, 0.7)
 
 	src.add_fingerprint(user)
 
-// shock the user with probability prb
-/obj/machinery/networked/power/cable/proc/shock(mob/user, prb, var/siemens_coeff = 1.0)
-	if(!prob(prb))
-		return 0
-	if (electrocute_mob(user, powernet, src, siemens_coeff))
-		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
-		s.set_up(5, 1, src)
-		s.start()
-		return 1
-	else
-		return 0
+/obj/structure/cable/hide(var/i)
+	if(level == 1 && istype(loc, /turf))
+		invisibility = i ? 101 : 0
+	update_icon()
 
-/obj/machinery/networked/power/cable/ex_act(severity)
+/obj/structure/cable/ex_act(severity)
+	var/lengths = d1 ? 2 : 1
 	switch(severity)
 		if(1.0)
 			qdel(src)
@@ -205,4 +156,67 @@
 			if (prob(25))
 				new coil_type(src.loc, lengths)
 				qdel(src)
+
+/////////////////////////////////////
+// POWER2 CABLE
+/////////////////////////////////////
+/datum/cablepart
+	var/dir1 = 0
+	var/dir2 = 0
+
+/obj/machinery/networked/power/cable
+	name = "power cable"
+	desc = "A flexible superconducting cable for heavy-duty power transfer"
+
+	icon_state = ""
+
+	var/list/parts = list() // Our components
+
+	level = 1
+	anchored = 1
+	invisibility = 101
+
+/obj/machinery/networked/power/cable/rebuild_connections()
+	var/connections=0
+	var/obj/structure/cable/C
+	for(var/key in parts)
+		C = parts[key]
+		connections |= C.d1 | C.d2
+	initialize_directions = connections
+	..()
+
+/obj/machinery/networked/power/cable/proc/addLink(var/obj/structure/cable/C)
+	var/key = "[C.d1]-[C.d2]"
+	if(key in parts)
+		return 0
+	parts[key]=C
+	return 1
+
+/obj/machinery/networked/power/cable/proc/rmLink(var/obj/structure/cable/C,var/autoclean=1)
+	var/key = "[C.d1]-[C.d2]"
+	if(key in parts)
+		parts.Remove(key)
+	if(autoclean && parts.len==0)
+		qdel(src)
+
+
+/obj/machinery/networked/power/cable/attack_tk(var/mob/user)
 	return
+
+/obj/machinery/networked/power/Destroy()
+	for(var/obj/machinery/networked/power/node in nodes)
+		if(node)
+			node.disconnect(src)
+	..()
+
+// shock the user with probability prb
+/obj/machinery/networked/power/cable/proc/shock(mob/user, prb, var/siemens_coeff = 1.0)
+	if(!prob(prb))
+		return 0
+	if (electrocute_mob(user, powernet, src, siemens_coeff))
+		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		s.set_up(5, 1, src)
+		s.start()
+		return 1
+	else
+		return 0

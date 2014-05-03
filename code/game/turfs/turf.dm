@@ -28,6 +28,9 @@
 	// Decal shit.
 	var/list/decals[0]
 
+	// One per turf, max.
+	var/obj/machinery/networked/power/cable/cable
+
 /turf/New()
 	..()
 	for(var/atom/movable/AM as mob|obj in src)

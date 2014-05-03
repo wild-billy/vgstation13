@@ -138,16 +138,6 @@
 		else
 			dirn = get_dir(F, user)
 
-		var/obj/machinery/networked/power/cable/C = F.get_cable()
-		if(!C)
-			C = new(F)
-		if (C.shock(user, 50))
-			if(prob(50))
-				C.check()
-				return
-		if(C.addCable(user,0,dirn,color))
-			use(1)
-		/*
 		for(var/obj/structure/cable/LC in F)
 			// If we carry data and the existing cable carries power, skip over it.
 			if((LC.d1 == dirn && LC.d2 == 0 ) || ( LC.d2 == dirn && LC.d1 == 0))
@@ -156,33 +146,20 @@
 
 		var/obj/structure/cable/C = new cable_type(F)
 
-		C.cableColor(_color)
-
 		C.d1 = 0
 		C.d2 = dirn
 		C.add_fingerprint(user)
-		C.updateicon()
-
-		C.powernet = new()
-		powernets += C.powernet
-		C.powernet.cables += C
-
-		C.mergeConnectedNetworks(C.d2)
-		C.mergeConnectedNetworksOnTurf()
+		C.initialize()
 
 
 		use(1)
-		if (C.shock(user, 50))
+		if (C.cable.shock(user, 50))
 			if (prob(50)) //fail
-				new/obj/item/weapon/cable_coil(C.loc, 1, C._color)
+				new C.coil_type(C.loc, 1)
 				del(C)
-		//src.laying = 1
-		//last = C
-		*/
 
 // called when cable_coil is click on an installed obj/cable
-/*
-/obj/item/weapon/cable_coil/proc/cable_join(obj/structure/cable/C, mob/user)
+/obj/item/weapon/cable_coil/proc/cable_join(var/obj/structure/cable/C, mob/user)
 
 	var/turf/U = user.loc
 	if(!isturf(U))
@@ -218,22 +195,14 @@
 					return
 
 			var/obj/structure/cable/NC = new cable_type(U)
-			NC.cableColor(_color)
-
 			NC.d1 = 0
 			NC.d2 = fdirn
 			NC.add_fingerprint()
-			NC.updateicon()
-
-			if(C.powernet)
-				NC.powernet = C.powernet
-				NC.powernet.cables += NC
-				NC.mergeConnectedNetworks(NC.d2)
-				NC.mergeConnectedNetworksOnTurf()
+			NC.initialize()
 			use(1)
-			if (NC.shock(user, 50))
+			if (NC.cable.shock(user, 50))
 				if (prob(50)) //fail
-					new src.type(NC.loc, 1, NC._color)
+					new src.type(NC.loc, 1)
 					del(NC)
 
 			return
@@ -255,28 +224,20 @@
 				user << "There's already a cable at that position."
 				return
 
-
-		C.cableColor(_color)
-
 		C.d1 = nd1
 		C.d2 = nd2
 
 		C.add_fingerprint()
-		C.updateicon()
-
-
-		C.mergeConnectedNetworks(C.d1)
-		C.mergeConnectedNetworks(C.d2)
-		C.mergeConnectedNetworksOnTurf()
+		C.cable.rmLink(C,autoclean=0)
+		C.initialize()
 
 		use(1)
-		if (C.shock(user, 50))
+		if (C.cable.shock(user, 50))
 			if (prob(50)) //fail
-				new/obj/item/weapon/cable_coil(C.loc, 2, C._color)
+				new src.type(C.loc, 2)
 				del(C)
 
 		return
-*/
 /obj/item/weapon/cable_coil/attack(mob/M as mob, mob/user as mob)
 	if(hasorgans(M))
 		var/datum/organ/external/S = M:get_organ(user.zone_sel.selecting)

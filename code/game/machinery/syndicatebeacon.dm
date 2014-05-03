@@ -118,7 +118,7 @@
 
 	var/active = 0 //It doesn't use up power, so use_power wouldn't really suit it
 	var/icontype = "beacon"
-	var/obj/structure/cable/attached = null
+	var/obj/machinery/networked/power/cable/attached = null
 
 
 	proc/Activate(mob/user = null)
@@ -196,7 +196,7 @@
 	proc/checkWirePower()
 		if(!attached)
 			return 0
-		var/datum/network/power/PN = attached.get_powernet()
+		var/datum/network/power/PN = attached.network
 		if(!PN)
 			return 0
 		if(PN.avail < 1500)

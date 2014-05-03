@@ -322,7 +322,7 @@
 	var/time = 100
 	var/turf/T = get_turf(src)
 	var/turf/U = get_turf(A)
-	var/obj/structure/cable/cable = locate() in T
+	var/obj/machinery/networked/power/cable/cable = locate() in T
 	if(!cable || !istype(cable))
 		return
 	if(world.time < G.next_shock)
@@ -331,7 +331,7 @@
 	src.visible_message("<span class='warning'>[name] fires an arc of electricity!</span>", \
 	"<span class='warning'>You fire an arc of electricity!</span>", \
 	"You hear the loud crackle of electricity!")
-	var/datum/network/power/PN = cable.get_powernet()
+	var/datum/network/power/PN = cable.network
 	var/available = 0
 	var/obj/item/projectile/beam/lightning/L = getFromPool(/obj/item/projectile/beam/lightning, loc)
 	if(PN)

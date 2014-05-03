@@ -196,18 +196,11 @@ datum/controller/game_controller/proc/process()
 
 				sleep(breather_ticks)
 
-				//PIPENETS
+				//NETWORKS
 				if(!pipe_processing_killed)
 					timer = world.timeofday
-					processPipenets()
+					processNetworks()
 					networks_cost = (world.timeofday - timer) / 10
-
-				sleep(breather_ticks)
-
-				//POWERNETS
-				timer = world.timeofday
-				processPowernets()
-				powernets_cost = (world.timeofday - timer) / 10
 
 				sleep(breather_ticks)
 
@@ -236,7 +229,7 @@ datum/controller/game_controller/proc/process()
 				gc_cost = (world.timeofday - timer) / 10
 
 				//TIMING
-				total_cost = air_cost + sun_cost + mobs_cost + diseases_cost + machines_cost + objects_cost + networks_cost + powernets_cost + nano_cost + events_cost + ticker_cost + gc_cost
+				total_cost = air_cost + sun_cost + mobs_cost + diseases_cost + machines_cost + objects_cost + networks_cost + nano_cost + events_cost + ticker_cost + gc_cost
 
 				var/end_time = world.timeofday
 				if(end_time < start_time)
@@ -298,25 +291,15 @@ datum/controller/game_controller/proc/processMobs()
 
 		processing_objects -= Object
 
-/datum/controller/game_controller/proc/processPipenets()
-	last_thing_processed = /datum/network/atmos
-
-	for (var/datum/network/atmos/Pipe_Network in pipe_networks)
-		if(Pipe_Network)
-			Pipe_Network.process()
-			continue
-
-		pipe_networks -= Pipe_Network
-
-/datum/controller/game_controller/proc/processPowernets()
+/datum/controller/game_controller/proc/processNetworks()
 	last_thing_processed = /datum/network/power
 
-	for (var/datum/network/power/Powernet in powernets)
-		if (Powernet)
-			Powernet.reset()
+	for (var/datum/network/power/NETWORRRRK in all_networks)
+		if (NETWORRRRK)
+			NETWORRRRK.process()
 			continue
 
-		powernets -= Powernet
+		powernets -= NETWORRRRK
 
 /datum/controller/game_controller/proc/processNano()
 	for (var/datum/nanoui/Nanoui in nanomanager.processing_uis)

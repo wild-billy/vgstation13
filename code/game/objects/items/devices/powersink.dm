@@ -1,11 +1,11 @@
 // Powersink - used to drain station power
 
-/obj/item/device/powersink
+/obj/machinery/networked/power/powersink
 	desc = "A nulling power sink which drains energy from electrical systems."
 	name = "power sink"
 	icon_state = "powersink0"
-	item_state = "electronic"
-	w_class = 4.0
+//	item_state = "electronic"
+//	w_class = 4.0
 	flags = FPRINT | TABLEPASS | CONDUCT
 	throwforce = 5
 	throw_speed = 1
@@ -18,27 +18,22 @@
 	var/max_power = 1e8		// maximum power that can be drained before exploding
 	var/mode = 0		// 0 = off, 1=clamped (off), 2=operating
 
-
-	var/obj/structure/cable/attached		// the attached cable
-
 	attackby(var/obj/item/I, var/mob/user)
 		if(istype(I, /obj/item/weapon/screwdriver))
 			if(mode == 0)
 				var/turf/T = loc
 				if(isturf(T) && !T.intact)
-					attached = locate() in T
-					if(!attached)
-						user << "No exposed cable here to attach to."
+//					attached = locate() in T
+					if(!locate(/obj/structure/cable) in T)
+						user << "\red No exposed cable here to attach to."
 						return
-					else
-						attached.attached = src
-						anchored = 1
-						mode = 1
-						user << "You attach the device to the cable."
-						for(var/mob/M in viewers(user))
-							if(M == user) continue
-							M << "[user] attaches the power sink to the cable."
-						return
+					anchored = 1
+					mode = 1
+					user << "You attach the device to the cable."
+					for(var/mob/M in viewers(user))
+						if(M == user) continue
+						M << "[user] attaches the power sink to the cable."
+					return
 				else
 					user << "Device must be placed over an exposed cable to attach to it."
 					return
@@ -48,8 +43,7 @@
 				anchored = 0
 				mode = 0
 				user << "You detach	the device from the cable."
-				attached.attached = null
-				attached = null
+//				attached = null
 				for(var/mob/M in viewers(user))
 					if(M == user) continue
 					M << "[user] detaches the power sink from the cable."
@@ -63,8 +57,6 @@
 	Destroy()
 		SetLuminosity(0)
 		processing_objects.Remove(src)
-		attached.attached = null
-		attached = null
 		..()
 
 	attack_paw()
@@ -98,31 +90,29 @@
 				processing_objects.Remove(src)
 
 	process()
-		if(attached)
-			var/datum/network/power/PN = attached.get_powernet()
-			if(PN)
-				SetLuminosity(12)
+		if(network)
+			SetLuminosity(12)
 
-				// found a powernet, so drain up to max power from it
+			// found a powernet, so drain up to max power from it
 
-				var/drained = min ( drain_rate, PN.avail )
-				PN.newload += drained
-				power_drained += drained
+			var/drained = min ( drain_rate, network.avail )
+			network.newload += drained
+			power_drained += drained
 
-				// if tried to drain more than available on powernet
-				// now look for APCs and drain their cells
-				if(drained < drain_rate)
-					for(var/obj/machinery/networked/power/terminal/T in PN.nodes)
-						if(istype(T.master, /obj/machinery/networked/power/apc))
-							var/obj/machinery/networked/power/apc/A = T.master
-							if(A.operating && A.cell)
-								A.cell.charge = max(0, A.cell.charge - 50)
-								power_drained += 50
+			// if tried to drain more than available on powernet
+			// now look for APCs and drain their cells
+			if(drained < drain_rate)
+				for(var/obj/machinery/networked/power/terminal/T in network.normal_members)
+					if(istype(T.master, /obj/machinery/networked/power/apc))
+						var/obj/machinery/networked/power/apc/A = T.master
+						if(A.operating && A.cell)
+							A.cell.charge = max(0, A.cell.charge - 50)
+							power_drained += 50
 
 
-			if(power_drained > max_power * 0.95)
-				playsound(src, 'sound/effects/screech.ogg', 100, 1, 1)
-			if(power_drained >= max_power)
-				processing_objects.Remove(src)
-				explosion(src.loc, 3,6,9,12)
-				qdel(src)
+		if(power_drained > max_power * 0.95)
+			playsound(src, 'sound/effects/screech.ogg', 100, 1, 1)
+		if(power_drained >= max_power)
+			processing_objects.Remove(src)
+			explosion(src.loc, 3,6,9,12)
+			qdel(src)

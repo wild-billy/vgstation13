@@ -8,12 +8,12 @@ var/list/solars_list = list()
 // This will choose whether to get the solar list from the powernet or the powernet nodes,
 // depending on the size of the nodes.
 /obj/machinery/networked/power/proc/get_solars_powernet()
-	if(!powernet)
+	if(!network)
 		return list()
-	if(solars_list.len < powernet.nodes)
+	if(solars_list.len < network.normal_members)
 		return solars_list
 	else
-		return powernet.nodes
+		return network.normal_members
 
 /obj/machinery/networked/power/solar
 	name = "solar panel"

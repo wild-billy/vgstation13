@@ -1054,7 +1054,7 @@ ________________________________________________________________________________
 							drained = min(drain, PN.avail)
 							PN.newload += drained
 							if(drained < drain)//if no power on net, drain apcs
-								for(var/obj/machinery/networked/power/terminal/T in PN.nodes)
+								for(var/obj/machinery/networked/power/terminal/T in PN.normal_members)
 									if(istype(T.master, /obj/machinery/networked/power/apc))
 										var/obj/machinery/networked/power/apc/AP = T.master
 										if(AP.operating && AP.cell && AP.cell.charge>0)
@@ -1098,7 +1098,7 @@ ________________________________________________________________________________
 
 		if("WIRE")
 			var/obj/structure/cable/A = target
-			var/datum/network/power/PN = A.get_powernet()
+			var/datum/network/power/PN = A.cable.network
 			while(G.candrain&&!maxcapacity&&!isnull(A))
 				drain = (round((rand(G.mindrain,G.maxdrain))/2))
 				var/drained = 0
@@ -1106,7 +1106,7 @@ ________________________________________________________________________________
 					drained = min(drain, PN.avail)
 					PN.newload += drained
 					if(drained < drain)//if no power on net, drain apcs
-						for(var/obj/machinery/networked/power/terminal/T in PN.nodes)
+						for(var/obj/machinery/networked/power/terminal/T in PN.normal_members)
 							if(istype(T.master, /obj/machinery/networked/power/apc))
 								var/obj/machinery/networked/power/apc/AP = T.master
 								if(AP.operating && AP.cell && AP.cell.charge>0)

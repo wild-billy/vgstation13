@@ -363,7 +363,7 @@ var/list/uplink_items = list()
 /datum/uplink_item/device_tools/powersink
 	name = "Power sink"
 	desc = "When screwed to wiring attached to an electric grid, then activated, this large device places excessive load on the grid, causing a stationwide blackout. The sink cannot be carried because of its excessive size. Ordering this sends you a small beacon that will teleport the power sink to your location on activation."
-	item = /obj/item/device/powersink
+	item = /obj/machinery/networked/power/powersink
 	cost = 5
 
 /datum/uplink_item/device_tools/singularity_beacon

@@ -91,7 +91,7 @@
 	else
 
 		var/list/L = list()
-		for(var/obj/machinery/networked/power/terminal/term in powernet.nodes)
+		for(var/obj/machinery/networked/power/terminal/term in network.normal_members)
 			if(istype(term.master, /obj/machinery/networked/power/apc))
 				var/obj/machinery/networked/power/apc/A = term.master
 				L += A
