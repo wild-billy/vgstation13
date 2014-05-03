@@ -69,7 +69,7 @@
 			C.icon_state = "[C.d1]-[C.d2]"
 			C.power_switch = src
 
-			var/datum/powernet/PN = new()
+			var/datum/network/power/PN = new()
 			PN.number = powernets.len + 1
 			powernets += PN
 			C.netnum = PN.number

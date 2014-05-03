@@ -99,7 +99,7 @@
 
 	process()
 		if(attached)
-			var/datum/powernet/PN = attached.get_powernet()
+			var/datum/network/power/PN = attached.get_powernet()
 			if(PN)
 				SetLuminosity(12)
 

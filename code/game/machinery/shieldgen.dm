@@ -354,9 +354,9 @@
 		return 0
 	var/turf/T = src.loc
 
-	var/obj/structure/cable/C = T.get_cable_node()
-	var/datum/powernet/PN
-	if(C)	PN = C.powernet		// find the powernet of the connected cable
+	var/obj/machinery/networked/power/cable/C = T.get_cable_node()
+	var/datum/network/power/PN
+	if(C)	PN = C.network		// find the powernet of the connected cable
 
 	if(!PN)
 		power = 0

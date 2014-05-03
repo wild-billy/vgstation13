@@ -49,9 +49,8 @@
 	// ***TODO: better communication system using network
 	if(powernet)
 		for(var/obj/machinery/networked/power/solar_control/C in get_solars_powernet())
-			if(powernet.nodes[C])
-				if(get_dist(C, src) < SOLAR_MAX_DIST)
-					C.tracker_update(angle)
+			if(get_dist(C, src) < SOLAR_MAX_DIST)
+				C.tracker_update(angle)
 
 
 /obj/machinery/networked/power/tracker/attackby(var/obj/item/weapon/W, var/mob/user)

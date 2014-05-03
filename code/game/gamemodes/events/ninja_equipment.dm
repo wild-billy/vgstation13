@@ -1046,7 +1046,7 @@ ________________________________________________________________________________
 
 				var/obj/machinery/networked/power/apc/B = A.loc.loc:get_apc()//Object.turf.area find APC
 				if(B)//If APC exists. Might not if the area is unpowered like CentCom.
-					var/datum/powernet/PN = B.terminal.powernet
+					var/datum/network/power/PN = B.terminal.powernet
 					while(G.candrain&&!maxcapacity&&!isnull(A))//And start a proc similar to drain from wire.
 						drain = rand(G.mindrain,G.maxdrain)
 						var/drained = 0
@@ -1098,7 +1098,7 @@ ________________________________________________________________________________
 
 		if("WIRE")
 			var/obj/structure/cable/A = target
-			var/datum/powernet/PN = A.get_powernet()
+			var/datum/network/power/PN = A.get_powernet()
 			while(G.candrain&&!maxcapacity&&!isnull(A))
 				drain = (round((rand(G.mindrain,G.maxdrain))/2))
 				var/drained = 0

@@ -246,7 +246,7 @@
 	if(!net)
 		powered = 0
 		return 0
-	var/datum/powernet/PN = powernets[net]			// find the powernet. Magic code, voodoo code.
+	var/datum/network/power/PN = powernets[net]			// find the powernet. Magic code, voodoo code.
 
 	if(!PN)
 		powered = 0

@@ -15,12 +15,11 @@
 //someone should really look into why circuits have a powernet var, it's several kinds of retarded.
 /obj/machinery/networked/power/monitor/New()
 	..()
-	var/obj/structure/cable/attached = null
-	var/turf/T = loc
+	var/turf/T = get_turf(src)
 	if(isturf(T))
-		attached = locate() in T
-	if(attached)
-		powernet = attached.get_powernet()
+		var/obj/machinery/networked/power/cable/attached = T.get_cable_node()
+		if(attached)
+			powernet = attached.network
 
 
 /obj/machinery/networked/power/monitor/attack_ai(mob/user)

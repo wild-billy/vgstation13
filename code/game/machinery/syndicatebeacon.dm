@@ -196,7 +196,7 @@
 	proc/checkWirePower()
 		if(!attached)
 			return 0
-		var/datum/powernet/PN = attached.get_powernet()
+		var/datum/network/power/PN = attached.get_powernet()
 		if(!PN)
 			return 0
 		if(PN.avail < 1500)

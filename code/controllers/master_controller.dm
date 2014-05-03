@@ -309,9 +309,9 @@ datum/controller/game_controller/proc/processMobs()
 		pipe_networks -= Pipe_Network
 
 /datum/controller/game_controller/proc/processPowernets()
-	last_thing_processed = /datum/powernet
+	last_thing_processed = /datum/network/power
 
-	for (var/datum/powernet/Powernet in powernets)
+	for (var/datum/network/power/Powernet in powernets)
 		if (Powernet)
 			Powernet.reset()
 			continue

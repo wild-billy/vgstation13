@@ -2,7 +2,7 @@
 	name = null
 	icon = 'icons/obj/power.dmi'
 	anchored = 1.0
-	var/datum/powernet/powernet = null
+	var/datum/network/power/powernet = null
 	var/directwired = 1		// by default, power machines are connected by a cable in a neighbouring turf
 							// if set to 0, requires a 0-X cable on this turf
 	use_power = 0
@@ -81,7 +81,7 @@
 	return
 
 
-/datum/powernet/proc/get_electrocute_damage()
+/datum/network/power/proc/get_electrocute_damage()
 	switch(avail)/*
 		if (1300000 to INFINITY)
 			return min(rand(70,150),rand(70,150))
@@ -118,27 +118,23 @@
 
 /obj/machinery/networked/power/proc/connect_to_network()
 	var/turf/T = src.loc
-	var/obj/structure/cable/C = T.get_cable_node()
-	if(!C || !C.powernet)	return 0
-//	makepowernets() //TODO: find fast way	//EWWWW what are you doing!?
-	powernet = C.powernet
-	powernet.nodes[src] = src
+	var/obj/machinery/networked/power/cable/C = T.get_cable_node()
+	if(!C || !C.network)	return 0
+	powernet = C.network
 	return 1
 
 /obj/machinery/networked/power/proc/disconnect_from_network()
 	if(!powernet)
 		//world << " no powernet"
 		return 0
-	powernet.nodes -= src
 	powernet = null
-	//world << "powernet null"
 	return 1
 
 /turf/proc/get_cable_node()
 	if(!istype(src, /turf/simulated/floor))
 		return null
-	for(var/obj/structure/cable/C in src)
-		if(C.d1 == 0)
+	for(var/obj/machinery/networked/power/cable/C in src)
+		if(C.initialize_directions & UP)
 			return C
 	return null
 
@@ -166,14 +162,14 @@
 	if(istype(power_source,/area))
 		source_area = power_source
 		power_source = source_area.get_apc()
-	if(istype(power_source,/obj/structure/cable))
-		var/obj/structure/cable/Cable = power_source
-		power_source = Cable.powernet
+	if(istype(power_source,/obj/machinery/networked/power))
+		var/obj/machinery/networked/power/PM
+		power_source = PM.network
 
-	var/datum/powernet/PN
+	var/datum/network/power/PN
 	var/obj/item/weapon/cell/cell
 
-	if(istype(power_source,/datum/powernet))
+	if(istype(power_source,/datum/network/power))
 		PN = power_source
 	else if(istype(power_source,/obj/item/weapon/cell))
 		cell = power_source
@@ -181,7 +177,7 @@
 		var/obj/machinery/networked/power/apc/apc = power_source
 		cell = apc.cell
 		if (apc.terminal)
-			PN = apc.terminal.powernet
+			PN = apc.terminal.network
 	else if (!power_source)
 		return 0
 	else
@@ -207,7 +203,7 @@
 
 	if (source_area)
 		source_area.use_power(drained_energy/CELLRATE)
-	else if (istype(power_source,/datum/powernet))
+	else if (istype(power_source,/datum/network/power))
 		var/drained_power = drained_energy/CELLRATE //convert from "joules" to "watts"
 		PN.newload+=drained_power
 	else if (istype(power_source, /obj/item/weapon/cell))

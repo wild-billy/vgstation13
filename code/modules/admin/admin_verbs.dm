@@ -291,7 +291,6 @@ var/list/admin_verbs_mod = list(
 		/client/proc/intercom_view,
 		/client/proc/air_status,
 		/client/proc/atmosscan,
-		/client/proc/powerdebug,
 		/client/proc/count_objects_on_z_level,
 		/client/proc/count_objects_all,
 		/client/proc/cmd_assume_direct_control,

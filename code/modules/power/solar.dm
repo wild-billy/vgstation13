@@ -137,8 +137,7 @@ var/list/solars_list = list()
 	var/sgen = SOLARGENRATE * sunfrac
 	add_avail(sgen)
 	if(powernet && control)
-		if(powernet.nodes[control])
-			control.gen += sgen
+		control.gen |= list(sgen)
 
 
 /obj/machinery/networked/power/solar/proc/broken()
@@ -473,9 +472,8 @@ Manual Tracking Direction:"}
 			if(!solars_list.Find(src,1,0))
 				solars_list.Add(src)
 			for(var/obj/machinery/networked/power/tracker/T in get_solars_powernet())
-				if(powernet.nodes[T])
-					cdir = T.sun_angle
-					break
+				cdir = T.sun_angle
+				break
 
 	if(href_list["trackdir"])
 		trackdir = text2num(href_list["trackdir"])
@@ -489,11 +487,10 @@ Manual Tracking Direction:"}
 /obj/machinery/networked/power/solar_control/proc/set_panels(var/cdir)
 	if(!powernet) return
 	for(var/obj/machinery/networked/power/solar/S in get_solars_powernet())
-		if(powernet.nodes[S])
-			if(get_dist(S, src) < SOLAR_MAX_DIST)
-				if(!S.control)
-					S.control = src
-				S.ndir = cdir
+		if(get_dist(S, src) < SOLAR_MAX_DIST)
+			if(!S.control)
+				S.control = src
+			S.ndir = cdir
 
 
 /obj/machinery/networked/power/solar_control/power_change()
