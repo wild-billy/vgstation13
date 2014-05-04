@@ -4,6 +4,8 @@
 	var/new_volume = 0
 	var/alert_pressure = 0
 
+	network_type = /datum/network/atmos
+
 	Del()
 		if(air && air.volume)
 			temporarily_store_air()
@@ -35,12 +37,20 @@
 		air.volume = new_volume
 
 	OnNewMember(var/obj/machinery/networked/atmos/pipe/item)
+		if(!istype(item)) return 0
 		new_volume += item.volume
 
 		alert_pressure = min(alert_pressure, item.alert_pressure)
 
 		if(item.air_temporary)
 			air.merge(item.air_temporary)
+		return 1
+
+
+	CanNetworkExpand(var/obj/machinery/networked/result)
+		return !istype(result,/obj/machinery/networked/atmos/pipe)
+	CanPhysNetworkExpand(var/obj/machinery/networked/borderline)
+		return istype(borderline,/obj/machinery/networked/atmos/pipe)
 
 	proc/temporarily_store_air()
 		//Update individual gas_mixtures by volume ratio

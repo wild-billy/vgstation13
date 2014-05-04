@@ -119,7 +119,7 @@ Pipelines + Other Objects -> Pipe network
 	..()
 
 /obj/machinery/networked/proc/physical_expansion()
-	return null
+	return list()
 
 /obj/machinery/networked/proc/set_physnet(var/datum/physical_network/p)
 	_physnet = p
