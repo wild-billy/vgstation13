@@ -107,11 +107,14 @@ Pipelines + Other Objects -> Pipe network
 
 /obj/machinery/networked/proc/build_network()
 	// Called to build a network from this node
+	return null
+	/*
 	check_physnet()
 	return _physnet.return_network()
-
+	*/
 
 /obj/machinery/networked/proc/network_expand(var/datum/network/new_network, var/obj/machinery/networked/reference)
+	if(!_physnet) return null
 	return _physnet.network_expand(new_network, reference)
 
 /obj/machinery/networked/Destroy()
