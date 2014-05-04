@@ -48,9 +48,7 @@
 
 
 	CanNetworkExpand(var/obj/machinery/networked/result)
-		return !istype(result,/obj/machinery/networked/atmos/pipe)
-	CanPhysNetworkExpand(var/obj/machinery/networked/borderline)
-		return istype(borderline,/obj/machinery/networked/atmos/pipe)
+		return istype(result,/obj/machinery/networked/atmos/pipe)
 
 	proc/temporarily_store_air()
 		//Update individual gas_mixtures by volume ratio

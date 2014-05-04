@@ -30,9 +30,6 @@
 	proc/OnNewMember(var/obj/machinery/networked/item)
 		return 0
 
-	proc/CanPhysNetworkExpand(var/obj/machinery/networked/result)
-		return 0
-
 	proc/build_physical_network(var/obj/machinery/networked/base)
 
 		var/list/possible_expansions = list(base)
@@ -45,21 +42,20 @@
 
 		while(possible_expansions.len>0)
 			for(var/obj/machinery/networked/borderline in possible_expansions)
-				if(!CanPhysNetworkExpand(borderline)) continue
-				var/list/result = borderline.physical_expansion()
-				var/edge_check = result.len
+				if(CanNetworkExpand(borderline))
+					var/list/result = borderline.physical_expansion()
+					var/edge_check = result.len
 
-				if(result.len>0)
-					for(var/obj/machinery/networked/item in result)
-						if(!members.Find(item))
-							if(OnNewMember(item))
-								members += item
-								possible_expansions += item
-								item.set_physnet(src)
-						edge_check--
-				if(edge_check>0)
-					edges += borderline
-
+					if(result.len>0)
+						for(var/obj/machinery/networked/item in result)
+							if(!members.Find(item))
+								if(OnNewMember(item))
+									members += item
+									possible_expansions += item
+									item.set_physnet(src)
+							edge_check--
+					if(edge_check>0)
+						edges += borderline
 				possible_expansions -= borderline
 
 		OnPreBuild(base)
@@ -78,7 +74,7 @@
 
 		for(var/obj/machinery/networked/edge in edges)
 			for(var/obj/machinery/networked/result in edge.physical_expansion())
-				if(CanNetworkExpand(result) && (result!=reference))
+				if(!CanNetworkExpand(result) && (result!=reference))
 					result.network_expand(new_network, edge)
 
 		return 1
