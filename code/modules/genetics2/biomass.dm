@@ -1,0 +1,1 @@
+/obj/machinery/networked/biomass_controller
