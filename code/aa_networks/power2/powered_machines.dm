@@ -11,10 +11,10 @@
 	network_type = /datum/network/power
 	physnet_type = /datum/physical_network/power
 
-/obj/machinery/networked/atmos/check_network()
+/obj/machinery/networked/power/check_network()
 	network=..()
 
-/obj/machinery/networked/atmos/check_physnet()
+/obj/machinery/networked/power/check_physnet()
 	physnet=..()
 
 /obj/machinery/networked/power/findAllConnections(var/connect_dirs)
@@ -33,7 +33,7 @@
 
 /obj/machinery/networked/power/proc/rebuild_connections()
 	findAllConnections()
-	update_icon(rebuild=1)
+	update_icon()
 	build_network()
 	for(var/obj/machinery/networked/power/node in nodes)
 		if(!node) continue

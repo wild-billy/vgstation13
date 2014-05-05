@@ -102,10 +102,9 @@ datum/controller/game_controller/proc/setup_objects()
 	for(var/atom/movable/object in world)
 		object.initialize()
 
-	world << "\red \b Initializing pipe networks"
+	world << "\red \b Initializing networks."
 	sleep(-1)
-	for(var/obj/machinery/networked/atmos/machine in machines)
-		machine.build_network()
+	CallHook("InitNetworks",list())
 
 	world << "\red \b Initializing atmos machinery."
 	sleep(-1)
@@ -292,10 +291,10 @@ datum/controller/game_controller/proc/processMobs()
 		processing_objects -= Object
 
 /datum/controller/game_controller/proc/processNetworks()
-	last_thing_processed = /datum/network/power
 
-	for (var/datum/network/power/NETWORRRRK in all_networks)
+	for (var/datum/network/NETWORRRRK in all_networks)
 		if (NETWORRRRK)
+			last_thing_processed = NETWORRRRK.type
 			NETWORRRRK.process()
 			continue
 
