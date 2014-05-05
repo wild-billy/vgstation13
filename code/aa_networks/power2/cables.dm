@@ -169,20 +169,21 @@
 	name = "power cable"
 	desc = "A flexible superconducting cable for heavy-duty power transfer"
 
+	icon = 'icons/obj/power.dmi'
 	icon_state = "powernet_cable"
 
 	var/list/parts = list() // Our components
 
 	//level = 1
 	anchored = 1
-	invisibility = 101
+	//invisibility = 101
 
 /obj/machinery/networked/power/cable/update_icon()
 	overlays=0
 	for(var/i=1;i<=4;i++)
 		var/c_dir = 1 << i
 		if(initialize_directions & c_dir)
-			overlays += image('icons/obj/power.dmi',icon_state = "pnet_connection", dir=c_dir)
+			overlays += image('icons/obj/power.dmi',icon_state = "pnet_dirs", dir=num2dir(c_dir))
 
 /obj/machinery/networked/power/cable/rebuild_connections()
 	var/connections=0
