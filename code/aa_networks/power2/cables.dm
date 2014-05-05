@@ -180,8 +180,9 @@
 
 /obj/machinery/networked/power/cable/update_icon()
 	overlays=0
-	for(var/i=1;i<=4;i++)
+	for(var/i=0;i<4;i++)
 		var/c_dir = 1 << i
+		testing("c_dir = [c_dir]")
 		if(initialize_directions & c_dir)
 			overlays += image('icons/obj/power.dmi',icon_state = "pnet_dirs", dir=num2dir(c_dir))
 
