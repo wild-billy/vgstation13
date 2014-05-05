@@ -1179,7 +1179,9 @@ note dizziness decrements automatically in the mob's Life() proc.
 				stat(null, "PiNet-[master_controller.networks_cost]\t#[pipe_networks.len]")
 				stat(null, "Ponet-[master_controller.powernets_cost]\t#[powernets.len]")
 				stat(null, "NanoUI-[master_controller.nano_cost]\t#[nanomanager.processing_uis.len]")
-				stat(null, "GC-[master_controller.gc_cost]\t#[garbage.queue.len]")
+				var/gcstat = "GC-[master_controller.gc_cost]"
+				if(garbage && garbage.queue) gcstat += "\t#[garbage.queue.len]"
+				stat(null, gcstat)
 				stat(null, "Tick-[master_controller.ticker_cost]")
 				stat(null, "ALL-[master_controller.total_cost]")
 			else

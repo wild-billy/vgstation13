@@ -2,11 +2,20 @@
 	name = "Powered Machine"
 	desc = "A machine that can directly tie into the power network."
 
+	// Replaces node1/2/3 vars
 	var/list/obj/machinery/networked/power/nodes=list()
-	var/list/datum/network/power/network
 
-/obj/machinery/networked/power/check_network()
-	network = ..(/datum/network/power)
+	var/datum/network/power/network
+	var/datum/physical_network/power/physnet
+
+	network_type = /datum/network/power
+	physnet_type = /datum/physical_network/power
+
+/obj/machinery/networked/atmos/check_network()
+	network=..()
+
+/obj/machinery/networked/atmos/check_physnet()
+	physnet=..()
 
 /obj/machinery/networked/power/findAllConnections(var/connect_dirs)
 	var/node_id=0

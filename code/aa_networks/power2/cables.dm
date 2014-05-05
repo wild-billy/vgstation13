@@ -81,7 +81,8 @@
 	cable.addLink(src)
 
 /obj/structure/cable/Destroy()
-	cable.rmLink(src)
+	if(cable)
+		cable.rmLink(src)
 	..()
 
 /obj/structure/cable/update_icon()
@@ -168,13 +169,20 @@
 	name = "power cable"
 	desc = "A flexible superconducting cable for heavy-duty power transfer"
 
-	icon_state = ""
+	icon_state = "powernet_cable"
 
 	var/list/parts = list() // Our components
 
-	level = 1
+	//level = 1
 	anchored = 1
 	invisibility = 101
+
+/obj/machinery/networked/power/cable/update_icon()
+	overlays=0
+	for(var/i=1;i<=4;i++)
+		var/c_dir = 1 << i
+		if(initialize_directions & c_dir)
+			overlays += image('icons/obj/power.dmi',icon_state = "pnet_connection", dir=c_dir)
 
 /obj/machinery/networked/power/cable/rebuild_connections()
 	var/connections=0
@@ -183,6 +191,7 @@
 		C = parts[key]
 		connections |= C.d1 | C.d2
 	initialize_directions = connections
+	update_icon()
 	..()
 
 /obj/machinery/networked/power/cable/proc/addLink(var/obj/structure/cable/C)
@@ -190,15 +199,16 @@
 	if(key in parts)
 		return 0
 	parts[key]=C
+	rebuild_connections()
 	return 1
 
 /obj/machinery/networked/power/cable/proc/rmLink(var/obj/structure/cable/C,var/autoclean=1)
 	var/key = "[C.d1]-[C.d2]"
 	if(key in parts)
 		parts.Remove(key)
+		rebuild_connections()
 	if(autoclean && parts.len==0)
 		qdel(src)
-
 
 /obj/machinery/networked/power/cable/attack_tk(var/mob/user)
 	return
@@ -220,3 +230,15 @@
 		return 1
 	else
 		return 0
+
+/obj/machinery/networked/power/cable/build_network()
+	check_physnet()
+	return physnet.return_network()
+
+/obj/machinery/networked/power/cable/network_expand(var/datum/physical_network/power/new_network, var/obj/machinery/networked/power/cable/reference)
+	check_physnet()
+	return physnet.network_expand(new_network, reference)
+
+/obj/machinery/networked/power/cable/return_network(var/obj/machinery/networked/atmos/pipe/reference)
+	check_physnet()
+	return physnet.return_network(reference)
