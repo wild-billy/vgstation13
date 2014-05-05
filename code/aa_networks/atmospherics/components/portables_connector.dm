@@ -11,6 +11,7 @@
 	var/obj/machinery/portable_atmospherics/connected_device
 
 	var/obj/machinery/networked/atmos/node
+	var/datum/network/atmos/network
 
 	var/on = 0
 	use_power = 0

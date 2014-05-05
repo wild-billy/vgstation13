@@ -2,14 +2,13 @@
 	// Pipe painter color setting.
 	var/_color
 
-	var/datum/network/atmos/network
 	var/datum/physical_network/atmos/physnet
 
 	network_type = /datum/network/atmos
 	physnet_type = /datum/physical_network/atmos
 
 /obj/machinery/networked/atmos/check_network()
-	network=..()
+	..()
 
 /obj/machinery/networked/atmos/check_physnet()
 	physnet=..()

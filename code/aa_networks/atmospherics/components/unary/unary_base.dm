@@ -4,6 +4,7 @@
 	layer = 2.45 // Cable says we're at 2.45, so we're at 2.45.  (old: TURF_LAYER+0.1)
 
 	var/datum/gas_mixture/air_contents
+	var/datum/network/atmos/network
 
 	var/obj/machinery/networked/atmos/node
 
@@ -29,8 +30,7 @@
 		return 1
 
 // Housekeeping and pipe network stuff below
-/*
-	network_expand(datum/physical_network/atmos/new_network, obj/machinery/networked/atmos/pipe/reference)
+	network_expand(datum/network/atmos/new_network, obj/machinery/networked/atmos/pipe/reference)
 		if(reference == node)
 			physnet = new_network
 
@@ -63,7 +63,7 @@
 				break
 
 		update_icon()
-*/
+
 	build_network()
 		if(!network && node)
 			network = new /datum/network/atmos()

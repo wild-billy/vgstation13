@@ -958,7 +958,7 @@
 
 	if(reference == node4)
 		if(istype(node4, /obj/machinery/networked/atmos/pipe))
-			del(network)
+			del(physnet)
 		node4 = null
 
 	update_icon()
