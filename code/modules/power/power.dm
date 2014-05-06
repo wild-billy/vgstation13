@@ -119,8 +119,8 @@
 /obj/machinery/networked/power/proc/connect_to_network()
 	var/turf/T = src.loc
 	var/obj/machinery/networked/power/cable/C = T.get_cable_node()
-	if(!C || !C.network)	return 0
-	powernet = C.network
+	if(!C)	return 0
+	powernet = C.return_network(src)
 	return 1
 
 /obj/machinery/networked/power/proc/disconnect_from_network()
@@ -134,7 +134,7 @@
 	if(!istype(src, /turf/simulated/floor))
 		return null
 	for(var/obj/machinery/networked/power/cable/C in src)
-		if(C.initialize_directions & UP)
+		if(C.initialize_directions & PWR_UP)
 			return C
 	return null
 

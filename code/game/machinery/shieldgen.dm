@@ -356,7 +356,7 @@
 
 	var/obj/machinery/networked/power/cable/C = T.get_cable_node()
 	var/datum/network/power/PN
-	if(C)	PN = C.network		// find the powernet of the connected cable
+	if(C)	PN = C.return_network()		// find the powernet of the connected cable
 
 	if(!PN)
 		power = 0

@@ -2,7 +2,8 @@
 // POWER2 CABLE
 /////////////////////////////////////
 
-// These handle the logical connections.
+// These objects handle the logical connections between tiles.
+// One per tile.
 
 /datum/cablepart
 	var/dir1 = 0
@@ -12,9 +13,6 @@
 	name = "power cable"
 	desc = "A flexible superconducting cable for heavy-duty power transfer"
 
-	icon = 'icons/obj/power.dmi'
-	icon_state = "powernet_cable"
-
 	var/list/parts = list() // Our components
 
 	//level = 1
@@ -23,13 +21,16 @@
 
 /obj/machinery/networked/power/cable/update_icon()
 	overlays=0
-	for(var/i=0;i<4;i++)
-		var/c_dir = 1 << i
-		//testing("c_dir = [c_dir]")
+	var/c_dir
+	for(var/i=0;i<8;i++)
+		c_dir = 1 << i
 		if(initialize_directions & c_dir)
-			//testing("Making overlay")
-			overlays += image('icons/obj/power.dmi',icon_state = "pnet_dirs", dir=num2dir(c_dir))
-			//testing("Made overlay")
+			var/image/I = image('icons/obj/power.dmi',icon_state = "pnet_dirs", dir=pwrdir2dir(c_dir))
+			if(connected_dirs & c_dir)
+				I.color = "#00FF00"
+			overlays += I
+	if(initialize_directions & PWR_UP)
+		overlays += image('icons/obj/power.dmi',icon_state = "pnet_connectpoint")
 
 /obj/machinery/networked/power/cable/rebuild_connections()
 	var/connections=0
@@ -37,9 +38,11 @@
 	for(var/key in parts)
 		C = parts[key]
 		connections |= C.d1 | C.d2
+		if(!C.d1 || !C.d2)
+			connections |= PWR_UP
 	initialize_directions = connections
-	update_icon()
 	..()
+	update_icon()
 
 /obj/machinery/networked/power/cable/proc/addLink(var/obj/structure/cable/C)
 	var/key = "[C.d1]-[C.d2]"
@@ -86,7 +89,7 @@
 	check_physnet()
 	return physnet.network_expand(new_network, reference)
 
-/obj/machinery/networked/power/cable/return_network(var/obj/machinery/networked/power/cable/reference)
+/obj/machinery/networked/power/cable/return_network(var/obj/machinery/networked/power/reference)
 	check_physnet()
 	return physnet.return_network(reference)
 

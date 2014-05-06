@@ -29,12 +29,12 @@ Pipelines + Other Objects -> Pipe network
 
 // Find a connecting /obj/machinery/networked/power in specified direction.
 /obj/machinery/proc/findConnectingWire(var/direction)
-	if(direction == DOWN)
+	if(direction & (UP|DOWN))
 		for(var/obj/machinery/networked/power/target in get_turf(src))
-			if(target.initialize_directions == UP)
+			if(target.initialize_directions & PWR_UP)
 				return target
 	else
-		for(var/obj/machinery/networked/power/target in get_step(src,direction))
+		for(var/obj/machinery/networked/power/target in get_step(src,pwrdir2dir(direction)))
 			if(target.initialize_directions & get_dir(target,src))
 				return target
 
