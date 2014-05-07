@@ -299,7 +299,7 @@ datum/controller/game_controller/proc/processMobs()
 			NETWORRRRK.process()
 			continue
 
-		powernets -= NETWORRRRK
+		all_networks -= NETWORRRRK
 
 /datum/controller/game_controller/proc/processNano()
 	for (var/datum/nanoui/Nanoui in nanomanager.processing_uis)
