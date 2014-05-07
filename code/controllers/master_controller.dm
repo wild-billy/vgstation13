@@ -104,7 +104,8 @@ datum/controller/game_controller/proc/setup_objects()
 
 	world << "\red \b Initializing networks."
 	sleep(-1)
-	CallHook("InitNetworks",list())
+	for(var/obj/machinery/networked/NM in machines)
+		NM.build_network()
 
 	world << "\red \b Initializing atmos machinery."
 	sleep(-1)

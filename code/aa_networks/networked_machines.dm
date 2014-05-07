@@ -107,6 +107,7 @@ Pipelines + Other Objects -> Pipe network
 
 /obj/machinery/networked/proc/build_network()
 	// Called to build a network from this node
+	warning("[type] has called build_network() from /obj/machinery/network!")
 	return null
 	/*
 	check_physnet()

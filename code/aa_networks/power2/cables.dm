@@ -8,7 +8,11 @@
 * By N3X15 for /vg/station.
 */
 
-// Our "overlay"
+/**
+*  Cables are basically just overlays that yell at
+* the real cable linkage object (/obj/machinery/networked/power/cable)
+* and tell it which directions are added/removed.
+*/
 /obj/structure/cable
 	level = 1
 	anchored =1
@@ -67,11 +71,15 @@
 // the power cable object
 /obj/structure/cable/New()
 	..()
-	// ensure d1 & d2 reflect the icon_state for entering and exiting cable
 
+	// ensure d1 & d2 reflect the icon_state for entering and exiting cable
 	var/dash = findtext(icon_state, "-")
 	d1 = text2num( copytext( icon_state, 1, dash ) )
 	d2 = text2num( copytext( icon_state, dash+1 ) )
+
+	// hide if turf is not intact
+	var/turf/T = src.loc
+	if(level==1) hide(T.intact)
 
 /obj/structure/cable/initialize()
 	var/turf/T = get_turf(src)
@@ -140,7 +148,7 @@
 
 /obj/structure/cable/hide(var/i)
 	if(level == 1 && istype(loc, /turf))
-		invisibility = i ? 0 : 101
+		invisibility = i ? 101 : 0
 	update_icon()
 
 /obj/structure/cable/ex_act(severity)

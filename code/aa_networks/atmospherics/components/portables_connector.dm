@@ -36,6 +36,12 @@
 			node.build_network()
 		return 1
 
+	build_network()
+		if(!network && node)
+			network = new /datum/network/atmos()
+			network.normal_members += src
+			network.build_network(node, src)
+
 	update_icon()
 		if(node)
 			icon_state = "[level == 1 && istype(loc, /turf/simulated) ? "h" : "" ]intact"
