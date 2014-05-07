@@ -17,6 +17,7 @@ Pipelines + Other Objects -> Pipe network
 	active_power_usage = 0
 	power_channel = ENVIRON
 	var/nodealert = 0
+	var/nodebuilt = 0 // No more double-building shit.
 
 	// Which directions can we connect with?
 	var/initialize_directions = 0
@@ -28,27 +29,18 @@ Pipelines + Other Objects -> Pipe network
 	var/physnet_type = /datum/physical_network
 
 // Find a connecting /obj/machinery/networked/power in specified direction.
+// USES PWR_*! NOT BYOND DIRECTIONS.
 /obj/machinery/proc/findConnectingWire(var/direction)
-	if(direction & (UP|DOWN))
-		for(var/obj/machinery/networked/power/target in get_turf(src))
-			if(target.initialize_directions & PWR_UP)
-				return target
-	else
-		for(var/obj/machinery/networked/power/target in get_step(src,pwrdir2dir(direction)))
-			if(target.initialize_directions & get_dir(target,src))
-				return target
+	for(var/obj/machinery/networked/power/target in get_step(src,pwrdir2dir(direction)))
+		if(target.initialize_directions & get_dir(target,src))
+			return target
 
 /*
 // Find a connecting /obj/machinery/networked/fiber in specified direction.
 /obj/machinery/proc/findConnectingFiber(var/direction)
-	if(direction == DOWN)
-		for(var/obj/machinery/networked/fiber/target in get_turf(src))
-			if(target.initialize_directions == UP)
-				return target
-	else
-		for(var/obj/machinery/networked/fiber/target in get_step(src,direction))
-			if(target.initialize_directions & get_dir(target,src))
-				return target
+	for(var/obj/machinery/networked/fiber/target in get_step(src,direction))
+		if(target.initialize_directions & get_dir(target,src))
+			return target
 */
 
 // Find a connecting /obj/machinery/networked/atmos/pipe in specified direction.

@@ -331,7 +331,7 @@
 	src.visible_message("<span class='warning'>[name] fires an arc of electricity!</span>", \
 	"<span class='warning'>You fire an arc of electricity!</span>", \
 	"You hear the loud crackle of electricity!")
-	var/datum/network/power/PN = cable.network
+	var/datum/network/power/PN = cable.powernet
 	var/available = 0
 	var/obj/item/projectile/beam/lightning/L = getFromPool(/obj/item/projectile/beam/lightning, loc)
 	if(PN)

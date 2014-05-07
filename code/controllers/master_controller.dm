@@ -28,7 +28,6 @@ datum/controller/game_controller
 	var/machines_cost	= 0
 	var/objects_cost	= 0
 	var/networks_cost	= 0
-	var/powernets_cost	= 0
 	var/nano_cost		= 0
 	var/events_cost		= 0
 	var/ticker_cost		= 0

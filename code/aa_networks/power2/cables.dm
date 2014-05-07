@@ -134,8 +134,8 @@
 		coil.cable_join(src, user)
 
 	else if(istype(W, /obj/item/device/multitool))
-		if(cable.network && (cable.network.avail > 0))		// is it powered?
-			user << "\red [cable.network.avail]W in power network."
+		if(cable.powernet && (cable.powernet.avail > 0))		// is it powered?
+			user << "\red [cable.powernet.avail]W in power network."
 		else
 			user << "\red The [src] is not powered."
 

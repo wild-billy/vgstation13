@@ -10,14 +10,16 @@
 	var/dir2 = 0
 
 /obj/machinery/networked/power/cable
-	name = "power cable"
-	desc = "A flexible superconducting cable for heavy-duty power transfer"
+	name = "logical power cable connections"
+	desc = "You can see the matrix.  Or maybe you're just going blind."
 
 	var/list/parts = list() // Our components
 
 	//level = 1
 	anchored = 1
 	//invisibility = 101
+
+	connection_type = POWERCONN_DIRECTIONAL
 
 /obj/machinery/networked/power/cable/update_icon()
 	overlays=0
@@ -31,6 +33,14 @@
 			overlays += I
 	if(initialize_directions & PWR_UP)
 		overlays += image('icons/obj/power.dmi',icon_state = "pnet_connectpoint")
+/*
+buildFrom()
+	build_network()
+	for(var/obj/machinery/networked/power/node in nodes)
+		if(!node) continue
+		node.initialize()
+		node.build_network()
+*/
 
 /obj/machinery/networked/power/cable/rebuild_connections()
 	var/connections=0
@@ -43,6 +53,9 @@
 	initialize_directions = connections
 	..()
 	update_icon()
+
+/obj/machinery/networked/power/cable/initialize()
+	rebuild_connections()
 
 /obj/machinery/networked/power/cable/proc/addLink(var/obj/structure/cable/C)
 	var/key = "[C.d1]-[C.d2]"
@@ -85,7 +98,7 @@
 	check_physnet()
 	return physnet.return_network()
 
-/obj/machinery/networked/power/cable/network_expand(var/datum/physical_network/power/new_network, var/obj/machinery/networked/power/cable/reference)
+/obj/machinery/networked/power/cable/network_expand(var/datum/physical_network/power/new_network, var/obj/machinery/networked/power/reference)
 	check_physnet()
 	return physnet.network_expand(new_network, reference)
 

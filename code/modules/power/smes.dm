@@ -23,27 +23,16 @@
 	var/chargelevel = 50000
 	var/online = 1
 	var/name_tag = null
-	var/obj/machinery/networked/power/terminal/terminal = null
+
 	//Holders for powerout event.
 	var/last_output = 0
 	var/last_charge = 0
 	var/last_online = 0
 
+	connection_type = POWERCONN_TERMINAL|POWERCONN_KNOT
+
 /obj/machinery/networked/power/smes/New()
 	..()
-	spawn(5)
-		dir_loop:
-			for(var/d in cardinal)
-				var/turf/T = get_step(src, d)
-				for(var/obj/machinery/networked/power/terminal/term in T)
-					if(term && term.dir == turn(d, 180))
-						terminal = term
-						break dir_loop
-		if(!terminal)
-			stat |= BROKEN
-			return
-		terminal.master = src
-		updateicon()
 	component_parts = list()
 	component_parts += new /obj/item/weapon/circuitboard/smes
 	component_parts += new /obj/item/weapon/stock_parts/matter_bin

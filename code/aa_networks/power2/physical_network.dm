@@ -15,10 +15,7 @@
 		return
 
 	OnNewMember(var/obj/machinery/networked/power/cable/item)
-		if(!istype(item)) return 0
-
-		return 1
-
+		return istype(item)
 
 	CanNetworkExpand(var/obj/machinery/networked/result)
 		return istype(result,/obj/machinery/networked/power/cable)

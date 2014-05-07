@@ -55,7 +55,6 @@
 
 
 	for(var/obj/machinery/networked/power/M in solars_list)
-
 		if(!M.powernet)
 			solars_list.Remove(M)
 			continue

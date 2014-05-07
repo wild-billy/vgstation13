@@ -11,16 +11,7 @@
 	idle_power_usage = 20
 	active_power_usage = 80
 
-//fix for issue 521, by QualityVan.
-//someone should really look into why circuits have a powernet var, it's several kinds of retarded.
-/obj/machinery/networked/power/monitor/New()
-	..()
-	var/turf/T = get_turf(src)
-	if(isturf(T))
-		var/obj/machinery/networked/power/cable/attached = T.get_cable_node()
-		if(attached)
-			powernet = attached.network
-
+// There was a New() here.  It's gone now - N3X
 
 /obj/machinery/networked/power/monitor/attack_ai(mob/user)
 	src.add_hiddenprint(user)
@@ -91,7 +82,7 @@
 	else
 
 		var/list/L = list()
-		for(var/obj/machinery/networked/power/terminal/term in network.normal_members)
+		for(var/obj/machinery/networked/power/terminal/term in powernet.normal_members)
 			if(istype(term.master, /obj/machinery/networked/power/apc))
 				var/obj/machinery/networked/power/apc/A = term.master
 				L += A
@@ -99,22 +90,39 @@
 
 		// AUTOFIXED BY fix_string_idiocy.py
 		// C:\Users\Rob\Documents\Projects\vgstation13\code\game\machinery\computer\power.dm:97: t += "<PRE>Total power: [powernet.avail] W<BR>Total load:  [num2text(powernet.viewload,10)] W<BR>"
-		t += {"<PRE>Total power: [powernet.avail] W<BR>Total load:  [num2text(powernet.viewload,10)] W<BR>
-			<FONT SIZE=-1>"}
+		t += {"<div style="font-family:monospace;">
+			Total power: [powernet.avail] W
+			Total load:  [num2text(powernet.viewload,10)] W
+			<table border="0" style="font-size:-1">
+				<tr>
+					<th>Area</th>
+					<th title="Equipment">Eq</th>
+					<th title="Lighting">Li</th>
+					<th title="Environment">En</th>
+					<th>Load</th>
+					<th>Cell</th>
+				</tr>"}
 		// END AUTOFIX
 		if(L.len > 0)
-
-			t += "Area                           Eqp./Lgt./Env.  Load   Cell<HR>"
-
-			var/list/S = list(" Off","AOff","  On", " AOn")
+			var/list/S = list("Off","AOff","On", "AOn")
 			var/list/chg = list("N","C","F")
 
 			for(var/obj/machinery/networked/power/apc/A in L)
+				var/areaname = copytext("\The [A.area]", 1, 30)
+				var/cellstatus = "N/C"
+				if(A.cell)
+					cellstatus = "[round(A.cell.percent())]% [chg[A.charging+1]]"
+				t += {"
+				<tr>
+					<td>[areaname]</td>
+					<td>[S[A.equipment+1]]</td>
+					<td>[S[A.lighting+1]]</td>
+					<td>[S[A.environ+1]]</td>
+					<td>[A.lastused_total]</td>
+					<td>[cellstatus]</td>
+				</tr>"}
 
-				t += copytext(add_tspace("\The [A.area]", 30), 1, 30)
-				t += " [S[A.equipment+1]] [S[A.lighting+1]] [S[A.environ+1]] [add_lspace(A.lastused_total, 6)]  [A.cell ? "[add_lspace(round(A.cell.percent()), 3)]% [chg[A.charging+1]]" : "  N/C"]<BR>"
-
-		t += "</FONT></PRE></TT>"
+		t += "</table></div>"
 
 	user << browse(t, "window=powcomp;size=420x900")
 	onclose(user, "powcomp")

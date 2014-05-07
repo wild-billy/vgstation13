@@ -51,6 +51,9 @@
 	anchored = 1
 	use_power = 0
 	req_access = list(access_engine_equip)
+
+	connection_type = POWERCONN_TERMINAL // WE SPECIAL 8D
+
 	var/spooky=0
 	var/area/area
 	var/areastring = null
@@ -70,7 +73,7 @@
 	var/coverlocked = 1
 	var/aidisabled = 0
 	var/tdir = null
-	var/obj/machinery/networked/power/terminal/terminal = null
+
 	var/lastused_light = 0
 	var/lastused_equip = 0
 	var/lastused_environ = 0

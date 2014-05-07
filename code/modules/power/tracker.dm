@@ -10,7 +10,7 @@
 	icon_state = "tracker"
 	anchored = 1
 	density = 1
-	directwired = 1
+	connection_type = POWERCONN_KNOT
 	use_power = 0
 
 	var/sun_angle = 0		// sun angle as set by sun datum

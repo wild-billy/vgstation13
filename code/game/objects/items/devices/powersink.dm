@@ -90,19 +90,19 @@
 				processing_objects.Remove(src)
 
 	process()
-		if(network)
+		if(powernet)
 			SetLuminosity(12)
 
 			// found a powernet, so drain up to max power from it
 
-			var/drained = min ( drain_rate, network.avail )
-			network.newload += drained
+			var/drained = min ( drain_rate, powernet.avail )
+			powernet.newload += drained
 			power_drained += drained
 
 			// if tried to drain more than available on powernet
 			// now look for APCs and drain their cells
 			if(drained < drain_rate)
-				for(var/obj/machinery/networked/power/terminal/T in network.normal_members)
+				for(var/obj/machinery/networked/power/terminal/T in powernet.normal_members)
 					if(istype(T.master, /obj/machinery/networked/power/apc))
 						var/obj/machinery/networked/power/apc/A = T.master
 						if(A.operating && A.cell)

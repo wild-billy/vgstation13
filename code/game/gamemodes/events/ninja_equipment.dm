@@ -1098,7 +1098,7 @@ ________________________________________________________________________________
 
 		if("WIRE")
 			var/obj/structure/cable/A = target
-			var/datum/network/power/PN = A.cable.network
+			var/datum/network/power/PN = A.cable.powernet
 			while(G.candrain&&!maxcapacity&&!isnull(A))
 				drain = (round((rand(G.mindrain,G.maxdrain))/2))
 				var/drained = 0
