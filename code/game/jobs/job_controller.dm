@@ -342,6 +342,12 @@ var/global/datum/controller/occupations/job_master
 				break
 			if(!S)
 				S = locate("start*[rank]") // use old stype
+			if(!S)
+				for(var/obj/effect/landmark/sloc in world)
+					if(sloc.name != "LateStart")	continue
+					if(locate(/mob/living) in sloc.loc)	continue
+					S = sloc
+					break
 			if(istype(S, /obj/effect/landmark/start) && istype(S.loc, /turf))
 				H.loc = S.loc
 

@@ -49,7 +49,7 @@
 
 /obj/machinery/networked/atmos/pipe/network_expand(var/datum/physical_network/atmos/new_network, var/obj/machinery/networked/atmos/pipe/reference)
 	check_physnet()
-	return physnet.network_expand(new_network, reference)
+	return physnet.expand(new_network, reference)
 
 /obj/machinery/networked/atmos/pipe/return_network(var/obj/machinery/networked/atmos/pipe/reference)
 	check_physnet()

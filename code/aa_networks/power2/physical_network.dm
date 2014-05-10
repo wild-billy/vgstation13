@@ -5,9 +5,6 @@
 	Del()
 		..()
 
-	process()
-		return
-
 	OnPreBuild(var/obj/machinery/networked/power/cable/base)
 		return
 

@@ -59,7 +59,8 @@ buildFrom()
 	update_icon()
 
 /obj/machinery/networked/power/cable/initialize()
-	//connect_to_network()
+	update_directions()
+	..()
 	initialized = 1
 
 /obj/machinery/networked/power/cable/proc/addLink(var/obj/structure/cable/C)
@@ -102,14 +103,13 @@ buildFrom()
 	else
 		return 0
 
-/*
 /obj/machinery/networked/power/cable/build_network()
-// I was doing this wrong, go figure.
-*/
+	check_physnet()
+	return physnet.return_network()
 
 /obj/machinery/networked/power/cable/network_expand(var/datum/physical_network/power/new_network, var/obj/machinery/networked/power/reference)
 	check_physnet()
-	return physnet.network_expand(new_network, reference)
+	return physnet.expand(new_network, reference)
 
 /obj/machinery/networked/power/cable/return_network(var/obj/machinery/networked/power/reference)
 	check_physnet()

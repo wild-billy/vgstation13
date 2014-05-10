@@ -63,7 +63,7 @@
 	proc/CanNetworkExpand(var/obj/machinery/networked/result)
 		return 0
 
-	proc/network_expand(var/datum/network/new_network, var/obj/machinery/networked/reference)
+	proc/expand(var/datum/network/new_network, var/obj/machinery/networked/reference)
 
 		if(new_network.physical_networks.Find(src))
 			return 0

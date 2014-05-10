@@ -25,6 +25,7 @@
 	active_power_usage = 0
 
 /obj/machinery/networked/power/New()
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/New()")
 	..()
 
 /obj/machinery/networked/power/check_physnet()
@@ -119,6 +120,7 @@
 
 // Housekeeping and pipe network stuff below
 /obj/machinery/networked/power/network_expand(var/datum/network/power/new_network, var/obj/machinery/networked/power/reference)
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/network_expand()")
 	var/idx = nodes.Find(reference)
 	if(idx)
 		powernets[idx]=new_network
@@ -156,28 +158,34 @@
 		return 0
 
 /obj/machinery/networked/power/initialize()
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/initialize()")
+
 	connect_to_network()
 
 	update_icon()
 
 /obj/machinery/networked/power/build_network()
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/build_network()")
 	if(powernets.len>0)
 		for(var/i=1;i<=powernets.len;i++)
 			if(!powernets[i] && nodes[i])
-				var/datum/network/power/pnet = new()
+				var/datum/network/power/pnet = new ()
 				pnet.normal_members += src
 				pnet.build_network(nodes[i], src)
 				powernets[i]=pnet
 
 /obj/machinery/networked/power/return_network(var/obj/machinery/networked/power/reference)
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/return_network()")
 	build_network()
 
-	if(reference in nodes)
-		return powernet
+	var/idx = nodes.Find(reference)
+	if(idx)
+		return powernets[idx]
 
 	return null
 
 /obj/machinery/networked/power/reassign_network(datum/network/power/old_network, datum/network/power/new_network)
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/reassign_network()")
 	var/idx = powernets.Find(old_network)
 	if(idx)
 		powernets[idx]=new_network
@@ -188,6 +196,7 @@
 	return 1
 
 /obj/machinery/networked/power/disconnect(obj/machinery/networked/power/reference)
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/disconnect()")
 	if(reference in nodes)
 		del(powernet)
 		nodes = null

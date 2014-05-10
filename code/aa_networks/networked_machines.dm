@@ -67,9 +67,10 @@ Pipelines + Other Objects -> Pipe network
 // I asked /tg/ and bay and they have no idea why this is here, so into the trash it goes. - N3X
 // Re-enabled for debugging.
 /obj/machinery/networked/process()
-	build_network()
+	//build_network()
 
 /obj/machinery/networked/proc/return_network(obj/machinery/atmospherics/reference)
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/proc/return_network()")
 	return check_network()
 
 /obj/machinery/networked/proc/reassign_network(datum/physical_network/atmos/old_network, datum/physical_network/atmos/new_network)
@@ -107,8 +108,9 @@ Pipelines + Other Objects -> Pipe network
 	*/
 
 /obj/machinery/networked/proc/network_expand(var/datum/network/new_network, var/obj/machinery/networked/reference)
+	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/proc/network_expand()")
 	if(!_physnet) return null
-	return _physnet.network_expand(new_network, reference)
+	return _physnet.expand(new_network, reference)
 
 /obj/machinery/networked/Destroy()
 	del(_network)
