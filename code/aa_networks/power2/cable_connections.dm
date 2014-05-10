@@ -102,9 +102,10 @@ buildFrom()
 	else
 		return 0
 
+/*
 /obj/machinery/networked/power/cable/build_network()
-	check_physnet()
-	return physnet.return_network()
+// I was doing this wrong, go figure.
+*/
 
 /obj/machinery/networked/power/cable/network_expand(var/datum/physical_network/power/new_network, var/obj/machinery/networked/power/reference)
 	check_physnet()
