@@ -55,14 +55,14 @@ buildFrom()
 	update_icon()
 
 /obj/machinery/networked/power/cable/initialize()
-	rebuild_connections()
+	connect_to_network()
 
 /obj/machinery/networked/power/cable/proc/addLink(var/obj/structure/cable/C)
 	var/key = "[C.d1]-[C.d2]"
 	if(key in parts)
 		return 0
 	parts[key]=C
-	rebuild_connections()
+	connect_to_network()
 	return 1
 
 /obj/machinery/networked/power/cable/proc/rmLink(var/obj/structure/cable/C,var/autoclean=1)

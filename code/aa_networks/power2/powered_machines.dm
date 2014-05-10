@@ -35,43 +35,46 @@
 
 /obj/machinery/networked/power/proc/connect_to_network()
 	// Resize if needed.
-	var/newlen = 0
-	if(connection_type & POWERCONN_KNOT)
-		newlen += 1
-	if(connection_type & POWERCONN_TERMINAL)
-		newlen += 1
-	if(connection_type & POWERCONN_DIRECTIONAL)
-		newlen += all_netdirs.len
-	nodes.len = newlen
-	powernets.len = newlen
+	if (nodes.len == 0)
+		var/newlen = 0
+		if(connection_type & POWERCONN_KNOT)
+			newlen += 1
+		if(connection_type & POWERCONN_TERMINAL)
+			newlen += 1
+		if(connection_type & POWERCONN_DIRECTIONAL)
+			newlen += all_netdirs.len
+		nodes.len = newlen
+		powernets.len = newlen
 
 	var/nid=1
 	if(connection_type & POWERCONN_KNOT)
-		var/turf/T = get_turf(src)
-		var/obj/machinery/networked/power/cable/C = T.get_cable_node()
-		if(!C)
-			stat |= BROKEN
-			return 0
-		nodes[nid] = C
-		powernet = C.return_network(src)
-		powernets[nid] = powernet
+		if(!nodes[nid])
+			var/turf/T = get_turf(src)
+			var/obj/machinery/networked/power/cable/C = T.get_cable_node()
+			if(!C)
+				stat |= BROKEN
+				return 0
+			nodes[nid] = C
+			powernet = C.return_network(src)
+			powernets[nid] = powernet
 		nid++
 
 	if(connection_type & POWERCONN_TERMINAL)
-		// Stolen from SMES code.
-		dir_loop:
-			for(var/d in cardinal)
-				var/turf/T = get_step(src, d)
-				for(var/obj/machinery/networked/power/terminal/term in T)
-					if(term && term.dir == turn(d, 180))
-						terminal = term
-						break dir_loop
-		if(!terminal)
-			stat |= BROKEN
-			return 0
-		nodes[nid] = terminal
-		powernets[nid] = terminal.powernet
-		terminal.master = src
+		if(!nodes[nid])
+			// Stolen from SMES code.
+			dir_loop:
+				for(var/d in cardinal)
+					var/turf/T = get_step(src, d)
+					for(var/obj/machinery/networked/power/terminal/term in T)
+						if(term && term.dir == turn(d, 180))
+							terminal = term
+							break dir_loop
+			if(!terminal)
+				stat |= BROKEN
+				return 0
+			nodes[nid] = terminal
+			powernets[nid] = terminal.powernet
+			terminal.master = src
 		nid++
 
 	if(connection_type & POWERCONN_DIRECTIONAL)
