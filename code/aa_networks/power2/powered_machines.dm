@@ -1,4 +1,4 @@
-var/list/all_wire_dirs = all_netdirs + list(PWR_UP)
+var/list/all_wire_dirs = all_netdirs + list(NET_NODE)
 
 /obj/machinery/networked/power
 	name = "Powered Machine"
@@ -92,7 +92,7 @@ var/list/all_wire_dirs = all_netdirs + list(PWR_UP)
 	var/byond_dir
 	for(var/direction in all_wire_dirs)
 		if(connect_dirs & direction)
-			byond_dir = dir2pwrdir(direction)
+			byond_dir = dir2netdir(direction)
 			var/obj/machinery/networked/power/found
 			var/node_type=getNodeType(node_id)
 			switch(node_type)

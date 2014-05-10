@@ -27,11 +27,11 @@
 	for(var/i=0;i<8;i++)
 		c_dir = 1 << i
 		if(initialize_directions & c_dir)
-			var/image/I = image('icons/obj/power.dmi',icon_state = "pnet_dirs", dir=pwrdir2dir(c_dir))
+			var/image/I = image('icons/obj/power.dmi',icon_state = "pnet_dirs", dir=netdir2dir(c_dir))
 			if(connected_dirs & c_dir)
 				I.color = "#00FF00"
 			overlays += I
-	if(initialize_directions & PWR_UP)
+	if(initialize_directions & NET_NODE)
 		overlays += image('icons/obj/power.dmi',icon_state = "pnet_connectpoint")
 /*
 buildFrom()
@@ -49,7 +49,7 @@ buildFrom()
 		C = parts[key]
 		connections |= C.d1 | C.d2
 		if(!C.d1 || !C.d2)
-			connections |= PWR_UP
+			connections |= NET_NODE
 	initialize_directions = connections
 	..()
 	update_icon()

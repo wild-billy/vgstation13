@@ -29,9 +29,9 @@ Pipelines + Other Objects -> Pipe network
 	var/physnet_type = /datum/physical_network
 
 // Find a connecting /obj/machinery/networked/power in specified direction.
-// USES PWR_*! NOT BYOND DIRECTIONS.
+// USES NET_*! NOT BYOND DIRECTIONS.
 /obj/machinery/proc/findConnectingWire(var/direction)
-	for(var/obj/machinery/networked/power/target in get_step(src,pwrdir2dir(direction)))
+	for(var/obj/machinery/networked/power/target in get_step(src,netdir2dir(direction)))
 		if(target.initialize_directions & get_dir(target,src))
 			return target
 

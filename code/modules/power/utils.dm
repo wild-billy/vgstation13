@@ -2,7 +2,7 @@
 	if(!istype(src, /turf/simulated/floor))
 		return null
 	for(var/obj/machinery/networked/power/cable/C in src)
-		if(C.initialize_directions & PWR_UP)
+		if(C.initialize_directions & NET_NODE)
 			return C
 	return null
 
