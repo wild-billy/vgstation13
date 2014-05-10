@@ -1,5 +1,3 @@
-var/list/all_wire_dirs = all_netdirs + list(NET_NODE)
-
 /obj/machinery/networked/power
 	name = "Powered Machine"
 	desc = "A machine that can directly tie into the power network."
@@ -28,16 +26,6 @@ var/list/all_wire_dirs = all_netdirs + list(NET_NODE)
 
 /obj/machinery/networked/power/New()
 	..()
-	// Resize if needed.
-	var/newlen = 0
-	if(connection_type & POWERCONN_KNOT)
-		newlen += 1
-	if(connection_type & POWERCONN_TERMINAL)
-		newlen += 1
-	if(connection_type & POWERCONN_DIRECTIONAL)
-		newlen += 8
-	nodes.len = newlen
-	powernets.len = newlen
 
 /obj/machinery/networked/power/check_physnet()
 	physnet=..()
@@ -46,6 +34,17 @@ var/list/all_wire_dirs = all_netdirs + list(NET_NODE)
 	return NETTYPE_POWER
 
 /obj/machinery/networked/power/proc/connect_to_network()
+	// Resize if needed.
+	var/newlen = 0
+	if(connection_type & POWERCONN_KNOT)
+		newlen += 1
+	if(connection_type & POWERCONN_TERMINAL)
+		newlen += 1
+	if(connection_type & POWERCONN_DIRECTIONAL)
+		newlen += all_netdirs.len
+	nodes.len = newlen
+	powernets.len = newlen
+
 	var/nid=1
 	if(connection_type & POWERCONN_KNOT)
 		var/turf/T = get_turf(src)
@@ -55,7 +54,7 @@ var/list/all_wire_dirs = all_netdirs + list(NET_NODE)
 			return 0
 		nodes[nid] = C
 		powernet = C.return_network(src)
-		powernets[nid] += powernet
+		powernets[nid] = powernet
 		nid++
 
 	if(connection_type & POWERCONN_TERMINAL)
@@ -80,8 +79,8 @@ var/list/all_wire_dirs = all_netdirs + list(NET_NODE)
 	return 1
 
 /obj/machinery/networked/power/proc/disconnect_from_network()
-	nodes = 0
-	powernets = 0
+	nodes.Cut()
+	powernets.Cut()
 	powernet = null
 	terminal = null
 	return 1
@@ -89,25 +88,21 @@ var/list/all_wire_dirs = all_netdirs + list(NET_NODE)
 // Direct, pipe-style connections (used by wires)
 /obj/machinery/networked/power/findAllConnections(var/connect_dirs, var/startnum=1)
 	var/node_id=startnum
-	var/byond_dir
-	for(var/direction in all_wire_dirs)
+	for(var/direction in all_netdirs)
 		if(connect_dirs & direction)
-			byond_dir = dir2netdir(direction)
 			var/obj/machinery/networked/power/found
 			var/node_type=getNodeType(node_id)
 			switch(node_type)
 				if(NETTYPE_POWER)
 					found = findConnectingWire(direction)
 				else
-					testing("Unknown getNodeType([node_id]) - [type]: [node_type]")
+					warning("Unknown getNodeType([node_id]) - [type]: [node_type]")
 			if(found)
 				if(!nodes[node_id])
 					nodes[node_id] = found
 				if(!powernets[node_id])
 					powernets[node_id] = found
-				connected_dirs |= byond_dir
-			else
-				testing("Could not find node #[node_id]: {[x],[y],[z]}")
+				connected_dirs |= direction
 			node_id++
 
 // Direct, pipe-style connections (used by wires)
