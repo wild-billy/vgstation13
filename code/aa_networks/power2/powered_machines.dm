@@ -163,11 +163,13 @@
 	update_icon()
 
 /obj/machinery/networked/power/build_network()
-	if(!powernet && nodes.len>0)
-		powernet = new /datum/network/power()
-		powernet.normal_members += src
-		for(var/i=1;i<=nodes.len;i++)
-			powernet.build_network(nodes[i], src)
+	if(powernets.len>0)
+		for(var/i=1;i<=powernets.len;i++)
+			if(!powernets[i] && nodes[i])
+				var/datum/network/power/pnet = new()
+				pnet.normal_members += src
+				pnet.build_network(nodes[i], src)
+				powernets[i]=pnet
 
 /obj/machinery/networked/power/return_network(var/obj/machinery/networked/power/reference)
 	build_network()
