@@ -43,7 +43,7 @@ buildFrom()
 		node.build_network()
 */
 
-/obj/machinery/networked/power/cable/connect_to_network()
+/obj/machinery/networked/power/cable/proc/update_directions()
 	var/connections=0
 	var/obj/structure/cable/C
 	for(var/key in parts)
@@ -52,6 +52,9 @@ buildFrom()
 		if(!C.d1 || !C.d2)
 			connections |= NET_NODE
 	initialize_directions = connections
+
+/obj/machinery/networked/power/cable/connect_to_network()
+	update_directions()
 	..()
 	update_icon()
 
@@ -66,6 +69,8 @@ buildFrom()
 	parts[key]=C
 	if(initialized)
 		connect_to_network()
+	else
+		update_directions()
 	return 1
 
 /obj/machinery/networked/power/cable/proc/rmLink(var/obj/structure/cable/C,var/autoclean=1)

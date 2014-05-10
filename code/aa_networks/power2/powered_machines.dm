@@ -156,8 +156,6 @@
 		return 0
 
 /obj/machinery/networked/power/initialize()
-	//if(nodes.len>0) return
-
 	connect_to_network()
 
 	update_icon()
