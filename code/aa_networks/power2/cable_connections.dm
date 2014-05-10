@@ -14,6 +14,7 @@
 	desc = "You can see the matrix.  Or maybe you're just going blind."
 
 	var/list/parts = list() // Our components
+	var/initialized = 0
 
 	//level = 1
 	anchored = 1
@@ -42,7 +43,7 @@ buildFrom()
 		node.build_network()
 */
 
-/obj/machinery/networked/power/cable/rebuild_connections()
+/obj/machinery/networked/power/cable/connect_to_network()
 	var/connections=0
 	var/obj/structure/cable/C
 	for(var/key in parts)
@@ -56,13 +57,15 @@ buildFrom()
 
 /obj/machinery/networked/power/cable/initialize()
 	//connect_to_network()
+	initialized = 1
 
 /obj/machinery/networked/power/cable/proc/addLink(var/obj/structure/cable/C)
 	var/key = "[C.d1]-[C.d2]"
 	if(key in parts)
 		return 0
 	parts[key]=C
-	connect_to_network()
+	if(initialized)
+		connect_to_network()
 	return 1
 
 /obj/machinery/networked/power/cable/proc/rmLink(var/obj/structure/cable/C,var/autoclean=1)

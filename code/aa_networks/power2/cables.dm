@@ -78,11 +78,10 @@
 	d2 = text2num( copytext( icon_state, dash+1 ) )
 
 	// hide if turf is not intact
-	var/turf/T = src.loc
+	var/turf/T = get_turf(src)
 	if(level==1) hide(T.intact)
 
-/obj/structure/cable/initialize()
-	var/turf/T = get_turf(src)
+	// Connect.
 	if(!T.cable)
 		T.cable = new(T)
 	cable = T.cable

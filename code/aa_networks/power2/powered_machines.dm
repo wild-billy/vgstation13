@@ -50,7 +50,7 @@
 	if(connection_type & POWERCONN_KNOT)
 		if(!nodes[nid])
 			var/turf/T = get_turf(src)
-			var/obj/machinery/networked/power/cable/C = T.get_cable_node()
+			var/obj/machinery/networked/power/C = T.get_cable_node()
 			if(!C)
 				stat |= BROKEN
 				return 0
