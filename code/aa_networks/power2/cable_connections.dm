@@ -55,7 +55,7 @@ buildFrom()
 	update_icon()
 
 /obj/machinery/networked/power/cable/initialize()
-	connect_to_network()
+	//connect_to_network()
 
 /obj/machinery/networked/power/cable/proc/addLink(var/obj/structure/cable/C)
 	var/key = "[C.d1]-[C.d2]"
