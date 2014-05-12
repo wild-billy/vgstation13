@@ -69,14 +69,18 @@
 	coil_type = /obj/item/weapon/cable_coil/white
 
 // the power cable object
-/obj/structure/cable/New()
-	..()
+/obj/structure/cable/New(var/turf/loc,var/suppress_powernet_update=0)
+	..(loc)
 
 	// ensure d1 & d2 reflect the icon_state for entering and exiting cable
 	var/dash = findtext(icon_state, "-")
 	d1 = text2num( copytext( icon_state, 1, dash ) )
 	d2 = text2num( copytext( icon_state, dash+1 ) )
 
+	if(!suppress_powernet_update)
+		update_powernet()
+
+/obj/structure/cable/proc/update_powernet()
 	// hide if turf is not intact
 	var/turf/T = get_turf(src)
 	if(level==1) hide(T.intact)

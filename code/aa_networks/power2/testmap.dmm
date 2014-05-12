@@ -1,14 +1,24 @@
 "a" = (/turf/space,/area)
-"b" = (/turf/simulated/wall/r_wall,/area/beach)
-"c" = (/obj/effect/landmark/start{name = "Assistant"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/beach)
-"d" = (/obj/machinery/networked/power/apc{dir = 1; pixel_y = 24},/obj/structure/cable{icon_state = "0-2"; pixel_y = 1; d2 = 2},/turf/simulated/floor/plating,/area/beach)
-"e" = (/obj/effect/landmark{name = "LateStart"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/beach)
-"f" = (/turf/simulated/floor{icon_state = "freezerfloor"},/area/beach)
-"g" = (/obj/structure/cable{d1 = 1; d2 = 2; icon_state = "1-2"},/turf/simulated/floor/plating,/area/beach)
-"h" = (/obj/machinery/light{dir = 8},/obj/effect/landmark/start{name = "Assistant"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/beach)
-"i" = (/obj/machinery/light{dir = 4},/obj/effect/landmark/start{name = "Assistant"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/beach)
-"j" = (/obj/machinery/networked/power/smes/magical,/obj/structure/cable,/turf/simulated/floor/plating,/area/beach)
-"k" = (/obj/machinery/networked/power/terminal{dir = 1},/turf/simulated/wall/r_wall,/area/beach)
+"b" = (/turf/simulated/wall/r_wall,/area/storage/testroom)
+"c" = (/obj/machinery/networked/power/terminal,/turf/simulated/wall/r_wall,/area/storage/testroom)
+"d" = (/obj/effect/landmark/start{name = "Assistant"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"e" = (/obj/machinery/networked/power/apc{dir = 1; pixel_y = 24},/obj/structure/cable{icon_state = "0-2"; pixel_y = 1; d2 = 2},/turf/simulated/floor/plating,/area/storage/testroom)
+"f" = (/obj/effect/landmark{name = "JoinLate"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"g" = (/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"h" = (/obj/machinery/networked/power/smes/magical,/obj/structure/cable{icon_state = "0-2"; pixel_y = 1; d2 = 2},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"i" = (/obj/structure/cable{d1 = 1; d2 = 2; icon_state = "1-2"},/turf/simulated/floor/plating,/area/storage/testroom)
+"j" = (/obj/structure/cable{d1 = 1; d2 = 2; icon_state = "1-2"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"k" = (/obj/machinery/light{dir = 8},/obj/effect/landmark/start{name = "Assistant"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"l" = (/obj/effect/landmark/start{name = "Assistant"},/obj/structure/cable{tag = "icon-4-10"; icon_state = "4-10"; d1 = 1; d2 = 2},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"m" = (/obj/structure/cable{tag = "icon-2-8"; icon_state = "2-8"; d1 = 1; d2 = 2},/obj/effect/landmark{name = "JoinLate"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"n" = (/obj/structure/cable{tag = "icon-2-10"; icon_state = "2-10"; d1 = 1; d2 = 2},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"o" = (/obj/machinery/light{dir = 4},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"p" = (/obj/structure/cable{d1 = 1; d2 = 2; icon_state = "1-2"},/obj/structure/cable{tag = "icon-2-5"; icon_state = "2-5"; d1 = 1; d2 = 2},/turf/simulated/floor/plating,/area/storage/testroom)
+"q" = (/obj/structure/cable{tag = "icon-1-5"; icon_state = "1-5"; d1 = 1; d2 = 2},/obj/effect/landmark{name = "JoinLate"},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"r" = (/obj/structure/cable{tag = "icon-1-4"; icon_state = "1-4"; d1 = 1; d2 = 2},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"s" = (/obj/structure/cable{tag = "icon-1-8"; icon_state = "1-8"; d1 = 1; d2 = 2},/turf/simulated/floor{icon_state = "freezerfloor"},/area/storage/testroom)
+"t" = (/obj/machinery/networked/power/smes/magical,/obj/structure/cable,/turf/simulated/floor/plating,/area/storage/testroom)
+"u" = (/obj/machinery/networked/power/terminal{dir = 1},/turf/simulated/wall/r_wall,/area/storage/testroom)
 
 (1,1,1) = {"
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -92,13 +102,13 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaabbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaabcdcefffbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaabcgcefffbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaabhgiefffbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaabcgcefffbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaabcjcefffbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaabbkbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaabbbbbbcbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaabdedfghgbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaabdidfgjgbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaabkilmnjobaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaabdpdqrsgbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaabdtdfgggbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaabbubbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

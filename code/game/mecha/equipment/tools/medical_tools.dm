@@ -363,6 +363,7 @@
 		var/obj/structure/cable/NC = new(new_turf)
 		NC.d1 = 0
 		NC.d2 = fdirn
+		NC.update_powernet()
 		NC.update_icon()
 
 		//var/datum/network/power/PN

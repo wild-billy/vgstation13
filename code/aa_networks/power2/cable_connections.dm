@@ -48,12 +48,14 @@ buildFrom()
 	var/obj/structure/cable/C
 	for(var/key in parts)
 		C = parts[key]
-		connections |= C.d1 | C.d2
+		connections |= dir2netdir(C.d1) | dir2netdir(C.d2)
 		if(!C.d1 || !C.d2)
 			connections |= NET_NODE
 	initialize_directions = connections
+	update_icon()
 
 /obj/machinery/networked/power/cable/connect_to_network()
+	connected_dirs = 0
 	update_directions()
 	..()
 	update_icon()
@@ -72,6 +74,8 @@ buildFrom()
 		connect_to_network()
 	else
 		update_directions()
+		update_icon()
+	testing("Added link [key]")
 	return 1
 
 /obj/machinery/networked/power/cable/proc/rmLink(var/obj/structure/cable/C,var/autoclean=1)
@@ -79,6 +83,7 @@ buildFrom()
 	if(key in parts)
 		parts.Remove(key)
 		rebuild_connections()
+		testing("Removed link [key]")
 	if(autoclean && parts.len==0)
 		qdel(src)
 

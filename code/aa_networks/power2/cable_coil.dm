@@ -139,7 +139,6 @@
 			dirn = get_dir(F, user)
 
 		for(var/obj/structure/cable/LC in F)
-			// If we carry data and the existing cable carries power, skip over it.
 			if((LC.d1 == dirn && LC.d2 == 0 ) || ( LC.d2 == dirn && LC.d1 == 0))
 				user << "There's already a cable at that position."
 				return
@@ -149,8 +148,8 @@
 		C.d1 = 0
 		C.d2 = dirn
 		C.add_fingerprint(user)
-		C.initialize()
-
+		C.update_powernet()
+		C.update_icon()
 
 		use(1)
 		if (C.cable.shock(user, 50))
@@ -197,8 +196,11 @@
 			var/obj/structure/cable/NC = new cable_type(U)
 			NC.d1 = 0
 			NC.d2 = fdirn
+			if(NC.cable)
+				NC.cable.rmLink(C)
 			NC.add_fingerprint()
-			NC.initialize()
+			NC.update_powernet()
+			NC.update_icon()
 			use(1)
 			if (NC.cable.shock(user, 50))
 				if (prob(50)) //fail
@@ -224,12 +226,16 @@
 				user << "There's already a cable at that position."
 				return
 
+
+		if(C.cable)
+			C.cable.rmLink(C)
+
 		C.d1 = nd1
 		C.d2 = nd2
 
 		C.add_fingerprint()
-		C.cable.rmLink(C,autoclean=0)
-		C.initialize()
+		C.update_powernet()
+		C.update_icon()
 
 		use(1)
 		if (C.cable.shock(user, 50))
