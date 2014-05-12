@@ -25,7 +25,6 @@
 	active_power_usage = 0
 
 /obj/machinery/networked/power/New()
-	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/New()")
 	..()
 
 /obj/machinery/networked/power/check_physnet()
@@ -120,7 +119,6 @@
 
 // Housekeeping and pipe network stuff below
 /obj/machinery/networked/power/network_expand(var/datum/network/power/new_network, var/obj/machinery/networked/power/reference)
-	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/network_expand()")
 	var/idx = nodes.Find(reference)
 	if(idx)
 		powernets[idx]=new_network
