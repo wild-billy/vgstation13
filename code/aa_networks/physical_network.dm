@@ -74,7 +74,7 @@
 
 		for(var/obj/machinery/networked/edge in edges)
 			for(var/obj/machinery/networked/result in edge.physical_expansion())
-				if(!CanNetworkExpand(result) && (result!=reference))
+				if(CanNetworkExpand(result) && (result!=reference))
 					result.network_expand(new_network, edge)
 
 		return 1
