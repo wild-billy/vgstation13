@@ -103,8 +103,6 @@
 			if(found)
 				if(!nodes[node_id])
 					nodes[node_id] = found
-				if(!powernets[node_id])
-					powernets[node_id] = found
 				connected_dirs |= direction
 			node_id++
 
