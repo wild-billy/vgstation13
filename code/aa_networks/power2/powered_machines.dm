@@ -103,6 +103,8 @@
 			if(found)
 				if(!nodes[node_id])
 					nodes[node_id] = found
+				if(!powernets[node_id])
+					powernets[node_id] = found.return_network(src)
 				connected_dirs |= direction
 			node_id++
 
@@ -119,6 +121,10 @@
 /obj/machinery/networked/power/network_expand(var/datum/network/power/new_network, var/obj/machinery/networked/power/reference)
 	var/idx = nodes.Find(reference)
 	if(idx)
+#ifdef DEBUG
+		if(!istype(new_network, /datum/network/power))
+			CRASH("[__FILE__]:[__LINE__]: We were passed a [new_network.type]!")
+#endif
 		powernets[idx]=new_network
 
 	if(new_network.normal_members.Find(src))
@@ -184,6 +190,10 @@
 	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/power/reassign_network()")
 	var/idx = powernets.Find(old_network)
 	if(idx)
+#ifdef DEBUG
+		if(!istype(new_network, /datum/network/power))
+			CRASH("[__FILE__]:[__LINE__]: We were passed a [new_network.type]!")
+#endif
 		powernets[idx]=new_network
 
 	if(powernet == old_network)

@@ -144,11 +144,13 @@ var/global/datum/controller/gameticker/ticker
 		for(var/obj/effect/landmark/spacepod/random/SS in landmarks_list)
 			if(istype(SS))
 				L += SS
-		var/obj/effect/landmark/spacepod/random/S = pick(L)
-		new /obj/spacepod/random(S.loc)
-		for(var/obj in L)
-			if(istype(obj, /obj/effect/landmark/spacepod/random))
-				del(obj)
+		if(L.len > 0)
+			var/obj/effect/landmark/spacepod/random/S = pick(L)
+			if(S)
+				new /obj/spacepod/random(S.loc)
+			for(var/obj in L)
+				if(istype(obj, /obj/effect/landmark/spacepod/random))
+					del(obj)
 		world << "<FONT color='blue'><B>Enjoy the game!</B></FONT>"
 		//world << sound('sound/AI/welcome.ogg') // Skie //Out with the old, in with the new. - N3X15
 		var/welcome_sentence=list('sound/AI/vox_login.ogg')

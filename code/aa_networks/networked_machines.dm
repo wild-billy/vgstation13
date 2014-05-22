@@ -73,7 +73,7 @@ Pipelines + Other Objects -> Pipe network
 	testing("[__FILE__]:[__LINE__]: /obj/machinery/networked/proc/return_network()")
 	return check_network()
 
-/obj/machinery/networked/proc/reassign_network(datum/physical_network/atmos/old_network, datum/physical_network/atmos/new_network)
+/obj/machinery/networked/proc/reassign_network(datum/network/atmos/old_network, datum/network/atmos/new_network)
 	// Used when two pipe_networks are combining
 
 /obj/machinery/networked/proc/check_network()
