@@ -23,37 +23,46 @@
 		..()
 	return
 
-// the power cable object
-
+/**
+ * The power cable object.
+ */
 /obj/structure/cable/New()
 	..()
 
-
-	// ensure d1 & d2 reflect the icon_state for entering and exiting cable
-
+	// Ensure d1 & d2 reflect the icon_state for entering and exiting cable.
 	var/dash = findtext(icon_state, "-")
+	d1 = text2num(copytext(icon_state, 1, dash))
+	d2 = text2num(copytext(icon_state, dash + 1))
 
-	d1 = text2num( copytext( icon_state, 1, dash ) )
+	var/turf/T = src.loc // Hide if turf is not intact.
 
-	d2 = text2num( copytext( icon_state, dash+1 ) )
+	if (level==1)
+		hide(T.intact)
 
-	var/turf/T = src.loc			// hide if turf is not intact
+	cable_list.Add(src)
 
-	if(level==1) hide(T.intact)
-	cable_list += src
+/obj/structure/cable/Destroy() // Called when a cable is deleted.
+	if (!defer_powernet_rebuild) // Set if network will be rebuilt manually.
+		if (powernet)
+			powernet.cut_cable(src) // Update the powernets
 
+	cable_list.Remove(src)
 
-/obj/structure/cable/Del()						// called when a cable is deleted
-	if(!defer_powernet_rebuild)					// set if network will be rebuilt manually
-		if(powernet)
-			powernet.cut_cable(src)				// update the powernets
-	cable_list -= src
-	..()													// then go ahead and delete the cable
+	if (istype(attached))
+		attached.SetLuminosity(0)
+		attached.icon_state = "powersink0"
+		attached.mode = 0
+		processing_objects.Remove(attached)
+		attached.anchored = 0
+		attached.attached = null
+
+	attached = null
+	..() // Then go ahead and delete the cable.
 
 /obj/structure/cable/hide(var/i)
-
-	if(level == 1 && istype(loc, /turf))
+	if (level == 1 && istype(loc, /turf))
 		invisibility = i ? 101 : 0
+
 	updateicon()
 
 /obj/structure/cable/proc/updateicon()
@@ -86,14 +95,14 @@
 			return
 
 		if(src.d1)	// 0-X cables are 1 unit, X-X cables are 2 units long
-			new/obj/item/weapon/cable_coil(T, 2, _color)
+			new/obj/item/weapon/cable_coil(T, 2, l_color)
 		else
-			new/obj/item/weapon/cable_coil(T, 1, _color)
+			new/obj/item/weapon/cable_coil(T, 1, l_color)
 
 		for(var/mob/O in viewers(src, null))
 			O.show_message("\red [user] cuts the cable.", 1)
 
-		var/message = "A wire has been cut"
+		var/message = "A wire has been cut "
 		var/atom/A = user
 		if(A)
 			var/turf/Z = get_turf(A)
@@ -108,7 +117,7 @@
 				message += " - Cut By: [M.real_name] ([M.key]) (<A HREF='?_src_=holder;adminplayeropts=\ref[M]'>PP</A>) (<A HREF='?_src_=holder;adminmoreinfo=\ref[M]'>?</A>)"
 				log_game("[M.real_name] ([M.key]) cut a wire in [my_area.name] ([T.x],[T.y],[T.z])")
 		message_admins(message, 0, 1)
-		del(src)
+		qdel(src)
 
 		return	// not needed, but for clarity
 
@@ -154,12 +163,12 @@
 			qdel(src)
 		if(2.0)
 			if (prob(50))
-				new/obj/item/weapon/cable_coil(src.loc, src.d1 ? 2 : 1, _color)
+				new/obj/item/weapon/cable_coil(src.loc, src.d1 ? 2 : 1, l_color)
 				qdel(src)
 
 		if(3.0)
 			if (prob(25))
-				new/obj/item/weapon/cable_coil(src.loc, src.d1 ? 2 : 1, _color)
+				new/obj/item/weapon/cable_coil(src.loc, src.d1 ? 2 : 1, l_color)
 				qdel(src)
 	return
 
@@ -178,8 +187,8 @@
 	w_class = 2.0
 	throw_speed = 2
 	throw_range = 5
-	m_amt = 50
-	g_amt = 20
+	m_amt = CC_PER_SHEET_METAL
+	w_type = RECYK_METAL
 	flags = TABLEPASS | USEDELAY | FPRINT | CONDUCT
 	slot_flags = SLOT_BELT
 	item_state = "coil_red"
@@ -191,7 +200,7 @@
 
 
 /obj/item/weapon/cable_coil/New(loc, length = MAXCOIL, var/param_color = null)
-	..()
+	. = ..()
 	src.amount = length
 	if (param_color)
 		_color = param_color
@@ -318,7 +327,6 @@
 		C.updateicon()
 
 		C.powernet = new()
-		powernets += C.powernet
 		C.powernet.cables += C
 
 		C.mergeConnectedNetworks(C.d2)
@@ -328,8 +336,8 @@
 		use(1)
 		if (C.shock(user, 50))
 			if (prob(50)) //fail
-				new/obj/item/weapon/cable_coil(C.loc, 1, C._color)
-				del(C)
+				new/obj/item/weapon/cable_coil(C.loc, 1, C.l_color)
+				qdel(C)
 		//src.laying = 1
 		//last = C
 
@@ -388,8 +396,8 @@
 			use(1)
 			if (NC.shock(user, 50))
 				if (prob(50)) //fail
-					new/obj/item/weapon/cable_coil(NC.loc, 1, NC._color)
-					del(NC)
+					new/obj/item/weapon/cable_coil(NC.loc, 1, NC.l_color)
+					qdel(NC)
 
 			return
 	else if(C.d1 == 0)		// exisiting cable doesn't point at our position, so see if it's a stub
@@ -427,8 +435,8 @@
 		use(1)
 		if (C.shock(user, 50))
 			if (prob(50)) //fail
-				new/obj/item/weapon/cable_coil(C.loc, 2, C._color)
-				del(C)
+				new/obj/item/weapon/cable_coil(C.loc, 2, C.l_color)
+				qdel(C)
 
 		return
 
@@ -452,7 +460,6 @@
 
 			if(!TC.powernet)
 				TC.powernet = new()
-				powernets += TC.powernet
 				TC.powernet.cables += TC
 
 			if(powernet)
@@ -467,7 +474,6 @@
 /obj/structure/cable/proc/mergeConnectedNetworksOnTurf()
 	if(!powernet)
 		powernet = new()
-		powernets += powernet
 		powernet.cables += src
 
 	for(var/AM in loc)
@@ -487,7 +493,7 @@
 				merge_powernets(powernet, N.terminal.powernet)
 			else
 				N.terminal.powernet = powernet
-				powernet.nodes[N.terminal] = N.terminal
+				powernet.nodes.Add(N.terminal)
 
 		else if(istype(AM,/obj/machinery/power))
 			var/obj/machinery/power/M = AM
@@ -496,14 +502,14 @@
 				merge_powernets(powernet, M.powernet)
 			else
 				M.powernet = powernet
-				powernet.nodes[M] = M
+				powernet.nodes.Add(M)
 
 
 obj/structure/cable/proc/cableColor(var/colorC)
 	var/color_n = "red"
 	if(colorC)
 		color_n = colorC
-	_color = color_n
+	l_color = color_n
 	switch(colorC)
 		if("red")
 			icon = 'icons/obj/power_cond_red.dmi'

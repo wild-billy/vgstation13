@@ -32,7 +32,6 @@
 	flag = "energy"
 	var/temperature = 300
 
-
 	on_hit(var/atom/target, var/blocked = 0)//These two could likely check temp protection on the mob
 		if(istype(target, /mob/living))
 			var/mob/M = target
@@ -138,3 +137,118 @@
 			var/mob/living/carbon/human/M = target
 			M.adjustBrainLoss(20)
 			M.hallucination += 20
+
+/obj/item/projectile/thrownbolas
+	name ="bolas"
+	icon_state= "bolas_thrown"
+	damage = 3
+	kill_count = 50
+	damage_type = BRUTE
+	flag = "bullet"
+	anchored = 0 //it's an object, can still be affected by singularity
+
+	on_hit(var/atom/target, var/blocked = 0)
+		log_admin("[src] has hit an atom of [target]")
+		if(isliving(target) && current != starting) //if the target is a live creature other than the thrower
+			var/mob/living/M = target
+			if(ishuman(M)) //if they're a human species
+				var/mob/living/carbon/human/H = M
+				if(H.m_intent == "run") //if they're set to run (though not necessarily running at that moment)
+					if(prob(70)) //this probability is up for change and mostly a placeholder - Comic
+						step(H, H.dir)
+						H << "\blue Your legs have been tangled!"
+						viewers(H) << "\red [H] was tripped by the bolas!"
+						H.Stun(5) //used instead of setting damage in vars to avoid non-human targets being affected
+						H.Weaken(10)
+						H.legcuffed = new /obj/item/weapon/legcuffs/bolas(H) //applies legcuff properties inherited through legcuffs
+						H.update_inv_legcuffed()
+				else if(H.legcuffed) //if the target is already legcuffed (has to be walking)
+					OnDeath()
+				else //walking, but uncuffed, or the running prob(70) failed
+					H << "\blue You stumble over the thrown bolas"
+					step(H, H.dir)
+					H.m_intent = "walk"
+					OnDeath()
+			else
+				M.Stun(2) //minor stun damage to anything not human
+				OnDeath()
+		else
+			OnDeath()
+
+	OnDeath()
+		if(shot_from == "hand") //if it's thrown, we want it to respawn the item. Mechs don't do this to avoid spam and infinite bolas works
+			var /obj/item/weapon/legcuffs/bolas/B = new /obj/item/weapon/legcuffs/bolas
+			B.loc = current
+		Destroy()
+
+/obj/item/projectile/kinetic
+	name = "kinetic force"
+	icon_state = "energy"
+	damage = 15
+	damage_type = BRUTE
+	flag = "energy"
+	var/range = 2
+
+obj/item/projectile/kinetic/New()
+	var/turf/proj_turf = get_turf(src)
+	if(!istype(proj_turf, /turf))
+		return
+	var/datum/gas_mixture/environment = proj_turf.return_air()
+	var/pressure = environment.return_pressure()
+	if(pressure < 50)
+		name = "full strength kinetic force"
+		damage = 30
+	..()
+
+/* wat - N3X
+/obj/item/projectile/kinetic/Range()
+	range--
+	if(range <= 0)
+		new /obj/item/effect/kinetic_blast(src.loc)
+		qdel(src)
+*/
+
+/obj/item/projectile/kinetic/on_hit(var/atom/target, var/blocked = 0)
+	if(!loc) return
+	var/turf/target_turf = get_turf(target)
+	//testing("Hit [target.type], on [target_turf.type].")
+	if(istype(target_turf, /turf/unsimulated/mineral))
+		var/turf/unsimulated/mineral/M = target_turf
+		M.GetDrilled()
+	new /obj/item/effect/kinetic_blast(target_turf)
+	..(target,blocked)
+
+/obj/item/projectile/kinetic/Bump(atom/A as mob|obj|turf|area)
+	if(!loc) return
+	if(A == firer)
+		loc = A.loc
+		return
+
+	if(src)//Do not add to this if() statement, otherwise the meteor won't delete them
+
+		if(A)
+			var/turf/target_turf = get_turf(A)
+			//testing("Bumped [A.type], on [target_turf.type].")
+			if(istype(target_turf, /turf/unsimulated/mineral))
+				var/turf/unsimulated/mineral/M = target_turf
+				M.GetDrilled()
+			// Now we bump as a bullet, if the atom is a non-turf.
+			if(!isturf(A))
+				..(A)
+			//qdel(src) // Comment this out if you want to shoot through the asteroid, ERASER-style.
+			returnToPool(src)
+			return 1
+	else
+		//qdel(src)
+		returnToPool(src)
+		return 0
+
+/obj/item/effect/kinetic_blast
+	name = "kinetic explosion"
+	icon = 'icons/obj/projectiles.dmi'
+	icon_state = "kinetic_blast"
+	layer = 4.1
+
+/obj/item/effect/kinetic_blast/New()
+	spawn(4)
+		del(src)

@@ -3,6 +3,14 @@
 	..()
 	if (monkeyizing)	return
 	if(!loc)			return	// Fixing a null error that occurs when the mob isn't found in the world -- TLE
+	if(reagents.has_reagent("bustanut"))
+		if(!(M_HARDCORE in mutations))
+			mutations.Add(M_HARDCORE)
+			src << "<span class='notice'>You feel like you're the best around.  Nothing's going to get you down.</span>"
+	else
+		if(M_HARDCORE in mutations)
+			mutations.Remove(M_HARDCORE)
+			src << "<span class='notice'>You feel like a pleb.</span>"
 	if(mind)
 		if(mind in ticker.mode.implanted)
 			if(implanting) return
@@ -25,7 +33,7 @@
 	set hidden = 1
 	if ((src.health < 0 && src.health > -95.0))
 		src.attack_log += "[src] has succumbed to death with [health] points of health!"
-		src.adjustOxyLoss(src.health + 200)
+		src.apply_damage(maxHealth + 5 + src.health, OXY) // This will ensure people die when using the command, but don't go into overkill. 15 oxy points over the limit for safety since brute and burn regenerates
 		src.health = 100 - src.getOxyLoss() - src.getToxLoss() - src.getFireLoss() - src.getBruteLoss()
 		src << "\blue You have given up life and succumbed to death."
 
@@ -441,7 +449,7 @@
 						var/atom/movable/t = M.pulling
 						M.stop_pulling()
 
-						//this is the gay blood on floor shit -- Added back -- Skie
+						/*//this is the gay blood on floor shit -- Added back -- Skie
 						if (M.lying && (prob(M.getBruteLoss() / 6)))
 							var/turf/location = M.loc
 							if (istype(location, /turf/simulated))
@@ -461,17 +469,16 @@
 										var/mob/living/carbon/H = M
 										var/blood_volume = round(H:vessel.get_reagent_amount("blood"))
 										if(blood_volume > 0)
-											H:vessel.remove_reagent("blood",1)
+											H:vessel.remove_reagent("blood",1)*/
 
 
 						step(pulling, get_dir(pulling.loc, T))
 						M.start_pulling(t)
 				else
 					if (pulling)
-						if (istype(pulling, /obj/structure/window))
-							if(pulling:ini_dir == NORTHWEST || pulling:ini_dir == NORTHEAST || pulling:ini_dir == SOUTHWEST || pulling:ini_dir == SOUTHEAST)
-								for(var/obj/structure/window/win in get_step(pulling,get_dir(pulling.loc, T)))
-									stop_pulling()
+						if (istype(pulling, /obj/structure/window/full))
+							for(var/obj/structure/window/win in get_step(pulling,get_dir(pulling.loc, T)))
+								stop_pulling()
 					if (pulling)
 						step(pulling, get_dir(pulling.loc, T))
 	else
@@ -582,7 +589,7 @@
 			L.buckled.manual_unbuckle(L)
 
 	//Breaking out of a locker?
-	else if( src.loc && (istype(src.loc, /obj/structure/closet)) )
+	if( src.loc && (istype(src.loc, /obj/structure/closet)) )
 		var/breakout_time = 2 //2 minutes by default
 
 		var/obj/structure/closet/C = L.loc
@@ -607,7 +614,7 @@
 
 
 		spawn(0)
-			if(do_after(usr,(breakout_time*60*10))) //minutes * 60seconds * 10deciseconds
+			if(do_after(usr,breakout_time * 60 * 10)) //minutes * 60seconds * 10deciseconds
 				if(!C || !L || L.stat != CONSCIOUS || L.loc != C || C.opened) //closet/user destroyed OR user dead/unconcious OR user no longer in closet OR closet opened
 					return
 
@@ -629,8 +636,9 @@
 					sleep(10)
 					flick(SC.icon_broken, SC)
 					sleep(10)
-					SC.broken = 1
+					SC.broken = SC.locked // If it's only welded just break the welding, dont break the lock.
 					SC.locked = 0
+					SC.welded = 0
 					usr << "\red You successfully break out!"
 					for(var/mob/O in viewers(L.loc))
 						O.show_message("\red <B>\the [usr] successfully broke out of \the [SC]!</B>", 1)
@@ -651,6 +659,16 @@
 	//breaking out of handcuffs
 	else if(iscarbon(L))
 		var/mob/living/carbon/CM = L
+		if(CM.on_fire && CM.canmove)
+			CM.fire_stacks -= 5
+			CM.weakened = 5
+			CM.visible_message("<span class='danger'>[CM] rolls on the floor, trying to put themselves out!</span>", \
+				"<span class='notice'>You stop, drop, and roll!</span>")
+			if(fire_stacks <= 0)
+				CM.visible_message("<span class='danger'>[CM] has successfully extinguished themselves!</span>", \
+					"<span class='notice'>You extinguish yourself.</span>")
+				ExtinguishMob()
+			return
 		if(CM.handcuffed && CM.canmove && (CM.last_special <= world.time))
 			CM.next_move = world.time + 100
 			CM.last_special = world.time + 100

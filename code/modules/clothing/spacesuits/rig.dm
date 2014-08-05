@@ -10,7 +10,7 @@
 	var/on = 0
 	var/no_light=0 // Disable the light on the atmos suit
 	_color = "engineering" //Determines used sprites: rig[on]-[_color] and rig[on]-[_color]2 (lying down sprite)
-	icon_action_button = "action_hardhat"
+	action_button_name = "Toggle Helmet Light"
 	heat_protection = HEAD
 	max_heat_protection_temperature = SPACE_SUIT_MAX_HEAT_PROTECITON_TEMPERATURE
 
@@ -132,6 +132,8 @@
 	armor = list(melee = 40, bullet = 20, laser = 20,energy = 20, bomb = 35, bio = 100, rad = 60)
 	siemens_coefficient = 0.7
 
+	wizard_garb = 1
+
 /obj/item/clothing/suit/space/rig/wizard
 	icon_state = "rig-wiz"
 	name = "gem-encrusted hardsuit"
@@ -143,6 +145,7 @@
 	armor = list(melee = 40, bullet = 20, laser = 20,energy = 20, bomb = 35, bio = 100, rad = 60)
 	siemens_coefficient = 0.7
 
+	wizard_garb = 1
 
 //Medical Rig
 /obj/item/clothing/head/helmet/space/rig/medical

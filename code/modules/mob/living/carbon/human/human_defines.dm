@@ -32,7 +32,7 @@
 	var/obj/item/shoes = null
 	var/obj/item/belt = null
 	var/obj/item/gloves = null
-	var/obj/item/glasses = null
+	var/obj/item/clothing/glasses/glasses = null
 	var/obj/item/head = null
 	var/obj/item/ears = null
 	var/obj/item/wear_id = null
@@ -53,6 +53,9 @@
 
 	var/failed_last_breath = 0 //This is used to determine if the mob failed a breath. If they did fail a brath, they will attempt to breathe each tick, otherwise just once per 4 ticks.
 
+	var/last_dam = -1	//Used for determining if we need to process all organs or just some or even none.
+	var/list/bad_external_organs = list()// organs we check until they are good.
+
 	var/xylophone = 0 //For the spoooooooky xylophone cooldown
 
 	var/mob/remoteview_target = null
@@ -63,3 +66,6 @@
 	var/check_mutations=0 // Check mutations on next life tick
 
 	var/lastFart = 0 // Toxic fart cooldown.
+
+	fire_dmi = 'icons/mob/OnFire.dmi'
+	fire_sprite = "Standing"

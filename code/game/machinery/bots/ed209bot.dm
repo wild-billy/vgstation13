@@ -866,7 +866,7 @@ Auto Patrol: []"},
 		pulse2.anchored = 1
 		pulse2.dir = pick(cardinal)
 		spawn(10)
-			pulse2.delete()
+			qdel(pulse2)
 		var/list/mob/living/carbon/targets = new
 		for (var/mob/living/carbon/C in view(12,src))
 			if (C.stat==2)
@@ -1020,7 +1020,8 @@ Auto Patrol: []"},
 	if((src.lasercolor == "b") && (src.disabled == 0))
 		if(istype(Proj, /obj/item/projectile/beam/lastertag/red))
 			src.disabled = 1
-			del (Proj)
+			//del (Proj)
+			returnToPool(Proj)
 			sleep(100)
 			src.disabled = 0
 		else
@@ -1028,7 +1029,8 @@ Auto Patrol: []"},
 	else if((src.lasercolor == "r") && (src.disabled == 0))
 		if(istype(Proj, /obj/item/projectile/beam/lastertag/blue))
 			src.disabled = 1
-			del (Proj)
+			//del (Proj)
+			returnToPool(Proj)
 			sleep(100)
 			src.disabled = 0
 		else

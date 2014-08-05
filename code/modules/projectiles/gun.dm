@@ -7,6 +7,7 @@
 	flags =  FPRINT | TABLEPASS | CONDUCT |  USEDELAY
 	slot_flags = SLOT_BELT
 	m_amt = 2000
+	w_type = RECYK_METAL
 	w_class = 3.0
 	throwforce = 5
 	throw_speed = 4
@@ -73,7 +74,7 @@
 				del(src)
 				return
 
-	if (!user.IsAdvancedToolUser() || isMoMMI(user))
+	if (!user.IsAdvancedToolUser() || isMoMMI(user) || istype(user, /mob/living/carbon/monkey/diona))
 		user << "\red You don't have the dexterity to do this!"
 		return
 	if(istype(user, /mob/living))
@@ -180,6 +181,9 @@
 /obj/item/weapon/gun/attack(mob/living/M as mob, mob/living/user as mob, def_zone)
 	//Suicide handling.
 	if (M == user && user.zone_sel.selecting == "mouth" && !mouthshoot)
+		if(istype(M.wear_mask, /obj/item/clothing/mask/happy))
+			M << "<span class='sinister'>BUT WHY? I'M SO HAPPY!</span>"
+			return
 		mouthshoot = 1
 		M.visible_message("\red [user] sticks their gun in their mouth, ready to pull the trigger...")
 		if(!do_after(user, 40))
@@ -195,6 +199,7 @@
 			in_chamber.on_hit(M)
 			if (!in_chamber.nodamage)
 				user.apply_damage(in_chamber.damage*2.5, in_chamber.damage_type, "head", used_weapon = "Point blank shot in the mouth with \a [in_chamber]")
+				user.stat=2 // Just to be sure
 				user.death()
 			else
 				user << "<span class = 'notice'>Ow...</span>"

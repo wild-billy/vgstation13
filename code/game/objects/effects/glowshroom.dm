@@ -16,14 +16,13 @@
 	var/spreadChance = 40
 	var/spreadIntoAdjacentChance = 60
 	var/evolveChance = 2
+	w_type=NOT_RECYCLABLE
 
 /obj/effect/glowshroom/single
 	spreadChance = 0
 
 /obj/effect/glowshroom/New()
-
 	..()
-
 	dir = CalcDir()
 
 	if(!floor)
@@ -42,7 +41,7 @@
 
 	spawn(delay)
 		SetLuminosity(round(potency/10))
-		Spread()
+		// Spread() - Methinks this is broken - N3X
 
 /obj/effect/glowshroom/proc/Spread()
 	//set background = 1
@@ -148,7 +147,7 @@
 		else
 	return
 
-/obj/effect/glowshroom/temperature_expose(datum/gas_mixture/air, exposed_temperature, exposed_volume)
+/obj/effect/glowshroom/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	if(exposed_temperature > 300)
 		endurance -= 5
 		CheckEndurance()

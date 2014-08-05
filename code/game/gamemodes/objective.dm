@@ -1,10 +1,11 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
 
-var/list/potential_theft_objectives=typesof(/datum/theft_objective) \
-	- /datum/theft_objective \
-	- /datum/theft_objective/special \
-	- /datum/theft_objective/number \
-	- /datum/theft_objective/number/special
+var/list/potential_theft_objectives=list(
+	"traitor" = typesof(/datum/theft_objective/traitor) - /datum/theft_objective/traitor,
+	"special" = typesof(/datum/theft_objective/special) - /datum/theft_objective/special,
+	"heist"   = typesof(/datum/theft_objective/heist) + typesof(/datum/theft_objective/number/heist) - /datum/theft_objective/heist - /datum/theft_objective/number/heist,
+	"salvage" = typesof(/datum/theft_objective/number/salvage) - /datum/theft_objective/number/salvage
+)
 
 /datum/objective
 	var/antag_role/role
@@ -491,30 +492,27 @@ var/list/potential_theft_objectives=typesof(/datum/theft_objective) \
 
 
 /datum/objective/steal
+	var/target_category = "traitor"
 	var/datum/theft_objective/steal_target
 
-	find_target(var/special_only=0)
+	find_target()
 		var/loop=50
 		while(!steal_target && loop > 0)
 			loop--
-			var/thefttype = pick(potential_theft_objectives)
+			var/thefttype = pick(potential_theft_objectives[target_category])
 			var/datum/theft_objective/O = new thefttype
 			if(owner.assigned_role in O.protected_jobs)
 				continue
-			if(special_only)
-				if(!(O.flags & 1)) // THEFT_FLAG_SPECIAL
-					continue
-			else
-				if(O.flags & 1) // THEFT_FLAG_SPECIAL
-					continue
 			steal_target=O
-			explanation_text = "Steal [O]."
+			explanation_text = format_explanation()
 			return
 		explanation_text = "Free Objective."
 
+	proc/format_explanation()
+		return "Steal [steal_target.name]."
 
 	proc/select_target()
-		var/list/possible_items_all = potential_theft_objectives+"custom"
+		var/list/possible_items_all = potential_theft_objectives[target_category]+"custom"
 		var/new_target = input("Select target:", "Objective target", null) as null|anything in possible_items_all
 		if (!new_target) return
 		if (new_target == "custom")
@@ -524,21 +522,20 @@ var/list/potential_theft_objectives=typesof(/datum/theft_objective) \
 			var/tmp_obj = new O.typepath
 			var/custom_name = tmp_obj:name
 			del(tmp_obj)
-			O.name = copytext(sanitize(input("Enter target name:", "Objective target", custom_name) as text|null),1,MAX_MESSAGE_LEN)
+			O.name = copytext(sanitize(input("Enter target name:", "Objective target", custom_name) as text|null),1,MAX_NAME_LEN)
 			if (!O.name) return
 			steal_target = O
-			explanation_text = "Steal [O.name]."
+			explanation_text = format_explanation()
 		else
 			steal_target = new new_target
-			explanation_text = "Steal [steal_target.name]."
+			explanation_text = format_explanation()
 		return steal_target
 
 	check_completion()
 		if(!steal_target) return 1 // Free Objective
 		return steal_target.check_completion(owner)
 
-
-/datum/objective/download
+datum/objective/download
 	proc/gen_amount_goal()
 		target_amount = rand(10,20)
 		explanation_text = "Download [target_amount] research levels."

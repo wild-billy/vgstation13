@@ -10,14 +10,14 @@
 	var/turf/T=get_turf(src)
 	switch(state)
 		if(0)
-			if(istype(W, /obj/item/weapon/circuitboard/airlock))
+			if(istype(W, /obj/item/weapon/circuitboard/airlock) && W:icon_state != "door_electronics_smoked")
 				user.drop_item()
 				circuit=W
 				circuit.loc=src
 				state++
 				playsound(get_turf(src), 'sound/items/Screwdriver.ogg', 50, 1)
 			if(istype(W, /obj/item/weapon/crowbar))
-				new /obj/machinery/constructable_frame(T)
+				new /obj/machinery/constructable_frame/machine_frame(T)
 				new /obj/item/stack/sheet/glass(T)
 				del(src)
 				playsound(get_turf(src), 'sound/items/Crowbar.ogg', 50, 1)
@@ -65,7 +65,7 @@
 	var/destroyed = 0
 	var/locked = 0
 	var/ue=null
-	var/icon/occupant_overlay=null
+	var/image/occupant_overlay=null
 
 	var/obj/item/weapon/circuitboard/airlock/circuit
 
@@ -73,6 +73,18 @@
 	occupant=new /obj/item/weapon/gun/energy/laser/captain(src)
 	locked=1
 	req_access=list(access_captain)
+	update_icon()
+
+/obj/structure/displaycase/gooncode/New()
+	occupant=new /obj/item/toy/gooncode(src)
+	locked=1
+	req_access=list(access_captain)
+	update_icon()
+
+/obj/structure/displaycase/lamarr/New()
+	occupant=new /obj/item/clothing/mask/facehugger/lamarr(src)
+	locked=1
+	req_access=list(access_rd)
 	update_icon()
 
 /obj/structure/displaycase/examine()
@@ -92,7 +104,7 @@
 /obj/structure/displaycase/ex_act(severity)
 	switch(severity)
 		if (1)
-			new /obj/item/weapon/shard( src.loc )
+			getFromPool(/obj/item/weapon/shard, loc)
 			if (occupant)
 				dump()
 			qdel(src)
@@ -115,13 +127,13 @@
 
 /obj/structure/displaycase/blob_act()
 	if (prob(75))
-		new /obj/item/weapon/shard( src.loc )
+		getFromPool(/obj/item/weapon/shard, loc)
 		if(occupant) dump()
 		del(src)
 
 
 /obj/structure/displaycase/meteorhit(obj/O as obj)
-		new /obj/item/weapon/shard( src.loc )
+		getFromPool(/obj/item/weapon/shard, loc)
 		if(occupant) dump()
 		del(src)
 
@@ -131,7 +143,7 @@
 		if (!( src.destroyed ))
 			src.density = 0
 			src.destroyed = 1
-			new /obj/item/weapon/shard( src.loc )
+			getFromPool(/obj/item/weapon/shard, loc)
 			playsound(get_turf(src), "shatter", 70, 1)
 			update_icon()
 	else
@@ -143,14 +155,17 @@
 		src.icon_state = "glassbox2b"
 	else
 		src.icon_state = "glassbox2[locked]"
-	underlays.Cut()
+	overlays = 0
 	if(occupant)
-		if(!occupant_overlay)
-			occupant_overlay=getFlatIcon(occupant)
-			occupant_overlay.Scale(16,16)
-			occupant_overlay.Shift(NORTH, 8)
-			occupant_overlay.Shift(EAST, 8)
-		underlays += occupant_overlay
+		var/icon/occupant_icon=getFlatIcon(occupant)
+		occupant_icon.Scale(16,16)
+		occupant_overlay = image(occupant_icon)
+		occupant_overlay.pixel_x=8
+		occupant_overlay.pixel_y=8
+		if(locked)
+			occupant_overlay.alpha=128//ChangeOpacity(0.5)
+		//underlays += occupant_overlay
+		overlays += occupant_overlay
 	return
 
 
@@ -191,9 +206,10 @@
 		else
 			C.loc=T
 			circuit=null
-			new /obj/machinery/constructable_frame(T)
+			new /obj/machinery/constructable_frame/machine_frame(T)
 		del(src)
 	if(user.a_intent == "hurt")
+		user.changeNext_move(10)
 		src.health -= W.force
 		src.healthcheck()
 		..()
@@ -223,6 +239,7 @@
 			update_icon()
 	else
 		if(user.a_intent == "hurt")
+			user.changeNext_move(10)
 			user.visible_message("\red [user.name] kicks \the [src]!", \
 				"\red You kick \the [src]!", \
 				"You hear glass crack.")

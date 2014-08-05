@@ -14,6 +14,7 @@ var/list/department_radio_keys = list(
 	  ":a" = "alientalk",	"#a" = "alientalk",		".a" = "alientalk",
 	  ":t" = "Syndicate",	"#t" = "Syndicate",		".t" = "Syndicate",
 	  ":u" = "Supply",		"#u" = "Supply",		".u" = "Supply",
+	  ":d" = "Service",     "#d" = "Service",       ".d" = "Service",
 	  ":g" = "changeling",	"#g" = "changeling",	".g" = "changeling",
 
 	  ":R" = "right ear",	"#R" = "right ear",		".R" = "right ear", "!R" = "fake right ear",
@@ -30,6 +31,7 @@ var/list/department_radio_keys = list(
 	  ":A" = "alientalk",	"#A" = "alientalk",		".A" = "alientalk",
 	  ":T" = "Syndicate",	"#T" = "Syndicate",		".T" = "Syndicate",
 	  ":U" = "Supply",		"#U" = "Supply",		".U" = "Supply",
+	  ":D" = "Service",     "#D" = "Service",       ".D" = "Service",
 	  ":G" = "changeling",	"#G" = "changeling",	".G" = "changeling",
 
 	  //kinda localization -- rastaf0
@@ -48,6 +50,7 @@ var/list/department_radio_keys = list(
 	  ":ô" = "alientalk",	"#ô" = "alientalk",		".ô" = "alientalk",
 	  ":å" = "Syndicate",	"#å" = "Syndicate",		".å" = "Syndicate",
 	  ":é" = "Supply",		"#é" = "Supply",		".é" = "Supply",
+	  ":â" = "Service",     "#â" = "Service",       ".â" = "Service",
 	  ":ï" = "changeling",	"#ï" = "changeling",	".ï" = "changeling"
 )
 
@@ -84,9 +87,11 @@ var/list/department_radio_keys = list(
 	message = capitalize(message)
 
 	if (!message)
+		src << "\red You cannot say that ...? \black (SAYDEBUG: message == null)"
 		return
 
 	if(silent)
+		src << "\red You can't speak while silenced."
 		return
 
 	if (stat == 2) // Dead.
@@ -99,10 +104,12 @@ var/list/department_radio_keys = list(
 			src << "\red You cannot speak in IC (muted)."
 			return
 		if (src.client.handle_spam_prevention(message, MUTE_IC))
+			src << "\red Stop spamming, shitbird."
 			return
 
 	// stat == 2 is handled above, so this stops transmission of uncontious messages
 	if (stat)
+		src << "\red You cannot find the strength to form the words."
 		return
 
 	// undo last word status.
@@ -113,10 +120,12 @@ var/list/department_radio_keys = list(
 
 	// Mute disability
 	if (sdisabilities & MUTE)
+		src << "\red Your words don't leave your mouth!"
 		return
 
 	// Muzzled.
 	if (istype(wear_mask, /obj/item/clothing/mask/muzzle))
+		src << "\red [pick("Mmmrf!","Mmmf!","Hmmmf!")]"
 		return
 
 	// Emotes.
@@ -180,6 +189,7 @@ var/list/department_radio_keys = list(
 		message_mode = null //Stunned people shouldn't be able to physically turn on their radio/hold down the button to speak into it
 */
 	if (!message)
+		src << "\red You cannot say that ...? \black (SAYDEBUG: living/say.dm: message == null, before brainloss)"
 		return
 
 	// :downs:
@@ -213,6 +223,131 @@ var/list/department_radio_keys = list(
 	if (stuttering)
 		message = stutter(message)
 
+// BEGIN OLD RADIO CODE
+/////////////////////////////////////////////////////////////////////////
+	var/list/obj/item/used_radios = new
+	var/is_speaking_radio = 0
+
+	switch (message_mode)
+		if ("headset")
+			if (isrobot(src) && src:radio)
+				src:radio.talk_into(src, message)
+				used_radios += src:radio
+				is_speaking_radio = 1
+
+			if (!isrobot(src) && src:ears)
+				src:ears.talk_into(src, message)
+				used_radios += src:ears
+				is_speaking_radio = 1
+
+			message_range = 1
+			italics = 1
+
+
+		if ("secure headset")
+			if (src:ears)
+				src:ears.talk_into(src, message, 1)
+				used_radios += src:ears
+				is_speaking_radio = 1
+
+			message_range = 1
+			italics = 1
+
+		if ("right hand")
+			if (r_hand)
+				r_hand.talk_into(src, message)
+				used_radios += src:r_hand
+				is_speaking_radio = 1
+
+			message_range = 1
+			italics = 1
+
+		if ("left hand")
+			if (l_hand)
+				l_hand.talk_into(src, message)
+				used_radios += src:l_hand
+				is_speaking_radio = 1
+
+			message_range = 1
+			italics = 1
+
+		if ("intercom")
+			for (var/obj/item/device/radio/intercom/I in view(1, null))
+				I.talk_into(src, message)
+				used_radios += I
+				is_speaking_radio = 1
+
+			message_range = 1
+			italics = 1
+
+		//I see no reason to restrict such way of whispering
+		if ("whisper")
+			whisper(message)
+			return
+
+		if ("binary")
+			if(robot_talk_understand || binarycheck())
+			//message = trim(copytext(sanitize(message), 1, MAX_MESSAGE_LEN)) //seems redundant
+				robot_talk(message)
+			return
+
+		if ("alientalk")
+			if(alien_talk_understand || hivecheck())
+			//message = trim(copytext(sanitize(message), 1, MAX_MESSAGE_LEN)) //seems redundant
+				alien_talk(message)
+			return
+
+		if ("department")
+			if(istype(src, /mob/living/carbon))
+				if (src:ears)
+					src:ears.talk_into(src, message, message_mode)
+					used_radios += src:ears
+					is_speaking_radio = 1
+			else if(istype(src, /mob/living/silicon/robot))
+				if (src:radio)
+					src:radio.talk_into(src, message, message_mode)
+					used_radios += src:radio
+			message_range = 1
+			italics = 1
+
+		if ("pAI")
+			if (src:radio)
+				src:radio.talk_into(src, message)
+				used_radios += src:radio
+			message_range = 1
+			italics = 1
+
+		if("changeling")
+			if(mind && mind.changeling)
+				log_say("[key_name(src)] ([mind.changeling.changelingID]): [message]")
+				for(var/mob/Changeling in mob_list)
+					if(istype(Changeling, /mob/living/silicon)) continue //WHY IS THIS NEEDED?
+					if((Changeling.mind && Changeling.mind.changeling) || istype(Changeling, /mob/dead/observer))
+						Changeling << "<i><font color=#800080><b>[mind.changeling.changelingID]:</b> [message]</font></i>"
+					else if(istype(Changeling,/mob/dead/observer)  && (Changeling.client && Changeling.client.prefs.toggles & CHAT_GHOSTEARS))
+						Changeling << "<i><font color=#800080><b>[mind.changeling.changelingID] (:</b> <a href='byond://?src=\ref[Changeling];follow2=\ref[Changeling];follow=\ref[src]'>(Follow)</a> [message]</font></i>"
+				return
+////SPECIAL HEADSETS START
+		else
+			//world << "SPECIAL HEADSETS"
+			if (message_mode in radiochannels)
+				if(isrobot(src))//Seperates robots to prevent runtimes from the ear stuff
+					var/mob/living/silicon/robot/R = src
+					if(R.radio)//Sanityyyy
+						R.radio.talk_into(src, message, message_mode)
+						used_radios += R.radio
+				else
+					if (src:ears)
+						src:ears.talk_into(src, message, message_mode)
+						used_radios += src:ears
+				message_range = 1
+				italics = 1
+/////SPECIAL HEADSETS END
+
+/////////////////////////////////////////////////////////////////////
+// END OLD RADIO CODE
+
+	/*
 	///////////////////////////////////////////////////////////
 	// VIDEO KILLED THE RADIO STAR V2.0
 	//
@@ -333,6 +468,7 @@ var/list/department_radio_keys = list(
 	/////////////////////////////////////////////////////////////////
 	// </NEW RADIO CODE>
 	/////////////////////////////////////////////////////////////////
+	*/
 
 	var/datum/gas_mixture/environment = loc.return_air()
 	if(environment)
@@ -393,7 +529,6 @@ var/list/department_radio_keys = list(
 
 	var/speech_bubble_test = say_test(message)
 	var/image/speech_bubble = image('icons/mob/talk.dmi',src,"h[speech_bubble_test]")
-	spawn(30) del(speech_bubble)
 
 	for(var/mob/M in hearers(5, src))
 		if(M != src && is_speaking_radio)
@@ -433,7 +568,7 @@ var/list/department_radio_keys = list(
 					deaf_message = "<span class='notice'>You cannot hear yourself!</span>"
 					deaf_type = 2 // Since you should be able to hear yourself without looking
 				M:show_message(rendered, 2, deaf_message, deaf_type)
-				M << speech_bubble
+				M.addSpeechBubble(speech_bubble)
 
 	if (length(heard_b))
 		var/message_b
@@ -460,10 +595,10 @@ var/list/department_radio_keys = list(
 					else
 						rendered2 = "<span class='game say'><span class='name'>[voice_name]</span></span> <a href='byond://?src=\ref[MM];follow2=\ref[MM];follow=\ref[src]'>(Follow)</a> <span class='message'>[message_b]</span></span>"
 					MM:show_message(rendered2, 2)
+					MM.addSpeechBubble(speech_bubble)
 					continue
 			if(hascall(M,"show_message"))
 				M:show_message(rendered, 2)
-				M << speech_bubble
 
 			/*
 			if(M.client)
@@ -492,6 +627,12 @@ var/list/department_radio_keys = list(
 			O.catchMessage(message, src)
 
 	log_say("[name]/[key] : [message]")
+
+/mob/proc/addSpeechBubble(image/speech_bubble)
+	if(client)
+		client.images += speech_bubble
+		spawn(30)
+			client.images -= speech_bubble
 
 /obj/effect/speech_bubble
 	var/mob/parent

@@ -22,9 +22,13 @@
 	throw_speed = 7
 	throw_range = 15
 	m_amt = 10
+	w_type = RECYK_MISC
 	var/colour = "black"	//what colour the ink is!
 	pressure_resistance = 2
 
+	suicide_act(mob/user)
+		viewers(user) << "\red <b>[user]is jamming the [src.name]into \his ear! It looks like \he's trying to commit suicide.</b>"
+		return(OXYLOSS)
 
 /obj/item/weapon/pen/blue
 	desc = "It's a normal blue ink pen."
@@ -68,13 +72,9 @@
 
 
 /obj/item/weapon/pen/sleepypen/New()
-	var/datum/reagents/R = new/datum/reagents(30) //Used to be 300
-	reagents = R
-	R.my_atom = src
-	R.add_reagent("chloralhydrate", 22)	//Used to be 100 sleep toxin//30 Chloral seems to be fatal, reducing it to 22./N
-	..()
-	return
-
+	. = ..()
+	create_reagents(30) // Used to be 300
+	reagents.add_reagent("chloralhydrate", 22) // Used to be 100 sleep toxin // 30 Chloral seems to be fatal, reducing it to 22. /N
 
 /obj/item/weapon/pen/sleepypen/attack(mob/M as mob, mob/user as mob)
 	if(!(istype(M,/mob)))

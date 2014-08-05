@@ -11,6 +11,14 @@
 	density = 1
 	var/orient = "LEFT" // "RIGHT" changes the dir suffix to "-r"
 
+	l_color = "#7BF9FF"
+	power_change()
+		..()
+		if(!(stat & (BROKEN|NOPOWER)))
+			SetLuminosity(2)
+		else
+			SetLuminosity(0)
+
 
 /obj/machinery/sleep_console/ex_act(severity)
 	switch(severity)
@@ -202,6 +210,8 @@
 		for(var/obj/OO in src)
 			OO.loc = src.loc
 		src.add_fingerprint(user)
+		if(user.pulling == L)
+			user.pulling = null
 		return
 	return
 

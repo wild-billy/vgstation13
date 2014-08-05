@@ -11,6 +11,8 @@ using metal and glass, it uses glass and reagents (usually sulfuric acis).
 	New(var/K,var/datum/design/D)
 		key=K
 		thing=D
+
+#define IMPRINTER_MAX_Q_LEN 30
 /obj/machinery/r_n_d/circuit_imprinter
 	name = "Circuit Imprinter"
 	icon_state = "circuit_imprinter"
@@ -26,17 +28,21 @@ using metal and glass, it uses glass and reagents (usually sulfuric acis).
 		/obj/item/stack/sheet/glass,
 		/obj/item/stack/sheet/mineral/gold,
 		/obj/item/stack/sheet/mineral/diamond,
-		/obj/item/stack/sheet/mineral/uranium
+		/obj/item/stack/sheet/mineral/uranium,
+		/obj/item/stack/sheet/mineral/plasma
 	)
 
 /obj/machinery/r_n_d/circuit_imprinter/New()
-	..()
-	component_parts = list()
-	component_parts += new /obj/item/weapon/circuitboard/circuit_imprinter(src)
-	component_parts += new /obj/item/weapon/stock_parts/matter_bin(src)
-	component_parts += new /obj/item/weapon/stock_parts/manipulator(src)
-	component_parts += new /obj/item/weapon/reagent_containers/glass/beaker(src)
-	component_parts += new /obj/item/weapon/reagent_containers/glass/beaker(src)
+	. = ..()
+
+	component_parts = newlist(
+		/obj/item/weapon/circuitboard/circuit_imprinter,
+		/obj/item/weapon/stock_parts/matter_bin,
+		/obj/item/weapon/stock_parts/manipulator,
+		/obj/item/weapon/reagent_containers/glass/beaker,
+		/obj/item/weapon/reagent_containers/glass/beaker
+	)
+
 	RefreshParts()
 
 	materials = new
@@ -59,9 +65,8 @@ using metal and glass, it uses glass and reagents (usually sulfuric acis).
 	var/T = 0
 	for(var/obj/item/weapon/reagent_containers/glass/G in component_parts)
 		T += G.reagents.maximum_volume
-	var/datum/reagents/R = new/datum/reagents(T)		//Holder for the reagents used as materials.
-	reagents = R
-	R.my_atom = src
+
+	create_reagents(T) // Holder for the reagents used as materials.
 	T = 0
 	for(var/obj/item/weapon/stock_parts/matter_bin/M in component_parts)
 		T += M.rating
@@ -200,8 +205,11 @@ using metal and glass, it uses glass and reagents (usually sulfuric acis).
 	src.updateUsrDialog()
 
 /obj/machinery/r_n_d/circuit_imprinter/proc/enqueue(var/key, var/datum/design/thing_to_build)
+	if(production_queue.len>=IMPRINTER_MAX_Q_LEN)
+		return 0
 	production_queue.Add(new /datum/circuitimprinter_queue_item(key,thing_to_build))
-	//stopped=0
+	//stopped=1
+	return 1
 
 /obj/machinery/r_n_d/circuit_imprinter/proc/queue_pop()
 	var/datum/circuitimprinter_queue_item/I = production_queue[1]

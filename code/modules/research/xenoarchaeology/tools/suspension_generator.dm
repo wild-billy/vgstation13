@@ -2,7 +2,7 @@
 	name = "suspension field generator"
 	desc = "It has stubby legs bolted up against it's body for stabilising."
 	icon = 'icons/obj/xenoarchaeology.dmi'
-	icon_state = "suspension2"
+	icon_state = "suspension2-b"
 	density = 1
 	req_access = list(access_research)
 	var/obj/item/weapon/cell/cell
@@ -157,11 +157,16 @@
 	if(!open)
 		interact(user)
 	else if(cell)
+		if(isobserver(user))
+			return 0
 		cell.loc = loc
 		cell.add_fingerprint(user)
 		cell.updateicon()
 
-		icon_state = "suspension0"
+		if(anchored)
+			icon_state = "suspension0"
+		else
+			icon_state = "suspension0-b"
 		cell = null
 		user << "<span class='info'>You remove the power cell</span>"
 
@@ -182,7 +187,7 @@
 					else
 						open = 1
 					user << "<span class='info'>You crowbar the battery panel [open ? "open" : "in place"].</span>"
-					icon_state = "suspension[open ? (cell ? "1" : "0") : "2"]"
+					icon_state = "suspension[anchored ? (open ? (cell ? "1" : "0") : "2") : (open ? (cell ? "1-b" : "0-b") : "2-b")]"
 				else
 					user << "<span class='warning'>[src]'s safety locks are engaged, shut it down first.</span>"
 			else
@@ -195,6 +200,7 @@
 				anchored = 0
 			else
 				anchored = 1
+			icon_state = "suspension[anchored ? (open ? (cell ? "1" : "0") : "2") : (open ? (cell ? "1-b" : "0-b") : "2-b")]"
 			user << "<span class='info'>You wrench the stabilising legs [anchored ? "into place" : "up against the body"].</span>"
 			if(anchored)
 				desc = "It is resting securely on four stubby legs."
@@ -211,7 +217,10 @@
 				W.loc = src
 				cell = W
 				user << "<span class='info'>You insert the power cell.</span>"
-				icon_state = "suspension1"
+				if(anchored)
+					icon_state = "suspension1"
+				else
+					icon_state = "suspension1-b"
 	else if(istype(W, /obj/item/weapon/card))
 		var/obj/item/weapon/card/I = W
 		if(!auth_card)
@@ -309,7 +318,7 @@
 	del(suspension_field)
 	icon_state = "suspension2"
 
-/obj/machinery/suspension_gen/Del()
+/obj/machinery/suspension_gen/Destroy()
 	//safety checks: clear the field and drop anything it's holding
 	deactivate()
 	..()
@@ -331,7 +340,7 @@
 	density = 1
 	var/field_type = "chlorine"
 
-/obj/effect/suspension_field/Del()
+/obj/effect/suspension_field/Destroy()
 	for(var/obj/I in src)
 		I.loc = src.loc
 	..()

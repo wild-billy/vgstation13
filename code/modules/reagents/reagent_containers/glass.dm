@@ -19,6 +19,7 @@
 	var/list/can_be_placed_into = list(
 		/obj/machinery/chem_master/,
 		/obj/machinery/chem_dispenser/,
+		/obj/machinery/snackbar_machine/,
 		/obj/machinery/reagentgrinder,
 		/obj/structure/table,
 		/obj/structure/closet,
@@ -37,6 +38,7 @@
 		/mob/living/simple_animal/cow,
 		/mob/living/simple_animal/hostile/retaliate/goat,
 		/obj/machinery/computer/centrifuge,
+		/obj/machinery/icemachine,
 		/obj/machinery/sleeper	)
 
 	New()
@@ -175,6 +177,7 @@
 	item_state = "beaker"
 	m_amt = 0
 	g_amt = 500
+	w_type = RECYK_GLASS
 
 	on_reagent_change()
 		update_icon()
@@ -299,6 +302,7 @@
 	item_state = "bucket"
 	m_amt = 200
 	g_amt = 0
+	w_type = RECYK_METAL
 	w_class = 3.0
 	amount_per_transfer_from_this = 20
 	possible_transfer_amounts = list(10,20,30,50,70)

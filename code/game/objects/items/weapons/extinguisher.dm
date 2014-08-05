@@ -12,19 +12,18 @@
 	throw_speed = 2
 	throw_range = 10
 	force = 10.0
-	m_amt = 90
+	m_amt = 90 // TODO: Check against autolathe.
+	w_type = RECYK_METAL
 	attack_verb = list("slammed", "whacked", "bashed", "thunked", "battered", "bludgeoned", "thrashed")
 	var/max_water = 50
 	var/last_use = 1.0
 	var/safety = 1
 	var/sprite_name = "fire_extinguisher"
 
-	reagents_to_log=list(
-		"fuel"  =  "welder fuel",
-		"plasma"=  "plasma",
-		"pacid" =  "polytrinic acid",
-		"sacid" =  "sulphuric acid"
-	)
+/obj/item/weapon/extinguisher/New()
+	. = ..()
+	create_reagents(max_water)
+	reagents.add_reagent("water", max_water)
 
 /obj/item/weapon/extinguisher/mini
 	name = "fire extinguisher"
@@ -39,12 +38,6 @@
 	m_amt = 0
 	max_water = 30
 	sprite_name = "miniFE"
-
-/obj/item/weapon/extinguisher/New()
-	var/datum/reagents/R = new/datum/reagents(max_water)
-	reagents = R
-	R.my_atom = src
-	R.add_reagent("water", max_water)
 
 /obj/item/weapon/extinguisher/examine()
 	set src in usr
@@ -108,7 +101,7 @@
 					badshit += reagents_to_log[bad_reagent]
 			if(badshit.len)
 				var/hl="\red <b>([english_list(badshit)])</b> \black"
-				message_admins("[user.name] ([user.ckey]) filled \a [src] with [o.reagents.get_reagent_ids()] [hl]. (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)")
+				// message_admins("[user.name] ([user.ckey]) filled \a [src] with [o.reagents.get_reagent_ids()] [hl]. (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)")
 				log_game("[user.name] ([user.ckey]) filled \a [src] with [o.reagents.get_reagent_ids()] [hl]. (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)")
 			o.reagents.trans_to(src, 50)
 			user << "\blue \The [src] is now refilled"

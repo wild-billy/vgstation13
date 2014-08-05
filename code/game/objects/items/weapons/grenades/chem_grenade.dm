@@ -13,11 +13,9 @@
 	var/list/allowed_containers = list(/obj/item/weapon/reagent_containers/glass/beaker, /obj/item/weapon/reagent_containers/glass/bottle)
 	var/affected_area = 3
 
-	New()
-		var/datum/reagents/R = new/datum/reagents(1000)
-		reagents = R
-		R.my_atom = src
-
+	hear_talk(mob/M as mob, message)
+		if(detonator)
+			detonator.hear_talk(M, message)
 	attack_self(mob/user as mob)
 		if(!stage || stage==1)
 			if(detonator)
@@ -150,7 +148,7 @@
 			playsound(get_turf(src), 'sound/items/Screwdriver2.ogg', 50, 1)
 			return
 
-		playsound(get_turf(src), 'sound/effects/bamf.ogg', 50, 1)
+		playsound(get_turf(src), 'sound/effects/bamfgas.ogg', 50, 1)
 
 		for(var/obj/item/weapon/reagent_containers/glass/G in beakers)
 			G.reagents.trans_to(src, G.reagents.total_volume)
@@ -175,6 +173,9 @@
 			for(var/obj/item/weapon/reagent_containers/glass/G in beakers)
 				G.loc = get_turf(src.loc)*/
 
+/obj/item/weapon/grenade/chem_grenade/New()
+	. = ..()
+	create_reagents(1000)
 
 /obj/item/weapon/grenade/chem_grenade/large
 	name = "Large Chem Grenade"

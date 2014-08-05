@@ -27,9 +27,10 @@
 	attack_verb = list("attacked", "stabbed", "poked")
 
 /obj/item/weapon/kitchen/utensil/New()
+	. = ..()
+
 	if (prob(60))
 		src.pixel_y = rand(0, 4)
-	return
 
 /*
  * Spoons
@@ -159,6 +160,7 @@
 	throw_speed = 3
 	throw_range = 6
 	m_amt = 12000
+	w_type = RECYK_METAL
 	origin_tech = "materials=1"
 	attack_verb = list("slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 
@@ -181,6 +183,7 @@
 	name = "Butcher's Cleaver"
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "butch"
+	hitsound = "sound/weapons/rapidslice.ogg"
 	desc = "A huge thing used for chopping and chopping up meat. This includes clowns and clown-by-products."
 	flags = FPRINT | TABLEPASS | CONDUCT
 	force = 15.0
@@ -189,6 +192,7 @@
 	throw_speed = 3
 	throw_range = 6
 	m_amt = 12000
+	w_type = RECYK_METAL
 	origin_tech = "materials=1"
 	attack_verb = list("cleaved", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 
@@ -220,6 +224,7 @@
 	name = "rolling pin"
 	desc = "Used to knock out the Bartender."
 	icon_state = "rolling_pin"
+	hitsound = "sound/weapons/smash.ogg"
 	force = 8.0
 	throwforce = 10.0
 	throw_speed = 2
@@ -279,21 +284,7 @@
 	w_class = 3.0
 	flags = FPRINT | TABLEPASS | CONDUCT
 	m_amt = 3000
-	/* // NOPE
-	var/food_total= 0
-	var/burger_amt = 0
-	var/cheese_amt = 0
-	var/fries_amt = 0
-	var/classyalcdrink_amt = 0
-	var/alcdrink_amt = 0
-	var/bottle_amt = 0
-	var/soda_amt = 0
-	var/carton_amt = 0
-	var/pie_amt = 0
-	var/meatbreadslice_amt = 0
-	var/salad_amt = 0
-	var/miscfood_amt = 0
-	*/
+	w_type = RECYK_METAL
 	var/list/carrying = list() // List of things on the tray. - Doohl
 	var/max_carry = 10 // w_class = 1 -- takes up 1
 					   // w_class = 2 -- takes up 3

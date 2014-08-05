@@ -39,11 +39,15 @@
 //  and to tell our new DNA datum which values to set in order to turn something
 //  on or off.
 var/global/list/dna_activity_bounds[DNA_SE_LENGTH]
+var/global/list/assigned_gene_blocks[DNA_SE_LENGTH]
 
 // Used to determine what each block means (admin hax and species stuff on /vg/, mostly)
 var/global/list/assigned_blocks[DNA_SE_LENGTH]
 
 var/global/list/datum/dna/gene/dna_genes[0]
+
+var/global/list/good_blocks[0]
+var/global/list/bad_blocks[0]
 
 /////////////////
 // GENE DEFINES
@@ -51,7 +55,13 @@ var/global/list/datum/dna/gene/dna_genes[0]
 
 // Skip checking if it's already active.
 // Used for genes that check for value rather than a binary on/off.
-#define GENE_ALWAYS_ACTIVATE 1
+#define GENE_ALWAYS_ACTIVATE   1
+
+// One of the genes that can't be handed out at roundstart
+#define GENE_UNNATURAL         2
+
+#define GENETYPE_BAD  0
+#define GENETYPE_GOOD 1
 
 /datum/dna
 	// READ-ONLY, GETS OVERWRITTEN
@@ -93,6 +103,9 @@ var/global/list/datum/dna/gene/dna_genes[0]
 	new_dna.UpdateUI()
 	new_dna.UpdateSE()
 	return new_dna
+
+/datum/dna/proc/GiveRandomSE(var/notflags = 0, var/flags = 0, var/genetype = -1)
+	SetSEState(pick(query_genes(notflags,flags,genetype)), 1)
 
 ///////////////////////////////////////
 // UNIQUE IDENTITY
@@ -267,7 +280,7 @@ var/global/list/datum/dna/gene/dna_genes[0]
 	if (block<=0) return 0
 	var/list/BOUNDS=GetDNABounds(block)
 	var/value=GetSEValue(block)
-	return (value > BOUNDS[DNA_ON_LOWERBOUND])
+	return (value >= BOUNDS[DNA_ON_LOWERBOUND])
 
 // Set a block "on" or "off".
 /datum/dna/proc/SetSEState(var/block,var/on,var/defer=0)

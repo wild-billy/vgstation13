@@ -30,12 +30,14 @@
 	new /obj/item/clothing/under/rank/miner(src)
 	new /obj/item/clothing/gloves/black(src)
 	new /obj/item/clothing/shoes/black(src)
-	new /obj/item/device/analyzer(src)
+	new /obj/item/device/mining_scanner(src)
 	new /obj/item/weapon/storage/bag/ore(src)
 	new /obj/item/device/flashlight/lantern(src)
 	new /obj/item/weapon/shovel(src)
 	new /obj/item/weapon/pickaxe(src)
 	new /obj/item/clothing/glasses/meson(src)
+	new /obj/item/device/gps/mining(src)
+	new /obj/item/weapon/storage/belt/mining(src)
 
 
 /**********************Shuttle Computer**************************/
@@ -91,7 +93,7 @@ proc/move_mining_shuttle()
 			if(istype(A,/obj/structure/lattice) \
 				|| istype(A, /obj/structure/window) \
 				|| istype(A, /obj/structure/grille))
-				del(A)
+				qdel(A)
 
 		fromArea.move_contents_to(toArea)
 		if (mining_shuttle_location)
@@ -168,7 +170,7 @@ proc/move_mining_shuttle()
 
 			if (src.stat & BROKEN)
 				user << "\blue The broken glass falls out."
-				new /obj/item/weapon/shard( src.loc )
+				getFromPool(/obj/item/weapon/shard, loc)
 				A.state = 3
 				A.icon_state = "3"
 			else
@@ -199,6 +201,7 @@ proc/move_mining_shuttle()
 	item_state = "pickaxe"
 	w_class = 4.0
 	m_amt = 3750 //one sheet, but where can you make them?
+	w_type = RECYK_METAL
 	var/digspeed = 40 //moving the delay to an item var so R&D can make improved picks. --NEO
 	origin_tech = "materials=1;engineering=1"
 	attack_verb = list("hit", "pierced", "sliced", "attacked")
@@ -291,6 +294,7 @@ proc/move_mining_shuttle()
 	item_state = "shovel"
 	w_class = 3.0
 	m_amt = 50
+	w_type = RECYK_MISC
 	origin_tech = "materials=1;engineering=1"
 	attack_verb = list("bashed", "bludgeoned", "thrashed", "whacked")
 

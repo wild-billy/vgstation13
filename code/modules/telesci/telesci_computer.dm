@@ -9,6 +9,8 @@
 	var/teles_left	// How many teleports left until it becomes uncalibrated
 	var/x_off	// X offset
 	var/y_off	// Y offset
+	var x_player_off // x offset set by player
+	var y_player_off // y offset set by player
 	var/x_co = 1	// X coordinate
 	var/y_co = 1	// Y coordinate
 	var/z_co = 1	// Z coordinate
@@ -24,10 +26,12 @@
 /obj/machinery/computer/telescience/New()
 	..()
 	cell=new/obj/item/weapon/cell()
-	cell.charge=0
-	teles_left = rand(8,12)
+	cell.charge = 0
+	teles_left = rand(12,14)
 	x_off = rand(-10,10)
 	y_off = rand(-10,10)
+	x_player_off = 0
+	y_player_off = 0
 	initialize()
 
 /obj/machinery/computer/telescience/initialize()
@@ -94,6 +98,8 @@
 			"maxcharge" = cell.maxcharge
 		)
 	var/list/data=list(
+		"pOffsetX" = x_player_off,
+		"pOffsetY" = y_player_off,
 		"coordx" = x_co,
 		"coordy" = y_co,
 		"coordz" = z_co,
@@ -217,8 +223,8 @@
 	return
 
 /obj/machinery/computer/telescience/proc/doteleport(mob/user)
-	var/trueX = x_co + x_off + WORLD_X_OFFSET
-	var/trueY = y_co + y_off + WORLD_Y_OFFSET
+	var/trueX = x_co + x_off - x_player_off + WORLD_X_OFFSET
+	var/trueY = y_co + y_off - y_player_off + WORLD_Y_OFFSET
 	trueX = Clamp(trueX, 1, world.maxx)
 	trueY = Clamp(trueY, 1, world.maxy)
 	if(telepad)
@@ -228,8 +234,9 @@
 			if(!telepad.amplifier || A.jammed==SUPER_JAMMED)
 				src.visible_message("\red \icon[src] [src] turns on and the lights dim.  You can see a faint shape, but it loses focus and the telepad shuts off with a buzz.  Perhaps you need more signal strength?", "\icon[src]\red You hear something buzz.")
 				return
-			del(telepad.amplifier)
-			src.visible_message("\icon[src]\blue You hear something shatter.","\icon[src]\blue You hear something shatter.")
+			if(prob(25))
+				del(telepad.amplifier)
+				src.visible_message("\icon[src]\blue You hear something shatter.","\icon[src]\blue You hear something shatter.")
 		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
 		s.set_up(5, 1, telepad)
 		s.start()
@@ -272,6 +279,23 @@
 /obj/machinery/computer/telescience/Topic(href, href_list)
 	if(stat & (NOPOWER|BROKEN))
 		return 0
+
+	if(href_list["setPOffsetX"])
+		var/new_x = input("Please input desired X offset.", name, x_player_off) as num
+		if(new_x < -10 || new_x > 10)
+			usr << "<span class='caution'>Error: Invalid X offset (-10 to 10)</span>"
+		else
+			x_player_off = new_x
+		return 1
+
+	if(href_list["setPOffsetY"])
+		var/new_y = input("Please input desired X offset.", name, y_player_off) as num
+		if(new_y < -10 || new_y > 10)
+			usr << "<span class='caution'>Error: Invalid Y offset (-10 to 10)</span>"
+		else
+			y_player_off = new_y
+		return 1
+
 
 	if(href_list["setx"])
 		var/new_x = input("Please input desired X coordinate.", name, x_co) as num
@@ -324,7 +348,7 @@
 		return 1
 
 	if(href_list["recal"])
-		teles_left = rand(9,12)
+		teles_left = rand(12,14)
 		x_off = rand(-10,10)
 		y_off = rand(-10,10)
 		sparks()

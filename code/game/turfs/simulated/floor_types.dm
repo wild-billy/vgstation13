@@ -37,6 +37,8 @@
 	name = "floor"
 	icon_state = "wood"
 	floor_tile = new/obj/item/stack/tile/wood
+	autoignition_temperature = AUTOIGNITION_WOOD
+	autoignition_temperature = AUTOIGNITION_WOOD
 
 /turf/simulated/floor/light
 	name = "Light floor"
@@ -148,7 +150,6 @@
 	thermal_conductivity = 0.05
 	heat_capacity = 0
 	layer = 2
-	accepts_lighting=0
 
 /turf/simulated/shuttle/wall
 	name = "wall"
@@ -212,20 +213,25 @@
 	name = "Carpet"
 	icon_state = "carpet"
 	floor_tile = new/obj/item/stack/tile/carpet
-
+	var/has_siding=1
 	New()
 		floor_tile.New() //I guess New() isn't ran on objects spawned without the definition of a turf to house them, ah well.
 		if(!icon_state)
-			icon_state = "carpet"
+			icon_state = initial(icon_state)
 		..()
-		spawn(4)
-			if(src)
-				update_icon()
-				for(var/direction in list(1,2,4,8,5,6,9,10))
-					if(istype(get_step(src,direction),/turf/simulated/floor))
-						var/turf/simulated/floor/FF = get_step(src,direction)
-						FF.update_icon() //so siding get updated properly
+		if(has_siding)
+			spawn(4)
+				if(src)
+					update_icon()
+					for(var/direction in list(1,2,4,8,5,6,9,10))
+						if(istype(get_step(src,direction),/turf/simulated/floor))
+							var/turf/simulated/floor/FF = get_step(src,direction)
+							FF.update_icon() //so siding get updated properly
 
+/turf/simulated/floor/carpet/arcade
+	name = "Arcade Carpet"
+	icon_state = "arcadecarpet"
+	has_siding=0
 
 
 /turf/simulated/floor/plating/ironsand/New()
@@ -271,7 +277,6 @@
 	heat_capacity = 700000
 
 	lighting_lumcount = 4		//starlight
-	accepts_lighting=0 			// Don't apply overlays
 
 	intact = 0
 
@@ -300,8 +305,10 @@
 		if(!C || !user)
 			return 0
 		if(istype(C, /obj/item/weapon/screwdriver))
-			ReplaceWithLattice()
 			playsound(src, 'sound/items/Screwdriver.ogg', 80, 1)
+			if(do_after(user, 30))
+				new /obj/item/stack/rods(src, 2)
+				ReplaceWithLattice()
 			return
 
 		if(istype(C, /obj/item/weapon/cable_coil))

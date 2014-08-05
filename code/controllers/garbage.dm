@@ -1,79 +1,128 @@
+#define GC_COLLECTIONS_PER_TICK 300 // Was 100.
+#define GC_COLLECTION_TIMEOUT (10 SECONDS)
+#define GC_FORCE_DEL_PER_TICK 20
+//#define GC_DEBUG
 
-#define GC_COLLECTIONS_PER_TICK 100
-var/global/datum/controller/garbage_collector/garbage
-var/global/list/uncollectable_vars=list(
-	"alpha",
-	"bestF",
-	"bounds",
-	"bound_height",
-	"bound_width",
-	"ckey",
-	"color",
-	"contents",
-	"gender",
-	"key",
-	//"loc",
-	"locs",
-	"luminosity",
-	"parent",
-	"parent_type",
-	"step_size",
-	"glide_size",
-	"step_x",
-	"step_y",
-	"step_z",
-	"tag",
-	"type",
-	"vars",
-	"verbs",
-	"x",
-	"y",
-	"z",
-)
-/datum/controller/garbage_collector
-	var/list/queue=list()
-	var/waiting=0
-	var/turf/trashbin=null
+var/list/gc_hard_del_types = new
+var/datum/garbage_collector/garbageCollector
 
-	New()
-		trashbin=locate(0,0,CENTCOMM_Z)
+/client/verb/gc_dump_hdl()
+	set name = "(GC) Hard Del List"
+	set desc = "List types that are hard del()'d by the GC."
+	set category = "Debug"
 
-	proc/AddTrash(var/atom/movable/A)
-		if(!A)
-			return
-		A.loc=trashbin
-		queue.Add(A)
-		waiting++
+	for(var/A in gc_hard_del_types)
+		usr << A
 
-	proc/Pop()
-		var/atom/movable/A = queue[1]
-		if(!A) return
-		if(!istype(A,/atom/movable))
-			testing("GC given a [A.type].")
-			del(A)
-			return
-		for(var/vname in A.vars)
-			if(vname in uncollectable_vars)
-				continue
-			//testing("Unsetting [vname] in [A.type]!")
-			A.vars[vname]=null
-		A.loc=null
-		queue.Remove(A)
+/datum/garbage_collector
+	var/list/queue = new
+	var/del_everything = 0
 
-	proc/process()
-		for(var/i=0;i<min(waiting,GC_COLLECTIONS_PER_TICK);i++)
-			if(waiting)
-				Pop()
-				waiting--
+	// To let them know how hardworking am I :^).
+	var/dels_count = 0
+	var/hard_dels = 0
 
-/**
-* NEVER USE THIS FOR ANYTHING OTHER THAN /atom/movable
-* OTHER TYPES CANNOT BE QDEL'D BECAUSE THEIR LOC IS LOCKED OR THEY DON'T HAVE ONE.
-*/
-/proc/qdel(var/atom/movable/A)
-	if(!A) return
-	if(!istype(A))
-		warning("qdel passed a [A.type]. qdel() can only handle /atom/movable types.")
-		del(A)
+/datum/garbage_collector/proc/addTrash(const/atom/movable/AM)
+	if(!istype(AM))
 		return
-	garbage.AddTrash(A)
+
+	if(del_everything)
+		del(AM)
+		hard_dels++
+		dels_count++
+		return
+
+	var/timeofday = world.timeofday
+	AM.timeDestroyed = timeofday
+	queue -= "\ref[AM]"
+	queue["\ref[AM]"] = timeofday
+
+/datum/garbage_collector/proc/process()
+	var/remainingCollectionPerTick = GC_COLLECTIONS_PER_TICK
+	var/remainingForceDelPerTick = GC_FORCE_DEL_PER_TICK
+	var/collectionTimeScope = world.timeofday - GC_COLLECTION_TIMEOUT
+
+	while(queue.len && --remainingCollectionPerTick >= 0)
+		var/refID = queue[1]
+		var/destroyedAtTime = queue[refID]
+
+		if(destroyedAtTime > collectionTimeScope)
+			break
+
+		var/atom/movable/AM = locate(refID)
+
+		// Something's still referring to the qdel'd object. Kill it.
+		if(AM && AM.timeDestroyed == destroyedAtTime)
+			if(remainingForceDelPerTick <= 0)
+				break
+
+			#ifdef GC_DEBUG
+			WARNING("gc process force delete [AM.type]")
+			#endif
+
+			gc_hard_del_types |= "[AM.type]"
+
+			del(AM)
+
+			hard_dels++
+			remainingForceDelPerTick--
+
+		queue.Cut(1, 2)
+		dels_count++
+
+#ifdef GC_DEBUG
+#undef GC_DEBUG
+#endif
+
+#undef GC_FORCE_DEL_PER_TICK
+#undef GC_COLLECTION_TIMEOUT
+#undef GC_COLLECTIONS_PER_TICK
+
+/*
+ * NEVER USE THIS FOR ANYTHING OTHER THAN /atom/movable
+ * OTHER TYPES CANNOT BE QDEL'D BECAUSE THEIR LOC IS LOCKED OR THEY DON'T HAVE ONE.
+ */
+/proc/qdel(const/atom/movable/AM)
+	if(isnull(AM))
+		return
+
+	if(isnull(garbageCollector))
+		del(AM)
+		return
+
+	if(!istype(AM))
+		WARNING("qdel() passed object of type [AM.type]. qdel() can only handle /atom/movable types.")
+		del(AM)
+		garbageCollector.hard_dels++
+		garbageCollector.dels_count++
+		return
+
+	if(isnull(AM.gcDestroyed))
+		// Let our friend know they're about to get fucked up.
+		AM.Destroy()
+
+		garbageCollector.addTrash(AM)
+
+/datum/controller
+	var/processing = 0
+	var/iteration = 0
+	var/processing_interval = 0
+
+/datum/controller/proc/recover() // If we are replacing an existing controller (due to a crash) we attempt to preserve as much as we can.
+
+/*
+ * Like Del(), but for qdel.
+ * Called BEFORE qdel moves shit.
+ */
+/datum/proc/Destroy()
+	del(src)
+
+/client/proc/qdel_toggle()
+	set name = "Toggle qdel Behavior"
+	set desc = "Toggle qdel usage between normal and force del()."
+	set category = "Debug"
+
+	garbageCollector.del_everything = !garbageCollector.del_everything
+	world << "<b>GC: qdel turned [garbageCollector.del_everything ? "off" : "on"].</b>"
+	log_admin("[key_name(usr)] turned qdel [garbageCollector.del_everything ? "off" : "on"].")
+	message_admins("\blue [key_name(usr)] turned qdel [garbageCollector.del_everything ? "off" : "on"].", 1)

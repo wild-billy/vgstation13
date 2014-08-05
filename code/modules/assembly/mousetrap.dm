@@ -3,7 +3,7 @@
 	desc = "A handy little spring-loaded trap for catching pesty rodents."
 	icon_state = "mousetrap"
 	m_amt = 100
-	w_amt = 10
+	w_type = RECYK_METAL
 	origin_tech = "combat=1"
 	var/armed = 0
 	wires = WIRE_PULSE
@@ -81,7 +81,7 @@
 		..()
 
 
-	HasEntered(AM as mob|obj)
+	Crossed(AM as mob|obj)
 		if(armed)
 			if(ishuman(AM))
 				var/mob/living/carbon/H = AM

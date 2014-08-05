@@ -1,4 +1,5 @@
 /mob/living/carbon/human/attack_hand(mob/living/carbon/human/M as mob)
+	//M.changeNext_move(10)
 	if (istype(loc, /turf) && istype(loc.loc, /area/start))
 		M << "No attacking people at spawn, you jackass."
 		return
@@ -131,6 +132,34 @@
 					M.handle_bloodsucking(src)
 					return
 			//end vampire codes
+
+			// BITING
+			var/can_bite = 0
+			for(var/datum/disease/D in M.viruses)
+				if(D.spread == "Bite")
+					can_bite = 1
+					break
+			if(can_bite)
+				if ((prob(75) && health > 0))
+					playsound(loc, 'sound/weapons/bite.ogg', 50, 1, -1)
+					for(var/mob/O in viewers(src, null))
+						O.show_message("\red <B>[M.name] has bit [name]!</B>", 1)
+					var/damage = rand(1, 5)
+					adjustBruteLoss(damage)
+					health = 100 - getOxyLoss() - getToxLoss() - getFireLoss() - getBruteLoss()
+					for(var/datum/disease/D in M.viruses)
+						if(D.spread == "Bite")
+							contract_disease(D,1,0)
+					M.attack_log += text("\[[time_stamp()]\] <font color='red'>bitten by [src.name] ([src.ckey])</font>")
+					src.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been bitten by [M.name] ([M.ckey])</font>")
+					if(!iscarbon(M))
+						LAssailant = null
+					else
+						LAssailant = M
+					log_attack("[M.name] ([M.ckey]) bitten by [src.name] ([src.ckey])")
+					return
+			//end biting
+
 			M.attack_log += text("\[[time_stamp()]\] <font color='red'>[M.species.attack_verb]ed [src.name] ([src.ckey])</font>")
 			src.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been [M.species.attack_verb]ed by [M.name] ([M.ckey])</font>")
 			if(!iscarbon(M))
@@ -140,7 +169,7 @@
 
 			log_attack("[M.name] ([M.ckey]) [M.species.attack_verb]ed [src.name] ([src.ckey])")
 
-			var/damage = rand(0, 5)//BS12 EDIT
+			var/damage = rand(0, M.species.max_hurt_damage)//BS12 EDIT // edited again by Iamgoofball to fix species attacks
 			if(!damage)
 				if(M.species.attack_verb == "punch")
 					playsound(loc, 'sound/weapons/punchmiss.ogg', 25, 1, -1)
@@ -164,7 +193,7 @@
 
 			visible_message("\red <B>[M] has [M.species.attack_verb]ed [src]!</B>")
 			//Rearranged, so claws don't increase weaken chance.
-			if(damage >= 5 && prob(50))
+			if(damage >= M.species.max_hurt_damage && prob(50))
 				visible_message("\red <B>[M] has weakened [src]!</B>")
 				apply_effect(2, WEAKEN, armor_block)
 
@@ -196,7 +225,7 @@
 					chance = !hand ? 40 : 20
 
 				if (prob(chance))
-					visible_message("<spawn class=danger>[src]'s [W] goes off during struggle!")
+					visible_message("<spawn class=danger>[W], held by [src], goes off during struggle!")
 					var/list/turfs = list()
 					for(var/turf/T in view())
 						turfs += T

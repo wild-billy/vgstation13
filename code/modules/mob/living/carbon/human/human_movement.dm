@@ -8,7 +8,11 @@
 
 	//(VG EDIT disabling for now) handle_embedded_objects() //Moving with objects stuck in you can cause bad times.
 
-	if(reagents.has_reagent("hyperzine")) return -1
+	if(reagents.has_reagent("hyperzine"))
+		if(dna.mutantrace == "slime")
+			tally *= 2
+		else
+			return -1
 
 	if(reagents.has_reagent("nuka_cola")) return -1
 
@@ -28,6 +32,9 @@
 	if(shoes)
 		tally += shoes.slowdown
 
+	if(reagents.has_reagent("frostoil") && dna.mutantrace == "slime")
+		tally *= 5
+
 	for(var/organ_name in list("l_foot","r_foot","l_leg","r_leg"))
 		var/datum/organ/external/E = get_organ(organ_name)
 		if(!E || (E.status & ORGAN_DESTROYED))
@@ -41,7 +48,13 @@
 
 	if(M_FAT in src.mutations)
 		tally += 1.5
-	if (bodytemperature < 283.222)
+	if(dna.mutantrace == "slime")
+		if (bodytemperature >= 330.23) // 135 F
+			return -1	// slimes become supercharged at high temperatures
+		if (bodytemperature < 183.222)
+			tally += (283.222 - bodytemperature) / 10 * 1.75
+	else if (bodytemperature < 283.222)
+
 		tally += (283.222 - bodytemperature) / 10 * 1.75
 
 	if(M_RUN in mutations)

@@ -22,15 +22,17 @@
 	if(loc)
 		environment = loc.return_air()
 
-	if (stat != DEAD && !istype(src,/mob/living/carbon/monkey/diona)) //still breathing
-		//First, resolve location and get a breath
-		if(air_master.current_cycle%4==2)
-			//Only try to take a breath every 4 seconds, unless suffocating
-			breathe()
-		else //Still give containing object the chance to interact
-			if(istype(loc, /obj/))
-				var/obj/location_as_object = loc
-				location_as_object.handle_internal_lifeform(src, 0)
+	if (stat != DEAD) //still breathing
+		//Is not a Diona Nymph - Snowflake Code
+		if(!istype(src,/mob/living/carbon/monkey/diona))
+			//First, resolve location and get a breath
+			if(air_master.current_cycle%4==2)
+				//Only try to take a breath every 4 seconds, unless suffocating
+				breathe()
+			else //Still give containing object the chance to interact
+				if(istype(loc, /obj/))
+					var/obj/location_as_object = loc
+					location_as_object.handle_internal_lifeform(src, 0)
 
 
 		//Updates the number of stored chemicals for powers
@@ -124,6 +126,9 @@
 			src << "\red You suddenly feel very weak."
 			Weaken(3)
 			emote("collapse")
+			if(reagents.has_reagent("creatine"))
+				var/datum/reagent/creatine/C = reagents.get_reagent("creatine")
+				C.dehulk(src)
 
 		if (radiation)
 
@@ -172,6 +177,8 @@
 
 	// Separate proc so we can jump out of it when we've succeeded in spreading disease.
 	proc/findAirborneVirii()
+		if(blood_virus_spreading_disabled)
+			return 0
 		for(var/obj/effect/decal/cleanable/blood/B in get_turf(src))
 			if(B.virus2.len)
 				for (var/ID in B.virus2)
@@ -301,6 +308,7 @@
 		//var/safe_oxygen_max = 140 // Maximum safe partial pressure of O2, in kPa (Not used for now)
 		var/safe_co2_max = 10 // Yes it's an arbitrary value who cares?
 		var/safe_toxins_max = 0.5
+		var/safe_toxins_mask = 5
 		var/SA_para_min = 0.5
 		var/SA_sleep_min = 5
 		var/oxygen_used = 0
@@ -353,9 +361,16 @@
 		if(Toxins_pp > safe_toxins_max) // Too much toxins
 			var/ratio = (breath.toxins/safe_toxins_max) * 10
 			//adjustToxLoss(Clamp(ratio, MIN_PLASMA_DAMAGE, MAX_PLASMA_DAMAGE))	//Limit amount of damage toxin exposure can do per second
-			if(reagents)
-				reagents.add_reagent("plasma", Clamp(ratio, MIN_PLASMA_DAMAGE, MAX_PLASMA_DAMAGE))
-			toxins_alert = max(toxins_alert, 1)
+			if(wear_mask)
+				if(wear_mask.flags & BLOCK_GAS_SMOKE_EFFECT)
+					if(breath.toxins > safe_toxins_mask)
+						ratio = (breath.toxins/safe_toxins_mask) * 10
+					else
+						ratio = 0
+			if(ratio)
+				if(reagents)
+					reagents.add_reagent("plasma", Clamp(ratio, MIN_PLASMA_DAMAGE, MAX_PLASMA_DAMAGE))
+				toxins_alert = max(toxins_alert, 1)
 		else
 			toxins_alert = 0
 

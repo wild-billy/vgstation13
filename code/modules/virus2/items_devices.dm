@@ -7,7 +7,7 @@
 /obj/item/device/antibody_scanner
 	name = "Antibody Scanner"
 	desc = "Used to scan living beings for antibodies in their blood."
-	icon_state = "health"
+	icon_state = "antibody"
 	w_class = 2.0
 	item_state = "electronic"
 	flags = FPRINT | TABLEPASS | CONDUCT | USEDELAY
@@ -35,15 +35,13 @@
 	var/info = 0
 	var/analysed = 0
 
-	reagents = list()
-
 /obj/item/weapon/virusdish/random
 	name = "Virus Sample"
 
-/obj/item/weapon/virusdish/random/New()
-	..()
-	src.virus2 = new /datum/disease2/disease
-	src.virus2.makerandom()
+/obj/item/weapon/virusdish/random/New(loc)
+	..(loc)
+	virus2 = new /datum/disease2/disease
+	virus2.makerandom()
 	growth = rand(5, 50)
 
 /obj/item/weapon/virusdish/attackby(var/obj/item/weapon/W as obj,var/mob/living/carbon/user as mob)

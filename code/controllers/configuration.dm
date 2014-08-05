@@ -64,6 +64,7 @@
 	var/ToRban = 0
 	var/automute_on = 0					//enables automuting/spam prevention
 	var/jobs_have_minimal_access = 0	//determines whether jobs use minimal access or expanded access.
+	var/copy_logs = null
 
 	var/cult_ghostwriter = 1               //Allows ghosts to write in blood in cult rounds...
 	var/cult_ghostwriter_req_cultists = 10 //...so long as this many cultists are active.
@@ -78,7 +79,10 @@
 	var/server
 	var/banappeals
 	var/wikiurl = "http://baystation12.net/wiki/index.php?title=Main_Page"
+	var/vgws_base_url = "http://vg13.undo.it" // No hanging slashes.
 	var/forumurl = "http://baystation12.net/forums/"
+
+	var/media_base_url = "" // http://ss13.nexisonline.net/media
 
 	//Alert level description
 	var/alert_desc_green = "All threats to the station have passed. Security may not have weapons visible, privacy laws are once again fully enforced."
@@ -143,22 +147,26 @@
 	var/assistantratio = 2 //how many assistants to security members
 
 /datum/configuration/New()
+	. = ..()
 	var/list/L = typesof(/datum/game_mode) - /datum/game_mode
+
 	for (var/T in L)
 		// I wish I didn't have to instance the game modes in order to look up
 		// their information, but it is the only way (at least that I know of).
 		var/datum/game_mode/M = new T()
 
 		if (M.config_tag)
-			if(!(M.config_tag in modes))		// ensure each mode is added only once
+			if (!(M.config_tag in modes)) // Ensure each mode is added only once.
 				diary << "Adding game mode [M.name] ([M.config_tag]) to configuration."
 				src.modes += M.config_tag
 				src.mode_names[M.config_tag] = M.name
 				src.probabilities[M.config_tag] = M.probability
+
 				if (M.votable)
-					src.votable_modes += M.config_tag
-		del(M)
-	src.votable_modes += "secret"
+					votable_modes += M.config_tag
+		qdel(M)
+
+	votable_modes += "secret"
 
 /datum/configuration/proc/load(filename, type = "config") //the type can also be game_options, in which case it uses a different switch. not making it separate to not copypaste code - Urist
 	var/list/Lines = file2list(filename)
@@ -478,6 +486,12 @@
 					config.assistantlimit = 1
 				if("assistant_ratio")
 					config.assistantratio = text2num(value)
+				if("copy_logs")
+					copy_logs=value
+				if("media_base_url")
+					media_base_url = value
+				if("vgws_base_url")
+					vgws_base_url = value
 				else
 					diary << "Unknown setting in configuration: '[name]'"
 

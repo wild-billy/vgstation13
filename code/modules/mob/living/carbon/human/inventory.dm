@@ -360,9 +360,17 @@
 	name = "human"
 	var/mob/living/carbon/human/target = null
 
+/obj/effect/equip_e/human/Destroy()
+	if(target)
+		target.requests -= src
+
 /obj/effect/equip_e/monkey
 	name = "monkey"
 	var/mob/living/carbon/monkey/target = null
+
+/obj/effect/equip_e/monkey/Destroy()
+	if(target)
+		target.requests -= src
 
 /obj/effect/equip_e/process()
 	return
@@ -372,11 +380,12 @@
 
 /obj/effect/equip_e/New()
 	if (!ticker)
-		del(src)
+		qdel(src)
 	spawn(100)
-		del(src)
+		qdel(src)
 	..()
 	return
+
 
 /obj/effect/equip_e/human/process()
 	if (item)
@@ -385,22 +394,22 @@
 		switch(place)
 			if("mask")
 				if (!( target.wear_mask ))
-					del(src)
+					qdel(src)
 			if("l_hand")
 				if (!( target.l_hand ))
-					del(src)
+					qdel(src)
 			if("r_hand")
 				if (!( target.r_hand ))
-					del(src)
+					qdel(src)
 			if("suit")
 				if (!( target.wear_suit ))
-					del(src)
+					qdel(src)
 			if("uniform")
 				if (!( target.w_uniform ))
-					del(src)
+					qdel(src)
 			if("back")
 				if (!( target.back ))
-					del(src)
+					qdel(src)
 			if("syringe")
 				return
 			if("pill")
@@ -413,10 +422,10 @@
 				return
 			if("handcuff")
 				if (!( target.handcuffed ))
-					del(src)
+					qdel(src)
 			if("id")
 				if ((!( target.wear_id ) || !( target.w_uniform )))
-					del(src)
+					qdel(src)
 			if("splints")
 				var/count = 0
 				for(var/organ in list("l_leg","r_leg","l_arm","r_arm"))
@@ -425,16 +434,28 @@
 						count = 1
 						break
 				if(count == 0)
-					del(src)
+					qdel(src)
 					return
+
+
+
 			if("internal")
 				if ((!( (istype(target.wear_mask, /obj/item/clothing/mask) && istype(target.back, /obj/item/weapon/tank) && !( target.internal )) ) && !( target.internal )))
-					del(src)
+					qdel(src)
+
+			if("internal1")
+				if ((!( (istype(target.wear_mask, /obj/item/clothing/mask) && istype(target.belt, /obj/item/weapon/tank) && !( target.internal )) ) && !( target.internal )))
+					qdel(src)
+
+			if("internal2")
+				if ((!( (istype(target.wear_mask, /obj/item/clothing/mask) && istype(target.s_store, /obj/item/weapon/tank) && !( target.internal )) ) && !( target.internal )))
+					qdel(src)
+
 
 	var/list/L = list( "syringe", "pill", "drink", "dnainjector", "fuel")
 	if ((item && !( L.Find(place) )))
 		if(isrobot(source) && place != "handcuff")
-			del(src)
+			qdel(src)
 		for(var/mob/O in viewers(target, null))
 			O.show_message("\red <B>[source] is trying to put \a [item] on [target]</B>", 1)
 	else
@@ -555,7 +576,7 @@
 				message = "\red <B>[source] is trying to empty [target]'s pockets.</B>"
 			if("CPR")
 				if (!target.cpr_time)
-					del(src)
+					qdel(src)
 				target.cpr_time = 0
 				message = "\red <B>[source] is trying perform CPR on [target]!</B>"
 			if("id")
@@ -566,6 +587,22 @@
 				else
 					source << "\blue You try to take off [target.wear_id] from [target]'s uniform!"
 			if("internal")
+				target.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has had their internals toggled by [source.name] ([source.ckey])</font>")
+				source.attack_log += text("\[[time_stamp()]\] <font color='red'>Attempted to toggle [target.name]'s ([target.ckey]) internals</font>")
+				if (target.internal)
+					message = "\red <B>[source] is trying to remove [target]'s internals</B>"
+				else
+					message = "\red <B>[source] is trying to set on [target]'s internals.</B>"
+
+			if("internal1")
+				target.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has had their internals toggled by [source.name] ([source.ckey])</font>")
+				source.attack_log += text("\[[time_stamp()]\] <font color='red'>Attempted to toggle [target.name]'s ([target.ckey]) internals</font>")
+				if (target.internal)
+					message = "\red <B>[source] is trying to remove [target]'s internals</B>"
+				else
+					message = "\red <B>[source] is trying to set on [target]'s internals.</B>"
+
+			if("internal2")
 				target.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has had their internals toggled by [source.name] ([source.ckey])</font>")
 				source.attack_log += text("\[[time_stamp()]\] <font color='red'>Attempted to toggle [target.name]'s ([target.ckey]) internals</font>")
 				if (target.internal)
@@ -639,13 +676,13 @@ It can still be worn/put on as normal.
 				strip_item = target.shoes
 		if("l_hand")
 			if (istype(target, /obj/item/clothing/suit/straight_jacket))
-				del(src)
+				qdel(src)
 			slot_to_process = slot_l_hand
 			if (target.l_hand)
 				strip_item = target.l_hand
 		if("r_hand")
 			if (istype(target, /obj/item/clothing/suit/straight_jacket))
-				del(src)
+				qdel(src)
 			slot_to_process = slot_r_hand
 			if (target.r_hand)
 				strip_item = target.r_hand
@@ -698,11 +735,11 @@ It can still be worn/put on as normal.
 				S.add_fingerprint(source)
 				if (!( istype(S, /obj/item/weapon/dnainjector) ))
 					S.inuse = 0
-					del(src)
+					qdel(src)
 				S.inject(target, source)
 				if (S.s_time >= world.time + 30)
 					S.inuse = 0
-					del(src)
+					qdel(src)
 				S.s_time = world.time
 				for(var/mob/O in viewers(source, null))
 					O.show_message("\red [source] injects [target] with the DNA Injector!", 1)
@@ -732,8 +769,53 @@ It can still be worn/put on as normal.
 						target.internal.add_fingerprint(source)
 						if (target.internals)
 							target.internals.icon_state = "internal1"
+
+
+
+		if("internal1")
+			if (target.internal)
+				target.internal.add_fingerprint(source)
+				target.internal = null
+				if (target.internals)
+					target.internals.icon_state = "internal0"
+			else
+				if (!( istype(target.wear_mask, /obj/item/clothing/mask) ))
+					return
+				else
+					if (istype(target.belt, /obj/item/weapon/tank))
+						target.internal = target.belt
+
+					if (target.internal)
+						for(var/mob/M in viewers(target, 1))
+							M.show_message("[target] is now running on internals.", 1)
+						target.internal.add_fingerprint(source)
+						if (target.internals)
+							target.internals.icon_state = "internal1"
+
+
+		if("internal2")
+			if (target.internal)
+				target.internal.add_fingerprint(source)
+				target.internal = null
+				if (target.internals)
+					target.internals.icon_state = "internal0"
+			else
+				if (!( istype(target.wear_mask, /obj/item/clothing/mask) ))
+					return
+				else
+					if (istype(target.s_store, /obj/item/weapon/tank))
+						target.internal = target.s_store
+
+					if (target.internal)
+						for(var/mob/M in viewers(target, 1))
+							M.show_message("[target] is now running on internals.", 1)
+						target.internal.add_fingerprint(source)
+						if (target.internals)
+							target.internals.icon_state = "internal1"
+
 	if(slot_to_process)
 		if(strip_item) //Stripping an item from the mob
+
 			var/obj/item/W = strip_item
 			target.u_equip(W)
 			if (target.client)
@@ -759,7 +841,7 @@ It can still be worn/put on as normal.
 	if(source && target)
 		if(source.machine == target)
 			target.show_inv(source)
-	del(src)
+	qdel(src)
 
 /mob/living/carbon/human/get_multitool(var/active_only=0)
 	if(istype(get_active_hand(),/obj/item/device/multitool))
@@ -767,3 +849,7 @@ It can still be worn/put on as normal.
 	if(active_only && istype(get_inactive_hand(),/obj/item/device/multitool))
 		return get_inactive_hand()
 	return null
+
+
+
+

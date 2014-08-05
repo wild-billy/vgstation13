@@ -60,16 +60,6 @@ var/global/datum/controller/occupations/job_master
 				player.mind.assigned_role = rank
 				player.mind.role_alt_title = GetPlayerAltTitle(player, rank)
 
-				// JOB OBJECTIVES OH SHIT
-				player.mind.job_objectives.Cut()
-				for(var/objectiveType in job.required_objectives)
-					new objectiveType(player.mind)
-
-				// 50/50 chance of getting optional objectives.
-				for(var/objectiveType in job.optional_objectives)
-					if(prob(50))
-						new objectiveType(player.mind)
-
 				unassigned -= player
 				job.current_positions++
 				return 1
@@ -390,6 +380,8 @@ var/global/datum/controller/occupations/job_master
 					H.MoMMIfy()
 					return 1
 				if("AI","Clown")	//don't need bag preference stuff!
+					if(rank=="Clown") // Clowns DO need to breathe, though - N3X
+						H.species.equip(H)
 				else
 					switch(H.backbag) //BS12 EDIT
 						if(1)
@@ -461,7 +453,7 @@ var/global/datum/controller/occupations/job_master
 
 			H.equip_or_collect(C, slot_wear_id)
 
-		H.equip_or_collect(new /obj/item/device/pda(H), slot_belt)
+		H.equip_or_collect(new job.pdatype(H), job.pdaslot)
 		if(locate(/obj/item/device/pda,H))
 			var/obj/item/device/pda/pda = locate(/obj/item/device/pda,H)
 			pda.owner = H.real_name

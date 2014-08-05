@@ -30,7 +30,7 @@
 	var/last_online = 0
 
 /obj/machinery/power/smes/New()
-	..()
+	. = ..()
 	spawn(5)
 		dir_loop:
 			for(var/d in cardinal)
@@ -44,31 +44,52 @@
 			return
 		terminal.master = src
 		updateicon()
-	component_parts = list()
-	component_parts += new /obj/item/weapon/circuitboard/smes
-	component_parts += new /obj/item/weapon/stock_parts/matter_bin
-	component_parts += new /obj/item/weapon/stock_parts/matter_bin
-	component_parts += new /obj/item/weapon/stock_parts/matter_bin
-	component_parts += new /obj/item/weapon/stock_parts/matter_bin
-	component_parts += new /obj/item/weapon/stock_parts/manipulator
-	component_parts += new /obj/item/weapon/stock_parts/manipulator
-	component_parts += new /obj/item/weapon/stock_parts/manipulator
-	component_parts += new /obj/item/weapon/stock_parts/micro_laser
-	component_parts += new /obj/item/weapon/stock_parts/micro_laser
-	component_parts += new /obj/item/weapon/stock_parts/micro_laser
-	component_parts += new /obj/item/weapon/stock_parts/console_screen
-	component_parts += new /obj/item/weapon/stock_parts/console_screen
+
+	component_parts = newlist(
+		/obj/item/weapon/circuitboard/smes,
+		/obj/item/weapon/stock_parts/matter_bin,
+		/obj/item/weapon/stock_parts/matter_bin,
+		/obj/item/weapon/stock_parts/matter_bin,
+		/obj/item/weapon/stock_parts/matter_bin,
+		/obj/item/weapon/stock_parts/manipulator,
+		/obj/item/weapon/stock_parts/manipulator,
+		/obj/item/weapon/stock_parts/manipulator,
+		/obj/item/weapon/stock_parts/micro_laser,
+		/obj/item/weapon/stock_parts/micro_laser,
+		/obj/item/weapon/stock_parts/micro_laser,
+		/obj/item/weapon/stock_parts/console_screen,
+		/obj/item/weapon/stock_parts/console_screen
+	)
+
 	RefreshParts()
 
-	return
-
-/obj/machinery/power/smes/proc/make_terminal()
-	// create a terminal object at the same position as original turf loc
-	// wires will attach to this
-	var/tempLoc = get_step(src.loc, WEST)
-	terminal = new/obj/machinery/power/terminal(tempLoc)
-	terminal.dir = EAST
-	terminal.master = src
+/obj/machinery/power/smes/proc/make_terminal(const/mob/user)
+	if (user.loc == loc)
+		user << "<span class='warning'>You must not be on the same tile with SMES.</span>"
+		return 1
+		
+	var/userdir = get_dir(user, src)
+		
+	for(var/dirs in cardinal)	//there shouldn't be any diagonal terminals
+		if(userdir == dirs)
+			var/turf/T = get_turf(user)
+			if(T.intact)
+				user << "<span class='warning'>The floor plating must be removed first.</span>"
+				return 1
+		
+			user << "<span class='notice'>You start adding cable to the SMES.</span>"
+			playsound(get_turf(src), 'sound/items/zip.ogg', 100, 1)
+			if(do_after(user,100))		
+				terminal = new /obj/machinery/power/terminal(user.loc)
+				terminal.dir = user.dir
+				terminal.master = src
+				return 0
+			else
+				user << "<span class='warning'>You moved!</span>"
+				return 1
+	
+	user << "<span class='warning'>You can't wire the SMES like that!</span>"
+	return 1
 
 /obj/machinery/power/smes/attackby(var/obj/item/weapon/W as obj, var/mob/user as mob) //these can only be moved by being reconstructed, solves having to remake the powernet.
 	if(istype(W, /obj/item/weapon/screwdriver))
@@ -93,16 +114,25 @@
 			del(src)
 			return 1
 		else if(istype(W, /obj/item/weapon/cable_coil) && !terminal)
+			var/obj/item/weapon/cable_coil/CC = W
+
+			if (CC.amount < 10)
+				user << "<span class=\"warning\">You need 10 length cable coil to make a terminal.</span>"
+				return
+
+			if (make_terminal(user))
+				return
+
+			CC.use(10)
 			user.visible_message(\
 				"\red [user.name] has added cables to the SMES!",\
 				"You added cables the SMES.")
-			make_terminal()
 			terminal.connect_to_network()
 			src.stat = 0
 		else if(istype(W, /obj/item/weapon/wirecutters) && terminal)
-			var/tempTDir = get_step(src.loc, WEST)
-			if(tempTDir:intact)
-				user << "\red You must remove the floor plating in front of the SMES first."
+			var/turf/T = get_turf(terminal) 
+			if(T.intact)
+				user << "<span class='warning'>You must remove the floor plating in front of the SMES first.</span>"
 				return
 			user << "You begin to cut the cables..."
 			playsound(get_turf(src), 'sound/items/Deconstruct.ogg', 50, 1)
@@ -114,7 +144,7 @@
 					return
 				new /obj/item/weapon/cable_coil(loc,10)
 				user.visible_message(\
-					"\red [user.name] cut the cables and dismantled the power terminal.",\
+					"<span class='warning'>[user.name] cut the cables and dismantled the power terminal.</span>",\
 					"You cut the cables and dismantle the power terminal.")
 				del(terminal)
 		else
@@ -199,7 +229,6 @@
 	if(last_disp != chargedisplay() || last_chrg != charging || last_onln != online)
 		updateicon()
 
-	updateDialog()
 	return
 
 // called after all power processes are finished
@@ -294,7 +323,7 @@
 
 //world << "[href] ; [href_list[href]]"
 
-	if (!istype(src.loc, /turf) || istype(usr, /mob/living/silicon/ai))
+	if (!istype(src.loc, /turf) && !istype(usr, /mob/living/silicon/))
 		return 0 // Do not update ui
 
 	if( href_list["cmode"] )
@@ -393,5 +422,11 @@
 	if(Limit) return "[href]=-[Limit]'>-</A>"+rate+"[href]=[Limit]'>+</A>"
 	return rate
 
+/obj/machinery/power/smes/Destroy()
+	if (terminal)
+		terminal.master = null
+		terminal = null
+
+	..()
 
 #undef SMESRATE

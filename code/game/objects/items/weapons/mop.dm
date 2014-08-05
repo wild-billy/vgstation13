@@ -3,6 +3,7 @@
 	name = "mop"
 	icon = 'icons/obj/janitor.dmi'
 	icon_state = "mop"
+	hitsound = "sound/weapons/whip.ogg"
 	force = 3.0
 	throwforce = 10.0
 	throw_speed = 5
@@ -13,19 +14,16 @@
 	var/mopping = 0
 	var/mopcount = 0
 
-
 /obj/item/weapon/mop/New()
-	var/datum/reagents/R = new/datum/reagents(5)
-	reagents = R
-	R.my_atom = src
+	. = ..()
+	create_reagents(5)
 
-
-obj/item/weapon/mop/proc/clean(turf/simulated/A as turf)
+/obj/item/weapon/mop/proc/clean(turf/simulated/A as turf)
 	reagents.reaction(A,1,10)
 	A.clean_blood()
 	for(var/obj/effect/O in A)
 		if( istype(O,/obj/effect/rune) || istype(O,/obj/effect/decal/cleanable) || istype(O,/obj/effect/overlay) )
-			del(O)
+			qdel(O)
 
 
 /obj/effect/attackby(obj/item/weapon/W as obj, mob/user as mob)
@@ -35,6 +33,8 @@ obj/item/weapon/mop/proc/clean(turf/simulated/A as turf)
 
 
 /obj/item/weapon/mop/afterattack(atom/A, mob/user as mob)
+	if(!user.Adjacent(A))
+		return
 	if(reagents.total_volume < 1 || mopcount >= 5)
 		user << "<span class='notice'>Your mop is dry!</span>"
 		return

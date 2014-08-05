@@ -1,4 +1,4 @@
-
+#define EAT_MOB_DELAY 300 // 30s
 
 // WAS: /datum/bioEffect/alcres
 /datum/dna/gene/basic/sober
@@ -54,7 +54,7 @@
 		if(!istype(T))
 			return
 		if(T.lighting_lumcount <= 2)
-			M.alpha = 0
+			M.alpha -= 25
 		else
 			M.alpha = round(255 * 0.80)
 
@@ -70,7 +70,7 @@
 
 	OnMobLife(var/mob/M)
 		if((world.time - M.last_movement) >= 30 && !M.stat && M.canmove && !M.restrained())
-			M.alpha = round(255 * 0.10)
+			M.alpha -= 25
 		else
 			M.alpha = round(255 * 0.80)
 
@@ -81,12 +81,16 @@
 
 	activate(var/mob/M, var/connected, var/flags)
 		..()
-		M.spell_list += spelltype
+		M.spell_list += new spelltype(M)
 		return 1
 
 	deactivate(var/mob/M, var/connected, var/flags)
 		..()
-		M.spell_list -= spelltype
+		for(var/obj/effect/proc_holder/spell/S in M.spell_list)
+			if(istype(S,spelltype))
+				M.spell_list.Remove(S)
+		return 1
+
 /datum/dna/gene/basic/grant_verb
 	var/verbtype
 
@@ -125,6 +129,8 @@
 	invocation_type = "none"
 	range = 7
 	selection_type = "range"
+	include_user = 1
+	centcomm_cancast = 0
 	var/list/compatible_mobs = list(/mob/living/carbon/human, /mob/living/carbon/monkey)
 
 /obj/effect/proc_holder/spell/targeted/cryokinesis/cast(list/targets)
@@ -138,10 +144,29 @@
 		usr << "\red This will only work on normal organic beings."
 		return
 
-	C.bodytemperature = -1500
-	C.ExtinguishMob()
+	if (M_RESIST_COLD in C.mutations)
+		C.visible_message("\red A cloud of fine ice crystals engulfs [C.name], but disappears almost instantly!")
+		return
+	var/handle_suit = 0
+	if(ishuman(C))
+		var/mob/living/carbon/human/H = C
+		if(istype(H.head, /obj/item/clothing/head/helmet/space))
+			if(istype(H.wear_suit, /obj/item/clothing/suit/space))
+				handle_suit = 1
+				if(H.internal)
+					H.visible_message("\red A cloud of fine ice crystals engulfs [H]!",
+										"<span class='notice'>A cloud of fine ice crystals cover your [H.head]'s visor.</span>")
+				else
+					H.visible_message("\red A cloud of fine ice crystals engulfs [H]!",
+										"<span class='warning'>A cloud of fine ice crystals cover your [H.head]'s visor and make it into your air vents!.</span>")
+					H.bodytemperature = max(0, H.bodytemperature - 50)
+					H.adjustFireLoss(5)
+	if(!handle_suit)
+		C.bodytemperature = max(0, C.bodytemperature - 100)
+		C.adjustFireLoss(10)
+		C.ExtinguishMob()
 
-	C.visible_message("\red A cloud of fine ice crystals engulfs [C]!")
+		C.visible_message("\red A cloud of fine ice crystals engulfs [C]!")
 
 	//playsound(usr.loc, 'bamf.ogg', 50, 0)
 
@@ -191,16 +216,19 @@
 	stat_allowed = 0
 	invocation_type = "none"
 	range = 1
-	selection_type = "range"
+	selection_type = "view"
+
+	var/list/types_allowed=list(/obj/item,/mob/living/simple_animal/hostile,/mob/living/simple_animal/parrot,/mob/living/simple_animal/cat,/mob/living/simple_animal/corgi,/mob/living/simple_animal/crab,/mob/living/simple_animal/mouse, /mob/living/carbon/monkey, /mob/living/carbon/human)
 
 /obj/effect/proc_holder/spell/targeted/eat/choose_targets(mob/user = usr)
 	var/list/targets = list()
 	var/list/possible_targets = list()
 
-	for(var/obj/item/O in view_or_range(range, user, selection_type))
-		possible_targets += O
+	for(var/atom/movable/O in view_or_range(range, user, selection_type))
+		if(is_type_in_list(O,types_allowed) && !istype(O.loc, /mob)) // No eating things inside of you or another person, that's just creepy
+			possible_targets += O
 
-	targets += input("Choose the target for the spell.", "Targeting") as mob in possible_targets
+	targets += input("Choose the target of your hunger.", "Targeting") as anything in possible_targets
 
 	if(!targets.len) //doesn't waste the spell
 		revert_cast(user)
@@ -208,20 +236,9 @@
 
 	perform(targets)
 
-/obj/effect/proc_holder/spell/targeted/eat/cast(list/targets)
-	if(!targets.len)
-		usr << "<span class='notice'>No target found in range.</span>"
-		return
-
-	var/obj/item/the_item = targets[1]
-
-	usr.visible_message("\red [usr] eats [the_item].")
-	playsound(usr.loc, 'sound/items/eatfood.ogg', 50, 0)
-
-	del(the_item)
-
-	if(ishuman(usr))
-		var/mob/living/carbon/human/H=usr
+/obj/effect/proc_holder/spell/targeted/eat/proc/doHeal(var/mob/user)
+	if(ishuman(user))
+		var/mob/living/carbon/human/H=user
 		for(var/name in H.organs_by_name)
 			var/datum/organ/external/affecting = null
 			if(!H.organs[name])
@@ -230,8 +247,63 @@
 			if(!istype(affecting, /datum/organ/external))
 				continue
 			affecting.heal_damage(4, 0)
-		usr:UpdateDamageIcon()
-		usr:updatehealth()
+		H.UpdateDamageIcon()
+		H.updatehealth()
+
+/obj/effect/proc_holder/spell/targeted/eat/cast(list/targets)
+	if(!targets.len)
+		usr << "<span class='notice'>No target found in range.</span>"
+		return
+
+	var/atom/movable/the_item = targets[1]
+	if(ishuman(the_item))
+		//My gender
+		var/m_his="his"
+		if(usr.gender==FEMALE)
+			m_his="her"
+		// Their gender
+		var/t_his="his"
+		if(the_item.gender==FEMALE)
+			t_his="her"
+		var/mob/living/carbon/human/H = the_item
+		var/datum/organ/external/limb = H.get_organ(usr.zone_sel.selecting)
+		if(!istype(limb))
+			usr << "\red You can't eat this part of them!"
+			revert_cast()
+			return 0
+		if(istype(limb,/datum/organ/external/head))
+			// Bullshit, but prevents being unable to clone someone.
+			usr << "\red You try to put \the [limb] in your mouth, but [t_his] ears tickle your throat!"
+			revert_cast()
+			return 0
+		if(istype(limb,/datum/organ/external/chest))
+			// Bullshit, but prevents being able to instagib someone.
+			usr << "\red You try to put their [limb] in your mouth, but it's too big to fit!"
+			revert_cast()
+			return 0
+		usr.visible_message("\red <b>[usr] begins stuffing [the_item]'s [limb.display_name] into [m_his] gaping maw!</b>")
+		var/oldloc = H.loc
+		if(!do_mob(usr,H,EAT_MOB_DELAY))
+			usr << "\red You were interrupted before you could eat [the_item]!"
+		else
+			if(!limb || !H)
+				return
+			if(H.loc!=oldloc)
+				usr << "\red \The [limb] moved away from your mouth!"
+				return
+			usr.visible_message("\red [usr] [pick("chomps","bites")] off [the_item]'s [limb]!")
+			playsound(usr.loc, 'sound/items/eatfood.ogg', 50, 0)
+			var/obj/limb_obj=limb.droplimb(1,1)
+			if(limb_obj)
+				var/datum/organ/external/chest=usr:get_organ("chest")
+				chest.implants += limb_obj
+				limb_obj.loc=usr
+			doHeal(usr)
+	else
+		usr.visible_message("\red [usr] eats \the [the_item].")
+		playsound(usr.loc, 'sound/items/eatfood.ogg', 50, 0)
+		del(the_item)
+		doHeal(usr)
 
 	return
 
@@ -259,22 +331,43 @@
 	include_user = 1
 
 	charge_type = "recharge"
-	charge_max = 30
+	charge_max = 60
 
 	clothes_req = 0
 	stat_allowed = 0
 	invocation_type = "none"
 
 /obj/effect/proc_holder/spell/targeted/leap/cast(list/targets)
-	if (istype(usr.loc,/mob/))
+	var/failure = 0
+	if (istype(usr.loc,/mob/) || usr.lying || usr.stunned || usr.buckled || usr.stat)
 		usr << "\red You can't jump right now!"
 		return
 
 	if (istype(usr.loc,/turf/))
+
+
+		if(usr.restrained())//Why being pulled while cuffed prevents you from moving
+			for(var/mob/M in range(usr, 1))
+				if(M.pulling == usr)
+					if(!M.restrained() && M.stat == 0 && M.canmove && usr.Adjacent(M))
+						failure = 1
+					else
+						M.stop_pulling()
+
+		if(usr.pinned.len)
+			failure = 1
+
 		usr.visible_message("\red <b>[usr.name]</b> takes a huge leap!")
 		playsound(usr.loc, 'sound/weapons/thudswoosh.ogg', 50, 1)
+		if(failure)
+			usr.Weaken(5)
+			usr.Stun(5)
+			usr.visible_message("<span class='warning'> \the [usr] attempts to leap away but is slammed back down to the ground!</span>",
+								"<span class='warning'>You attempt to leap away but are suddenly slammed back down to the ground!</span>",
+								"<span class='notice'>You hear the flexing of powerful muscles and suddenly a crash as a body hits the floor.</span>")
+			return 0
 		var/prevLayer = usr.layer
-		usr.layer = 15
+		usr.layer = 9
 
 		for(var/i=0, i<10, i++)
 			step(usr, usr.dir)
@@ -400,7 +493,10 @@
 	// lower health means more pain
 	var/list/randomthoughts = list("what to have for lunch","the future","the past","money",
 	"their hair","what to do next","their job","space","amusing things","sad things",
-	"annoying things","happy things","something incoherent","something they did wrong")
+	"annoying things","happy things","something incoherent","something they did wrong",
+	"getting those valids","burning catpeople","something spooky","somethng lewd","odd things",
+	"dumb things","lighting things on fire","lighting themselves on fire","blowing things up",
+	"blowing themeselves up","shooting everyone","shooting themselves")
 	var/thoughts = "thinking about [pick(randomthoughts)]"
 	if (M.fire_stacks)
 		pain_condition -= 50
@@ -428,7 +524,7 @@
 			usr << "\blue <b>Mood</b>: You sense cautious thoughts from [M.name]."
 		if ("grab")
 			usr << "\blue <b>Mood</b>: You sense hostile thoughts from [M.name]."
-		if ("harm")
+		if ("hurt")
 			usr << "\blue <b>Mood</b>: You sense cruel thoughts from [M.name]."
 			for(var/mob/living/L in view(7,M))
 				if (L == M)

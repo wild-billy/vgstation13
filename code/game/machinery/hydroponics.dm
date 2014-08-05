@@ -25,16 +25,19 @@
 	var/opened = 0.0
 
 /obj/machinery/hydroponics/New()
-	..()
-	component_parts = list()
-	component_parts += new /obj/item/weapon/circuitboard/hydroponics
-	component_parts += new /obj/item/weapon/stock_parts/matter_bin
-	component_parts += new /obj/item/weapon/stock_parts/matter_bin
-	component_parts += new /obj/item/weapon/stock_parts/scanning_module
-	component_parts += new /obj/item/weapon/stock_parts/capacitor
-	component_parts += new /obj/item/weapon/reagent_containers/glass/beaker
-	component_parts += new /obj/item/weapon/reagent_containers/glass/beaker
-	component_parts += new /obj/item/weapon/stock_parts/console_screen
+	. = ..()
+
+	component_parts = newlist(
+		/obj/item/weapon/circuitboard/hydroponics,
+		/obj/item/weapon/stock_parts/matter_bin,
+		/obj/item/weapon/stock_parts/matter_bin,
+		/obj/item/weapon/stock_parts/scanning_module,
+		/obj/item/weapon/stock_parts/capacitor,
+		/obj/item/weapon/reagent_containers/glass/beaker,
+		/obj/item/weapon/reagent_containers/glass/beaker,
+		/obj/item/weapon/stock_parts/console_screen
+	)
+
 	RefreshParts()
 
 /obj/machinery/hydroponics/bullet_act(var/obj/item/projectile/Proj) //Works with the Somatoray to modify plant variables.
@@ -52,7 +55,7 @@
 		..()
 		return
 
-/obj/machinery/hydroponics/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
+/obj/machinery/hydroponics/CanPass(atom/movable/mover, turf/target, height=1.5, air_group = 0)
 	if(air_group || (height==0)) return 1
 
 	if(istype(mover) && mover.checkpass(PASSTABLE))
@@ -348,6 +351,13 @@ obj/machinery/hydroponics/proc/mutatespecie() // Mutagent produced a new plant!
 	else if ( istype(myseed, /obj/item/seeds/plumpmycelium ))
 		del(myseed)
 		myseed = new /obj/item/seeds/walkingmushroommycelium
+	else if ( istype(myseed, /obj/item/seeds/synthmeatseed ))
+		del(myseed)
+		switch(rand(1,100))
+			if(1 to 50)
+				myseed = new /obj/item/seeds/synthbuttseed
+			if(51 to 100)
+				myseed = new /obj/item/seeds/synthbrainseed
 
 	else if ( istype(myseed, /obj/item/seeds/chiliseed ))
 		del(myseed)
@@ -697,7 +707,10 @@ obj/machinery/hydroponics/attackby(var/obj/item/O as obj, var/mob/user as mob)
 				user.client.screen -= O
 			O.dropped(user)
 			updateicon()
-
+			if(istype(0, /obj/item/seeds/replicapod))
+				var/obj/item/seeds/replicapod/RP = O
+				if(!RP.source)
+					RP.request_player()
 		else
 			user << "\red The [src] already has seeds in it!"
 

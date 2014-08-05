@@ -11,12 +11,27 @@
 	var/amount = 30					//How much paper is in the bin.
 	var/list/papers = new/list()	//List of papers put in the bin for reference.
 
+	autoignition_temperature = 519.15 // Kelvin
+
+/obj/item/weapon/paper_bin/ignite(var/temperature)
+	on_fire=1
+	visible_message("\The [src]'s paper bursts into flame!")
+	overlays += fire_sprite
+	spawn(rand(3,10) SECONDS)
+		if(!on_fire)
+			return
+		new ashtype(src.loc)
+		papers=0
+		amount=0
+		update_icon()
 
 /obj/item/weapon/paper_bin/MouseDrop(mob/user as mob)
 	if((user == usr && (!( usr.restrained() ) && (!( usr.stat ) && (usr.contents.Find(src) || in_range(src, usr))))))
 		if(!istype(usr, /mob/living/carbon/slime) && !istype(usr, /mob/living/simple_animal))
 			if( !usr.get_active_hand() )		//if active hand is empty
-				attack_hand(usr, 1, 1)
+				src.loc = user
+				user.put_in_hands(src)
+				user.visible_message("<span class='notice'>[user] picks up the [src].</span>", "<span class='notice'>You grab [src] from the floor!</span>")
 
 	return
 

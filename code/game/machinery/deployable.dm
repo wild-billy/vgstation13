@@ -86,9 +86,7 @@ for reference:
 				else
 			if (src.health <= 0)
 				visible_message("\red <B>The barricade is smashed apart!</B>")
-				new /obj/item/stack/sheet/wood(get_turf(src))
-				new /obj/item/stack/sheet/wood(get_turf(src))
-				new /obj/item/stack/sheet/wood(get_turf(src))
+				new /obj/item/stack/sheet/wood(get_turf(src, 5))
 				del(src)
 			..()
 
@@ -123,7 +121,7 @@ for reference:
 			del(src)
 		return
 
-	CanPass(atom/movable/mover, turf/target, height=0, air_group=0)//So bullets will fly over and stuff.
+	CanPass(atom/movable/mover, turf/target, height=1.5, air_group = 0)//So bullets will fly over and stuff.
 		if(air_group || (height==0))
 			return 1
 		if(istype(mover) && mover.checkpass(PASSTABLE))
@@ -247,7 +245,7 @@ for reference:
 			src.explode()
 		return
 
-	CanPass(atom/movable/mover, turf/target, height=0, air_group=0)//So bullets will fly over and stuff.
+	CanPass(atom/movable/mover, turf/target, height=1.5, air_group = 0)//So bullets will fly over and stuff.
 		if(air_group || (height==0))
 			return 1
 		if(istype(mover) && mover.checkpass(PASSTABLE))

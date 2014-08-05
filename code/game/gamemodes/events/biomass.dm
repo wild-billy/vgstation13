@@ -14,7 +14,7 @@
 	New()
 		return
 
-	Del()
+	Destroy()
 		if(master)
 			master.vines -= src
 			master.growth_queue -= src
@@ -60,7 +60,7 @@
 		spawn_biomass_piece(src.loc)
 		processing_objects.Add(src)
 
-	Del()
+	Destroy()
 		processing_objects.Remove(src)
 		..()
 
@@ -154,8 +154,8 @@
 				return
 	return
 
-/obj/effect/biomass/temperature_expose(null, temp, volume) //hotspots kill biomass
-	del src
+/obj/effect/biomass/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume) //hotspots kill biomass
+	qdel(src)
 
 
 /proc/biomass_infestation()

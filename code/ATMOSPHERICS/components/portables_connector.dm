@@ -76,9 +76,7 @@
 
 		return null
 
-	Del()
-		loc = null
-
+	Destroy()
 		if(connected_device)
 			connected_device.disconnect()
 

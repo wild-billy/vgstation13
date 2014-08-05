@@ -49,6 +49,36 @@
 	world << "<B>The current game mode is - Cult!</B>"
 	world << "<B>Some crewmembers are attempting to start a cult!<BR>\nCultists - complete your objectives. Convert crewmembers to your cause by using the convert rune. Remember - there is no you, there is only the cult.<BR>\nPersonnel - Do not let the cult succeed in its mission. Brainwashing them with the chaplain's bible reverts them to whatever CentCom-allowed faith they had.</B>"
 
+
+/datum/game_mode/cult/pre_setup()
+	if(istype(ticker.mode, /datum/game_mode/mixed))
+		mixed = 1
+	if(prob(50))
+		objectives += "survive"
+		objectives += "sacrifice"
+	else
+		objectives += "eldergod"
+		objectives += "sacrifice"
+
+	if(config.protect_roles_from_antagonist)
+		restricted_jobs += protected_jobs
+
+	var/list/cultists_possible = get_players_for_role(BE_CULTIST)
+	for(var/datum/mind/player in cultists_possible)
+		for(var/job in restricted_jobs)//Removing heads and such from the list
+			if(player.assigned_role == job)
+				cultists_possible -= player
+
+	for(var/cultists_number = 1 to max_cultists_to_start)
+		if(!cultists_possible.len)
+			break
+		var/datum/mind/cultist = pick(cultists_possible)
+		cultists_possible -= cultist
+		cult += cultist
+
+	return (cult.len>0)
+
+
 /datum/game_mode/cult/post_setup()
 	var/antag_role/cultist/cult = ticker.antag_types["cultist"]
 
@@ -88,7 +118,7 @@
 				if(cultist.current.client)
 					for(var/image/I in cultist.current.client.images)
 						if(I.icon_state == "cult")
-							del(I)
+							cultist.current.client.images -= I
 
 		for(var/datum/mind/cultist in cult)
 			if(cultist.current)
@@ -119,13 +149,13 @@
 				if(cultist.current.client)
 					for(var/image/I in cultist.current.client.images)
 						if(I.icon_state == "cult" && I.loc == cult_mind.current)
-							del(I)
+							cultist.current.client.images -= I
 
 		if(cult_mind.current)
 			if(cult_mind.current.client)
 				for(var/image/I in cult_mind.current.client.images)
 					if(I.icon_state == "cult")
-						del(I)
+						cult_mind.current.client.images -= I
 
 
 /datum/game_mode/cult/proc/get_unconvertables()

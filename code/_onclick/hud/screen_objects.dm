@@ -50,7 +50,7 @@
 		return 1
 	if(usr.next_move >= world.time)
 		return
-	usr.next_move = world.time + 6
+	//usr.next_move = world.time + 6
 
 	if(usr.stat || usr.restrained() || usr.stunned || usr.lying)
 		return 1
@@ -80,6 +80,11 @@
 /obj/screen/grab/attackby()
 	return
 
+/obj/screen/grab/Destroy()
+	if(master)
+		master = null
+
+	..()
 
 /obj/screen/storage
 	name = "storage"
@@ -95,7 +100,7 @@
 		var/obj/item/I = usr.get_active_hand()
 		if(I)
 			master.attackby(I, usr)
-			usr.next_move = world.time+2
+			//usr.next_move = world.time+2
 	return 1
 
 /obj/screen/gun
@@ -320,6 +325,13 @@
 											else
 												contents.Add(0)
 
+										// ACK ACK ACK Plasmen
+										if ("plasma")
+											if(t.air_contents.toxins)
+												contents.Add(t.air_contents.toxins)
+											else
+												contents.Add(0)
+
 
 								else
 									//no tank so we set contents to 0
@@ -485,12 +497,12 @@
 			if(iscarbon(usr))
 				var/mob/living/carbon/C = usr
 				C.activate_hand("r")
-				usr.next_move = world.time+2
+				//usr.next_move = world.time+2
 		if("l_hand")
 			if(iscarbon(usr))
 				var/mob/living/carbon/C = usr
 				C.activate_hand("l")
-				usr.next_move = world.time+2
+				//usr.next_move = world.time+2
 		if("swap")
 			usr:swap_hand()
 		if("hand")

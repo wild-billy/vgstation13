@@ -98,9 +98,7 @@ obj/machinery/atmospherics/tvalve
 
 		return null
 
-	Del()
-		loc = null
-
+	Destroy()
 		if(node1)
 			node1.disconnect(src)
 			del(network_node1)

@@ -1,17 +1,25 @@
-/mob/Del()//This makes sure that mobs with clients/keys are not just deleted from the game.
-	mob_list -= src
-	dead_mob_list -= src
-	living_mob_list -= src
+/mob/recycle(var/datum/materials)
+	return RECYK_BIOLOGICAL
+
+/mob/Destroy() // This makes sure that mobs with clients/keys are not just deleted from the game.
+	unset_machine()
+	mob_list.Remove(src)
+	dead_mob_list.Remove(src)
+	living_mob_list.Remove(src)
 	ghostize()
 	..()
 
 /mob/New()
+	. = ..()
 	mob_list += src
-	if(stat == DEAD)
+
+	if(DEAD == stat)
 		dead_mob_list += src
 	else
 		living_mob_list += src
-	..()
+
+/mob/proc/generate_name()
+	return name
 
 /mob/proc/Cell()
 	set category = "Admin"
@@ -39,6 +47,8 @@
 /mob/proc/show_message(msg, type, alt, alt_type)//Message, type of message (1 or 2), alternative message, alt message type (1 or 2)
 
 	if(!client)	return
+
+	msg = copytext(msg, 1, MAX_MESSAGE_LEN)
 
 	if (type)
 		if(type & 1 && (sdisabilities & BLIND || blinded || paralysis) )//Vision related
@@ -94,8 +104,6 @@
 	return 0
 
 /mob/proc/Life()
-//	if(organStructure)
-//		organStructure.ProcessOrgans()
 	return
 
 /mob/proc/get_item_by_slot(slot_id)
@@ -120,8 +128,10 @@
 
 /mob/proc/put_in_any_hand_if_possible(obj/item/W as obj, act_on_fail = 0, disable_warning = 1, redraw_mob = 1)
 	if(equip_to_slot_if_possible(W, slot_l_hand, act_on_fail, disable_warning, redraw_mob))
+		update_inv_l_hand()
 		return 1
 	else if(equip_to_slot_if_possible(W, slot_r_hand, act_on_fail, disable_warning, redraw_mob))
+		update_inv_r_hand()
 		return 1
 	return 0
 
@@ -699,8 +709,7 @@ var/list/slot_equipment_priority = list( \
 			if (L.master == src)
 				var/list/temp = list(  )
 				temp += L.container
-				//L = null
-				del(L)
+				L.loc = null
 				return temp
 			else
 				return L.container
@@ -723,8 +732,8 @@ var/list/slot_equipment_priority = list( \
 		if (W)
 			W.attack_self(src)
 			update_inv_r_hand()
-	if(next_move < world.time)
-		next_move = world.time + 2
+	//if(next_move < world.time)
+	//	next_move = world.time + 2
 	return
 
 /*
@@ -785,17 +794,18 @@ var/list/slot_equipment_priority = list( \
 		flavor_text = msg
 
 /mob/proc/warn_flavor_changed()
-	if(flavor_text && flavor_text != "") // don't spam people that don't use it!
+	if(flavor_text) // Don't spam people that don't use it!
 		src << "<h2 class='alert'>OOC Warning:</h2>"
-		src << "<span class='alert'>Your flavor text is likely out of date! <a href='byond://?src=\ref[src];flavor_change=1'>Change</a></span>"
+		src << "<span class='alert'>Your flavor text is likely out of date! <a href='?src=\ref[src];flavor_text=change'>Change</a></span>"
 
 /mob/proc/print_flavor_text()
-	if (flavor_text && flavor_text != "")
-		var/msg = replacetext(flavor_text, "\n", " ")
-		if(lentext(msg) <= 40)
+	if(flavor_text)
+		var/msg = replacetext(flavor_text, "\n", "<br />")
+
+		if(lentext(msg) <= 32)
 			return "<font color='#ffa000'><b>[msg]</b></font>"
 		else
-			return "<font color='#ffa000'><b>[copytext(msg, 1, 37)]... <a href='byond://?src=\ref[src];flavor_more=1'>More...</a></b></font>"
+			return "<font color='#ffa000'><b>[copytext(msg, 1, 32)]...<a href='?src=\ref[src];flavor_text=more'>More</a></b></font>"
 
 /*
 /mob/verb/help()
@@ -984,20 +994,18 @@ var/list/slot_equipment_priority = list( \
 		if(src:cameraFollow)
 			src:cameraFollow = null
 
-/mob/Topic(href, href_list)
+/mob/Topic(href,href_list[])
 	if(href_list["mach_close"])
 		var/t1 = text("window=[href_list["mach_close"]]")
 		unset_machine()
 		src << browse(null, t1)
 
-	if(href_list["flavor_more"])
-		usr << browse(text("<HTML><HEAD><TITLE>[]</TITLE></HEAD><BODY><TT>[]</TT></BODY></HTML>", name, replacetext(flavor_text, "\n", "<BR>")), text("window=[];size=500x200", name))
-		onclose(usr, "[name]")
-	if(href_list["flavor_change"])
-		update_flavor_text()
-//	..()
-	return
-
+	switch(href_list["flavor_text"])
+		if("more")
+			usr << browse(text("<HTML><HEAD><TITLE>[]</TITLE></HEAD><BODY><TT>[]</TT></BODY></HTML>", name, replacetext(flavor_text, "\n", "<BR>")), text("window=[];size=500x200", name))
+			onclose(usr, "[name]")
+		if("change")
+			update_flavor_text()
 
 /mob/proc/pull_damage()
 	if(ishuman(src))
@@ -1156,26 +1164,34 @@ note dizziness decrements automatically in the mob's Life() proc.
 /mob/Stat()
 	..()
 
-	if(statpanel("Status"))	//not looking at that panel
+	if(client && client.holder)
 
-		if(client && client.holder)
-			stat(null,"Location:\t([x], [y], [z])")
-			stat(null,"CPU:\t[world.cpu]")
-			stat(null,"Instances:\t[world.contents.len]")
+		if (statpanel("Status"))	//not looking at that panel
+			stat(null, "Location:\t([x], [y], [z])")
+			stat(null, "CPU:\t[world.cpu]")
+			stat(null, "Instances:\t[world.contents.len]")
 
-			if(master_controller)
-				stat(null,"MasterController-[last_tick_duration] ([master_controller.processing?"On":"Off"]-[controller_iteration])")
-				stat(null,"Air-[master_controller.air_cost]\tSun-[master_controller.sun_cost]")
-				stat(null,"Mob-[master_controller.mobs_cost]\t#[mob_list.len]")
-				stat(null,"Dis-[master_controller.diseases_cost]\t#[active_diseases.len]")
-				stat(null,"Mch-[master_controller.machines_cost]\t#[machines.len]")
-				stat(null,"Obj-[master_controller.objects_cost]\t#[processing_objects.len]")
-				stat(null,"Net-[master_controller.networks_cost]\tPnet-[master_controller.powernets_cost]")
-				stat(null,"NanoUI-[master_controller.nano_cost]\t#[nanomanager.processing_uis.len]")
-				stat(null,"GC-[master_controller.gc_cost]\t#[garbage.queue.len]")
-				stat(null,"Tick-[master_controller.ticker_cost]\tALL-[master_controller.total_cost]")
+			if (master_controller)
+				stat(null, "MasterController-[last_tick_duration] ([master_controller.processing?"On":"Off"]-[master_controller.iteration])")
+				stat(null, "Air-[master_controller.air_cost]")
+				stat(null, "Sun-[master_controller.sun_cost]")
+				stat(null, "Mob-[master_controller.mobs_cost]\t#[mob_list.len]")
+				stat(null, "Dis-[master_controller.diseases_cost]\t#[active_diseases.len]")
+				stat(null, "Mch-[master_controller.machines_cost]\t#[machines.len]")
+				stat(null, "Obj-[master_controller.objects_cost]\t#[processing_objects.len]")
+				stat(null, "PiNet-[master_controller.networks_cost]\t#[pipe_networks.len]")
+				stat(null, "Ponet-[master_controller.powernets_cost]\t#[powernets.len]")
+				stat(null, "NanoUI-[master_controller.nano_cost]\t#[nanomanager.processing_uis.len]")
+				stat(null, "Tick-[master_controller.ticker_cost]")
+				stat(null, "garbage collector - [master_controller.garbageCollectorCost]")
+				stat(null, "\tqdel - [garbageCollector.del_everything ? "off" : "on"]")
+				stat(null, "\ton queue - [garbageCollector.queue.len]")
+				stat(null, "\ttotal delete - [garbageCollector.dels_count]")
+				stat(null, "\tsoft delete - [garbageCollector.dels_count - garbageCollector.hard_dels]")
+				stat(null, "\thard delete - [garbageCollector.hard_dels]")
+				stat(null, "ALL - [master_controller.total_cost]")
 			else
-				stat(null,"MasterController-ERROR")
+				stat(null, "master controller - ERROR")
 
 	if(listed_turf && client)
 		if(get_dist(listed_turf,src) > 1)
@@ -1193,11 +1209,11 @@ note dizziness decrements automatically in the mob's Life() proc.
 				continue //Not showing the noclothes spell
 			switch(S.charge_type)
 				if("recharge")
-					statpanel("Spells","[S.charge_counter/10.0]/[S.charge_max/10]",S)
+					statpanel(S.panel,"[S.charge_counter/10.0]/[S.charge_max/10]",S)
 				if("charges")
-					statpanel("Spells","[S.charge_counter]/[S.charge_max]",S)
+					statpanel(S.panel,"[S.charge_counter]/[S.charge_max]",S)
 				if("holdervar")
-					statpanel("Spells","[S.holder_var_type] [S.holder_var_amount]",S)
+					statpanel(S.panel,"[S.holder_var_type] [S.holder_var_amount]",S)
 
 
 
@@ -1236,11 +1252,13 @@ note dizziness decrements automatically in the mob's Life() proc.
 		canmove = has_limbs
 
 	if(lying)
+		layer = 3.9
 		density = 0
 		drop_l_hand()
 		drop_r_hand()
 	else
 		density = 1
+		layer = 4
 
 	//Temporarily moved here from the various life() procs
 	//I'm fixing stuff incrementally so this will likely find a better home.
@@ -1430,3 +1448,11 @@ mob/verb/yank_out_object()
 		if(!pinned.len)
 			anchored = 0
 	return 1
+
+// Mobs tell access what access levels it has.
+/mob/proc/GetAccess()
+	return list()
+
+// Skip over all the complex list checks.
+/mob/proc/hasFullAccess()
+	return 0

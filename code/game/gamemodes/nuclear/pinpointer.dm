@@ -9,6 +9,7 @@
 	throw_speed = 4
 	throw_range = 20
 	m_amt = 500
+	w_type = RECYK_ELECTRONIC
 	var/obj/item/weapon/disk/nuclear/the_disk = null
 	var/active = 0
 
@@ -18,6 +19,7 @@
 			active = 1
 			workdisk()
 			usr << "\blue You activate the pinpointer"
+			playsound(get_turf(src), 'sound/items/healthanalyzer.ogg', 30, 1)
 		else
 			active = 0
 			icon_state = "pinoff"
@@ -243,3 +245,54 @@
 				icon_state = "pinonfar"
 
 	spawn(5) .()
+
+/obj/item/weapon/pinpointer/pdapinpointer
+	name = "pda pinpointer"
+	desc = "A pinpointer that has been illegally modified to track the PDA of a crewmember for malicious reasons."
+	var/obj/target = null
+	var/used = 0
+
+	attack_self()
+		if(!active)
+			active = 1
+			point_at(target)
+			usr << "\blue You activate the pinpointer"
+		else
+			active = 0
+			icon_state = "pinoff"
+			usr << "\blue You deactivate the pinpointer"
+
+	verb/select_pda()
+		set category = "Object"
+		set name = "Select pinpointer target"
+		set src in view(1)
+
+		if(used)
+			usr << "Target has already been set!"
+			return
+
+		var/list/L = list()
+		L["Cancel"] = "Cancel"
+		var/length = 1
+		for (var/obj/item/device/pda/P in world)
+			if(P.name != "\improper PDA")
+				L[text("([length]) [P.name]")] = P
+				length++
+
+		var/t = input("Select pinpointer target. WARNING: Can only set once.") as null|anything in L
+		if(t == "Cancel")
+			return
+		target = L[t]
+		if(!target)
+			usr << "Failed to locate [target]!"
+			return
+		active = 1
+		point_at(target)
+		usr << "You set the pinpointer to locate [target]"
+		used = 1
+
+
+	examine()
+		..()
+		if (target)
+			usr << "\blue Tracking [target]"

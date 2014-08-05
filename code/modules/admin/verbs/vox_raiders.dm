@@ -70,6 +70,7 @@ var/global/vox_tick = 1
 	equip_to_slot_or_del(W, slot_wear_id)
 
 	vox_tick++
-	if (vox_tick > 4) vox_tick = 1
+	if (vox_tick > 4)
+		vox_tick = 1
 
 	return 1

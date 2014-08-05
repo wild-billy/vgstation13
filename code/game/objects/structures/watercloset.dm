@@ -13,6 +13,7 @@
 	var/mob/living/swirlie = null	//the mob being given a swirlie
 
 /obj/structure/toilet/New()
+	. = ..()
 	open = round(rand(0, 1))
 	update_icon()
 
@@ -193,7 +194,7 @@
 				del(mymist)
 				ismist = 0
 
-/obj/machinery/shower/HasEntered(atom/movable/O)
+/obj/machinery/shower/Crossed(atom/movable/O)
 	..()
 	wash(O)
 	if(ismob(O))

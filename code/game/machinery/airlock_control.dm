@@ -119,9 +119,6 @@ obj/machinery/door/airlock/New()
 		set_frequency(frequency)
 
 
-
-
-
 /obj/item/airlock_sensor_frame
 	name = "Airlock Sensor frame"
 	desc = "Used for repairing or building airlock sensors"
@@ -145,7 +142,7 @@ obj/machinery/door/airlock/New()
 	if (!istype(loc, /turf/simulated/floor))
 		usr << "\red [src] cannot be placed on this spot."
 		return
-	new /obj/machinery/access_button(loc, ndir, 1)
+	new /obj/machinery/airlock_sensor(loc, ndir, 1)
 	del(src)
 
 obj/machinery/airlock_sensor
@@ -243,8 +240,8 @@ obj/machinery/airlock_sensor/multitool_menu(var/mob/user,var/obj/item/device/mul
 	return {"
 		<ul>
 			<li><b>Frequency:</b> <a href="?src=\ref[src];set_freq=-1">[format_frequency(frequency)] GHz</a> (<a href="?src=\ref[src];set_freq=[0]">Reset</a>)</li>
-			[format_tag("ID Tag",id_tag)]
-			[format_tag("Master ID Tag",master_tag)]
+			[format_tag("ID Tag","id_tag")]
+			[format_tag("Master ID Tag","master_tag")]
 		</ul>"}
 
 obj/machinery/airlock_sensor/Topic(href,href_list)
@@ -271,8 +268,6 @@ obj/machinery/airlock_sensor/Topic(href,href_list)
 
 
 obj/machinery/airlock_sensor/attackby(var/obj/item/W, var/mob/user)
-	if(..())
-		return
 	if(istype(W,/obj/item/device/multitool))
 		update_multitool_menu(user)
 	if(istype(W,/obj/item/weapon/screwdriver))
@@ -281,7 +276,6 @@ obj/machinery/airlock_sensor/attackby(var/obj/item/W, var/mob/user)
 			user << "You successfully pry \the [src] off the wall."
 			new /obj/item/airlock_sensor_frame(get_turf(src))
 			del(src)
-
 
 /obj/item/access_button_frame
 	name = "access button frame"
@@ -399,8 +393,8 @@ obj/machinery/access_button/multitool_menu(var/mob/user,var/obj/item/device/mult
 	return {"
 		<ul>
 			<li><b>Frequency:</b> <a href="?src=\ref[src];set_freq=-1">[format_frequency(frequency)] GHz</a> (<a href="?src=\ref[src];set_freq=[0]">Reset</a>)</li>
-			[format_tag("Master ID Tag",master_tag)]
-			[format_tag("Command",command)]
+			[format_tag("Master ID Tag","master_tag")]
+			[format_tag("Command","command")]
 		</ul>"}
 
 obj/machinery/access_button/Topic(href,href_list)

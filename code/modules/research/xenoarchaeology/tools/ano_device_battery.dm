@@ -9,6 +9,7 @@
 	var/effect_id = ""
 
 /obj/item/weapon/anobattery/New()
+	. = ..()
 	battery_effect = new()
 
 /obj/item/weapon/anobattery/proc/UpdateSprite()
@@ -29,7 +30,7 @@
 	var/turf/archived_loc
 
 /obj/item/weapon/anodevice/New()
-	..()
+	. = ..()
 	processing_objects.Add(src)
 
 /obj/item/weapon/anodevice/attackby(var/obj/I as obj, var/mob/user as mob)
@@ -191,6 +192,6 @@
 	p = min(p, 100)
 	icon_state = "anodev[round(p,25)]"
 
-/obj/item/weapon/anodevice/Del()
+/obj/item/weapon/anodevice/Destroy()
 	processing_objects.Remove(src)
 	..()

@@ -81,7 +81,7 @@
 	desc = "Sounds more like quacking than anything else."
 	key = "x"
 	speech_verb = "quacks"
-	colour = "soghun"
+	colour = "rough"
 	native=1
 	flags = RESTRICTED
 
@@ -91,6 +91,23 @@
 	if(len > 1)
 		for(var/i=0,i<len,i++)
 			message += " ACK"
+	return message+"!"
+
+/datum/language/skellington
+	name = "Clatter"
+	desc = "Click clack go the bones."
+	key = "z"
+	speech_verb = "chatters"
+	colour = "rough"
+	native=1
+	flags = RESTRICTED
+
+/datum/language/skellington/say_misunderstood(mob/M, message)
+	message="CLICK"
+	var/len = max(1,Ceiling(length(message)/5))
+	if(len > 1)
+		for(var/i=0,i<len,i++)
+			message += " CL[pick("A","I")]CK"
 	return message+"!"
 
 // Language handling.

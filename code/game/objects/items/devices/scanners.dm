@@ -18,7 +18,13 @@ REAGENT SCANNER
 	w_class = 2
 	item_state = "electronic"
 	m_amt = 150
+	w_type = RECYK_ELECTRONIC
 	origin_tech = "magnets=1;engineering=1"
+
+/obj/item/device/t_scanner/Destroy()
+	if(on)
+		processing_objects.Remove(src)
+	..()
 
 /obj/item/device/t_scanner/attack_self(mob/user)
 
@@ -51,6 +57,13 @@ REAGENT SCANNER
 						var/turf/U = O.loc
 						if(U.intact)
 							O.invisibility = 101
+		for(var/mob/living/M in T.contents)
+			var/oldalpha = M.alpha
+			if(M.alpha < 255 && istype(M))
+				M.alpha = 255
+				spawn(10)
+					if(M)
+						M.alpha = oldalpha
 
 		var/mob/living/M = locate() in T
 		if(M && M.invisibility == 2)
@@ -72,6 +85,7 @@ REAGENT SCANNER
 	throw_speed = 5
 	throw_range = 10
 	m_amt = 200
+	w_type = RECYK_ELECTRONIC
 	origin_tech = "magnets=1;biotech=1"
 	var/mode = 1;
 
@@ -95,6 +109,7 @@ REAGENT SCANNER
 	var/TX = M.getToxLoss() > 50 	? 	"<b>[M.getToxLoss()]</b>" 		: M.getToxLoss()
 	var/BU = M.getFireLoss() > 50 	? 	"<b>[M.getFireLoss()]</b>" 		: M.getFireLoss()
 	var/BR = M.getBruteLoss() > 50 	? 	"<b>[M.getBruteLoss()]</b>" 	: M.getBruteLoss()
+	playsound(get_turf(src), 'sound/items/healthanalyzer.ogg', 50, 1)
 	if(M.status_flags & FAKEDEATH)
 		OX = fake_oxy > 50 			? 	"<b>[fake_oxy]</b>" 			: fake_oxy
 		user.show_message("\blue Analyzing Results for [M]:\n\t Overall Status: dead")
@@ -223,6 +238,7 @@ REAGENT SCANNER
 	throw_range = 20
 	m_amt = 30
 	g_amt = 20
+	w_type = RECYK_ELECTRONIC
 	origin_tech = "magnets=1;engineering=1"
 
 /obj/item/device/analyzer/attack_self(mob/user as mob)
@@ -293,15 +309,14 @@ REAGENT SCANNER
 	throw_range = 20
 	m_amt = 30
 	g_amt = 20
+	w_type = RECYK_ELECTRONIC
 	origin_tech = "magnets=2;biotech=2"
 	var/details = 0
 	var/recent_fail = 0
 
 /obj/item/device/mass_spectrometer/New()
-	..()
-	var/datum/reagents/R = new/datum/reagents(5)
-	reagents = R
-	R.my_atom = src
+	. = ..()
+	create_reagents(5)
 
 /obj/item/device/mass_spectrometer/on_reagent_change()
 	if(reagents.total_volume)
@@ -366,6 +381,7 @@ REAGENT SCANNER
 	throw_range = 20
 	m_amt = 30
 	g_amt = 20
+	w_type = RECYK_ELECTRONIC
 	origin_tech = "magnets=2;biotech=2"
 	var/details = 0
 	var/recent_fail = 0

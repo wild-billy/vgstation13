@@ -17,6 +17,10 @@
 	g_amt = 1000
 	var/mode = SYRINGE_DRAW
 
+	suicide_act(mob/user)
+		viewers(user) << "\red <b>[user] appears to be injecting an air bubble using a [src.name]! It looks like \he's trying to commit suicide.</b>"
+		return(OXYLOSS)
+
 	on_reagent_change()
 		update_icon()
 
@@ -83,7 +87,7 @@
 						var/amount = src.reagents.maximum_volume - src.reagents.total_volume
 						var/mob/living/carbon/T = target
 						if(!T.dna)
-							usr << "You are unable to locate any blood. (To be specific, your target seems to be missing their DNA datum)"
+							user << "You are unable to locate any blood. (BUG: To be specific, your target seems to be missing their DNA datum)"
 							return
 						if(M_NOCLONE in T.mutations) //target done been et, no more blood in him
 							user << "\red You are unable to locate any blood."
@@ -96,9 +100,12 @@
 							src.reagents.update_total()
 							src.on_reagent_change()
 							src.reagents.handle_reactions()
-						user << "\blue You take a blood sample from [target]"
-						for(var/mob/O in viewers(4, user))
-							O.show_message("\red [user] takes a blood sample from [target].", 1)
+							user << "\blue You take a blood sample from [target]"
+							for(var/mob/O in viewers(4, user))
+								O.show_message("\red [user] takes a blood sample from [target].", 1)
+						else
+							user.visible_message("\red [user] inserts the syringe into [target], draws back the plunger and gets... Nothing?",\
+								"\red You insert the syringe into [target], draw back the plunger and get... Nothing?")
 
 				else //if not mob
 					if(!target.reagents.total_volume)
@@ -187,6 +194,7 @@
 					if(B && istype(target,/mob/living/carbon))
 						var/mob/living/carbon/C = target
 						C.inject_blood(src,5)
+						trans = 5
 					else
 						trans = src.reagents.trans_to(target, amount_per_transfer_from_this)
 					user << "\blue You inject [trans] units of the solution. The syringe now contains [src.reagents.total_volume] units."
@@ -426,6 +434,15 @@
 		mode = SYRINGE_INJECT
 		update_icon()
 
+/obj/item/weapon/reagent_containers/syringe/charcoal
+	name = "Syringe (Activated Charcoal)"
+	desc = "Contains activated charcoal - used to treat overdoses."
+	New()
+		..()
+		reagents.add_reagent("charcoal", 15)
+		mode = SYRINGE_INJECT
+		update_icon()
+
 /obj/item/weapon/reagent_containers/ld50_syringe/choral
 	New()
 		..()
@@ -451,6 +468,15 @@
 	New()
 		..()
 		reagents.add_reagent("inaprovaline", 15)
+		mode = SYRINGE_INJECT
+		update_icon()
+
+/obj/item/weapon/reagent_containers/syringe/robot/charcoal
+	name = "Syringe (Activated Charcoal)"
+	desc = "Contains activated charcoal - used to treat overdoses."
+	New()
+		..()
+		reagents.add_reagent("charcoal", 15)
 		mode = SYRINGE_INJECT
 		update_icon()
 
