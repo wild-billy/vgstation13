@@ -185,8 +185,8 @@ var/list/datum/power/changeling/powerinstances = list()
 	set category = "Changeling"
 	set desc = "Level up!"
 
-	if(!usr || !usr.mind || !usr.mind.antag_roles["changeling"])	return
-	src = usr.mind.antag_roles["changeling"]
+	if(!usr || !usr.GetRole("changeling"))	return
+	src = usr.GetRole("changeling")
 
 	if(!powerinstances.len)
 		for(var/P in powers)
@@ -460,7 +460,7 @@ var/list/datum/power/changeling/powerinstances = list()
 
 
 /antag_role/changeling/proc/purchasePower(var/datum/mind/M, var/Pname, var/remake_verbs = 1)
-	if(!M || !M.antag_roles["changeling"])
+	if(!M || !M.GetRole("changeling"))
 		return
 
 	var/datum/power/changeling/Thepower = Pname

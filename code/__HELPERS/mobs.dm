@@ -158,3 +158,4 @@ proc/add_ghostlogs(var/mob/user, var/obj/target, var/what_done, var/admin=1, var
 			log_adminghost("[subject_text] [what_done] [target_text] [addition]")
 		else
 			log_ghost("[subject_text] [what_done] [target_text] [addition]")
+

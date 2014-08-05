@@ -47,49 +47,28 @@ You must kill it all while minimizing the damage to the station."}
 		start_state = new /datum/station_state()
 		start_state.count()
 
-	spawn(0)
-
-		var/wait_time = rand(waittime_l, waittime_h)
-
-		sleep(wait_time)
-
-		send_intercept(0)
-
-		sleep(100)
-
-		show_message("<span class='alert'>You feel tired and bloated.</span>")
-
-		sleep(wait_time)
-
-		show_message("<span class='alert'>You feel like you are about to burst.</span>")
-
-		sleep(wait_time / 2)
-
-		burst_blobs()
-
-		// Stage 0
-		sleep(40)
-		stage(0)
-
-		// Stage 1
-		sleep(2000)
-		stage(1)
 	..()
 
 /datum/game_mode/blob/proc/send_alert(var/stage)
 	if(known_stage>=stage) return
 	known_stage=stage
 	switch(stage)
-		if (0)
-			biohazard_alert()
-			declared = 1
-			return
+		if(0)
+			biohazard_alert() // Who fucking cares.
+		if(1)
+			spawn(rand(30,60) SECONDS) // 30-60 seconds of leeway.
+				declared=1
+				command_alert("Biohazard outbreak alert status upgraded to level 9.  [station_name()] is now locked down, under Directive 7-10, until further notice.", "Directive 7-10 Initiated")
 
-		if (1)
-			command_alert("Biohazard outbreak alert status upgraded to level 9.  [station_name()] is now locked down, under Directive 7-10, until further notice.", "Directive 7-10 Initiated")
-			for(var/mob/M in player_list)
-				if(!istype(M,/mob/new_player))
-					M << sound('sound/AI/blob_confirmed.ogg')
+				for(var/mob/M in player_list)
+					if(!istype(M,/mob/new_player))
+						M << sound('sound/AI/blob_confirmed.ogg')
 
-	return
+				/*
+				var/obj/item/weapon/aiModule/quarantine/Q = new
+				for(var/mob/living/silicon/ai/ai in world)
+					if(ai.mind && ai.mind.assigned_role == "AI")
+						Q.transmitInstructions(ai)
+				del(Q)
+				*/
 

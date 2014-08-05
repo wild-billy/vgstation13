@@ -5,10 +5,10 @@
 * By N3X15
 */
 
-#define ANTAG_MIXABLE   1 // Can be used in mixed mode
-#define ANTAG_NEED_HOST 2 // Antag needs a host/partner
-#define ANTAG_ADDITIVE  4 // Antag can be added on top of another antag.
-#define ANTAG_GOOD      8 // Role is not actually an antag. (Used for GetAllBadMinds() etc)
+#define ROLE_MIXABLE   1 // Can be used in mixed mode
+#define ROLE_NEED_HOST 2 // Antag needs a host/partner
+#define ROLE_ADDITIVE  4 // Antag can be added on top of another antag.
+#define ROLE_GOOD      8 // Role is not actually an antag. (Used for GetAllBadMinds() etc)
 
 /antag_role
 	//////////////////////////////

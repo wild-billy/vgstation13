@@ -1,7 +1,7 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
 
 /proc/iscultist(mob/living/M as mob)
-	return istype(M) && M.mind && ticker && ticker.mode && (M.mind.antag_roles["cultist"])
+	return istype(M) && M.GetRole("cultist")
 
 /proc/is_convertable_to_cult(datum/mind/mind)
 	if(!istype(mind))	return 0
@@ -49,62 +49,33 @@
 	world << "<B>The current game mode is - Cult!</B>"
 	world << "<B>Some crewmembers are attempting to start a cult!<BR>\nCultists - complete your objectives. Convert crewmembers to your cause by using the convert rune. Remember - there is no you, there is only the cult.<BR>\nPersonnel - Do not let the cult succeed in its mission. Brainwashing them with the chaplain's bible reverts them to whatever CentCom-allowed faith they had.</B>"
 
-
-/datum/game_mode/cult/pre_setup()
-	if(istype(ticker.mode, /datum/game_mode/mixed))
-		mixed = 1
-	if(prob(50))
-		objectives += "survive"
-		objectives += "sacrifice"
-	else
-		objectives += "eldergod"
-		objectives += "sacrifice"
-
-	if(config.protect_roles_from_antagonist)
-		restricted_jobs += protected_jobs
-
-	var/list/cultists_possible = get_players_for_role(BE_CULTIST)
-	for(var/datum/mind/player in cultists_possible)
-		for(var/job in restricted_jobs)//Removing heads and such from the list
-			if(player.assigned_role == job)
-				cultists_possible -= player
-
-	for(var/cultists_number = 1 to max_cultists_to_start)
-		if(!cultists_possible.len)
-			break
-		var/datum/mind/cultist = pick(cultists_possible)
-		cultists_possible -= cultist
-		cult += cultist
-
-	return (cult.len>0)
-
-
 /datum/game_mode/cult/post_setup()
 	var/antag_role/cultist/cult = ticker.antag_types["cultist"]
 
 	modePlayer += cult.minds
 
-	if(!mixed)
-		spawn (rand(waittime_l, waittime_h))
-			send_intercept()
+	//if(!mixed)
+	spawn (rand(waittime_l, waittime_h))
+		send_intercept()
+
 	..()
 
 
 /datum/game_mode/proc/add_cultist(datum/mind/cult_mind) //BASE
 	if (!istype(cult_mind))
 		return 0
-	if(!cult_mind.antag_roles["cultist"] && is_convertable_to_cult(cult_mind))
+	if(!cult_mind.GetRole("cultist") && is_convertable_to_cult(cult_mind))
 		cult_mind.assignRole("cultist")
 		update_cult_icons_added(cult_mind)
 
 /datum/game_mode/cult/add_cultist(datum/mind/cult_mind) //INHERIT
 	if (!..(cult_mind))
 		return
-	var/antag_role/cultist/cultist = cult_mind.antag_roles["cultist"]
+	var/antag_role/cultist/cultist = cult_mind.GetRole("cultist")
 	cultist.MemorizeCultObjectives()
 
 /datum/game_mode/proc/remove_cultist(datum/mind/cult_mind, show_message = 1)
-	if(cult_mind.antag_roles["cultist"])
+	if(cult_mind.GetRole("cultist"))
 		cult_mind.unassignRole("cultist")
 		if(show_message)
 			for(var/mob/M in viewers(cult_mind.current))

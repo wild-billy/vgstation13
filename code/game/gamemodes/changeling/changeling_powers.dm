@@ -2,10 +2,10 @@
 /mob/proc/make_changeling()
 	if(!mind)
 		return
-	if(!mind.antag_roles["changeling"])
+	if(!mind.GetRole("changeling"))
 		mind.assignRole("changeling")
 
-	var/antag_role/changeling/changeling = mind.antag_roles["changeling"]
+	var/antag_role/changeling/changeling = mind.GetRole("changeling")
 
 	verbs += /antag_role/changeling/proc/EvolutionMenu
 
@@ -32,8 +32,8 @@
 
 /mob/proc/remove_changeling_powers()
 	var/antag_role/changeling/changeling = null
-	if(src.mind && src.mind.antag_roles["changeling"])
-		changeling = src.mind.antag_roles["changeling"]
+	if(src.mind && src.GetRole("changeling"))
+		changeling = src.GetRole("changeling")
 	if(!changeling)
 		return 0
 	for(var/datum/power/changeling/P in changeling.purchasedpowers)
@@ -46,7 +46,7 @@
 	if(!src.mind)		return
 	if(!iscarbon(src))	return
 
-	var/antag_role/changeling/changeling = src.mind.antag_roles["changeling"]
+	var/antag_role/changeling/changeling = src.GetRole("changeling")
 
 	if(!changeling)
 		world.log << "[src] has the changeling_transform() verb but is not a changeling."
@@ -138,7 +138,7 @@
 	changeling.chem_charges += 10
 	changeling.geneticpoints += 2
 
-	if(T.mind && T.mind.antag_roles["changeling"])
+	if(T.GetRole("changeling"))
 		if(changeling.absorbed_dna)
 			for(var/dna_data in changeling.absorbed_dna)	//steal all their loot
 				if(dna_data in changeling.absorbed_dna)
@@ -385,7 +385,7 @@
 /mob/proc/changeling_returntolife()
 	set category = "Changeling"
 	set name = "Return To Life (20)"
-	var/datum/changeling/changeling = changeling_power(20,1,100,DEAD)
+	var/antag_role/changeling/changeling = changeling_power(20,1,100,DEAD)
 	if(!changeling)	return
 
 	var/mob/living/carbon/C = src
@@ -522,13 +522,13 @@
 
 //Speeds up chemical regeneration
 /mob/proc/changeling_fastchemical()
-	var/antag_role/changeling/changeling = mind.antag_roles["changeling"]
+	var/antag_role/changeling/changeling = mind.GetRole("changeling")
 	changeling.chem_recharge_rate *= 2
 	return 1
 
 //Increases macimum chemical storage
 /mob/proc/changeling_engorgedglands()
-	var/antag_role/changeling/changeling = mind.antag_roles["changeling"]
+	var/antag_role/changeling/changeling = mind.GetRole("changeling")
 	changeling.chem_storage += 25
 	return 1
 
@@ -847,9 +847,7 @@ var/list/datum/dna/hivemind_bank = list()
 	set name = "Extract DNA Sting (40)"
 	set desc="Stealthily sting a target to extract their DNA."
 
-	var/antag_role/changeling/changeling = null
-	if(src.mind && src.mind.antag_roles["changeling"])
-		changeling = src.mind.antag_roles["changeling"]
+	var/antag_role/changeling/changeling = GetRole("changeling")
 	if(!changeling)
 		return 0
 

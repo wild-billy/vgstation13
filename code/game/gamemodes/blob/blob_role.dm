@@ -83,7 +83,7 @@
 /antag_role/blob/DeclareAll()
 	var/text = "<FONT size = 2><B>The blob[(minds.len > 1 ? "s were" : " was")]:</B></FONT>"
 	for(var/datum/mind/mind in minds)
-		var/antag_role/R=mind.antag_roles[id]
+		var/antag_role/R=mind.GetRole(id)
 		text += R.Declare()
 	world << text
 

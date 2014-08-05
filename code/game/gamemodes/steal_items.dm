@@ -235,7 +235,7 @@
 // SPECIAL OBJECTIVES
 ////////////////////////////////
 /datum/objective/steal/special
-	target_category = "special"
+//	target_category = "special"
 
 /datum/theft_objective/special/nuke_gun
 	name = "nuclear gun"

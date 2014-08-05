@@ -927,7 +927,7 @@ var/list/sacrificed = list()
 		bloodboil() //cultists need at least one DANGEROUS rune. Even if they're all stealthy.
 /*
 			var/list/mob/living/carbon/cultists = new
-			for(var/datum/mind/H.antag_roles["cultist"])
+			for(var/datum/mind/H in antag_roles["cultist"])
 				if (istype(H.current,/mob/living/carbon))
 					cultists+=H.current
 */

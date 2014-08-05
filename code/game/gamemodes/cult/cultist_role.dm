@@ -119,7 +119,7 @@
 		text += "<b>HEAD</b>|officer|employee|cultist"
 	else if (M.assigned_role in list("Security Officer", "Detective", "Warden"))
 		text += "head|<b>OFFICER</b>|employee|cultist"
-	else if (M.antag_roles["cultist"])
+	else if (M.GetRole("cultist"))
 		text += {"head|officer|<a href='?src=\ref[src];remove_role=cultist'>employee</a>|<b>CULTIST</b>
 <ul>
 	<li>Give <a href='?src=\ref[src];mind=\ref[M];give=tome'>tome</a></li>
@@ -150,6 +150,6 @@
 						H << "A tome, a message from your new master, appears in your [where]."
 
 			if("amulet")
-				var/antag_role/cultist/cultist = M.antag_roles["cultist"]
+				var/antag_role/cultist/cultist = M.GetRole("cultist")
 				if (!cultist.Equip())
 					usr << "\red Spawning amulet failed!"

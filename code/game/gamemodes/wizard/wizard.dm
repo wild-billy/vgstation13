@@ -37,7 +37,7 @@
 		else
 			break
 	if(isnull(wizard))
-		log_admin("COULD NOT MAKE A WIZARD, Mixed mode is [mixed ? "enabled" : "disabled"]")
+		log_admin("COULD NOT MAKE A WIZARD")
 		return 0
 	wizards += wizard
 	modePlayer += wizard
@@ -64,9 +64,10 @@
 		equip_wizard(wizard.current)
 		name_wizard(wizard.current)
 		greet_wizard(wizard)
-	if(!mixed)
-		spawn (rand(waittime_l, waittime_h))
-			send_intercept()
+
+	//if(!mixed)
+	spawn (rand(waittime_l, waittime_h))
+		send_intercept()
 	..()
 	return
 
@@ -192,9 +193,11 @@
 
 
 /datum/game_mode/wizard/check_finished()
+	/*
 	if(istype(ticker.mode, /datum/game_mode/mixed))
 		mixed = 1
-	if(config.continous_rounds || mixed)
+	*/
+	if(config.continous_rounds /*|| mixed*/)
 		return ..()
 
 	var/wizards_alive = 0

@@ -28,6 +28,8 @@
 		log_admin("MODE FAILURE: BORER. NOT ENOUGH BORER CANDIDATES.")
 		return 0 // not enough candidates for borer
 
+	var/list/found_vents=list()
+
 	for(var/obj/machinery/atmospherics/unary/vent_pump/v in world)
 		if(!v.welded && v.z == STATION_Z && v.canSpawnMice==1) // No more spawning in atmos.  Assuming the mappers did their jobs, anyway.
 			found_vents.Add(v)
@@ -36,6 +38,7 @@
 		log_admin("MODE FAILURE: BORER. NOT ENOUGH VENTS.")
 		return 0 // not enough candidates for borer
 
+	/*
 	// for each 2 possible borers, add one borer and one host
 	while(possible_borers.len >= 2)
 		var/datum/mind/borer = pick(possible_borers)
@@ -54,6 +57,7 @@
 
 		borer.assigned_role = "MODE" //So they aren't chosen for other jobs.
 		borer.special_role = "Borer"
+	*/
 
 	return 1
 
@@ -62,37 +66,9 @@
 
 
 /datum/game_mode/borer/post_setup()
-	// create a borer and enter it
-	for(var/datum/mind/borer in borers)
-		// Pick a backup location to spawn at if we can't infest.
-		var/spawn_loc
-		if(found_vents.len)
-			var/vent = pick(found_vents)
-			found_vents.Remove(vent)
-			spawn_loc=get_turf(vent)
-		else
-			spawn_loc=pick(xeno_spawn)
+	if(!..()) return 0
 
-		var/mob/living/simple_animal/borer/M = new(spawn_loc,1) // loc, by_gamemode=0
-		var/mob/original = borer.current
-		borer.transfer_to(M)
-		//M.clearHUD()
-
-		// get the host for this borer
-		var/datum/mind/first_host = assigned_hosts[borer.key]
-
-		// this is a redundant check, but I don't think the above works..
-		// if picking hosts works with this method, remove the method above
-		if(!first_host)
-			first_host = pick(first_hosts)
-			first_hosts.Remove(first_host)
-
-		M.perform_infestation(first_host.current)
-		forge_borer_objectives(borer, first_host)
-
-		del(original)
-
-	log_admin("Created [borers.len] borers.")
+	log_admin("Created [ticker.GetPlayersWithRole("borer")] borers.")
 
 	spawn (rand(waittime_l, waittime_h))
 		send_intercept()

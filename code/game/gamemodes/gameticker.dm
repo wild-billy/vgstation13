@@ -53,7 +53,7 @@ var/global/datum/controller/gameticker/ticker
 	var/list/bad_minds[0]
 	for(var/role_id in antag_types)
 		var/antag_role/R = antag_types[role_id]
-		if(R.flags & ANTAG_GOOD)
+		if(R.flags & ROLE_GOOD)
 			continue
 
 		bad_minds |= R.minds

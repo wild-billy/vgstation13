@@ -38,7 +38,7 @@
 	if(ticker && istype(ticker.mode,/datum/game_mode/heist))
 		check_return = 1
 	for(var/datum/mind/vox in group.minds)
-		var/antag_role/group/vox_raider/raider=vox.antag_roles["raider"]
+		var/antag_role/group/vox_raider/raider=vox.GetRole("raider")
 		if(!vox.current)
 			continue
 		if(vox.current.stat == DEAD)
@@ -52,7 +52,7 @@
 /antag_role/group/vox_raider/proc/GetNumLeftBehind()
 	var/count=0
 	for(var/datum/mind/vox in group.minds)
-		var/antag_role/group/vox_raider/raider=vox.antag_roles["raider"]
+		var/antag_role/group/vox_raider/raider=vox.GetRole("raider")
 		if(get_area(raider.cortical_stack) != locate(/area/shuttle/vox/station))
 			count++
 	return count
@@ -184,7 +184,7 @@ Use :V to voxtalk, :H to talk on your encrypted channel, and <b>don't forget to 
 		text += "<b>HEAD</b>|officer|employee|cultist"
 	else if (M.assigned_role in list("Security Officer", "Detective", "Warden"))
 		text += "head|<b>OFFICER</b>|employee|cultist"
-	else if (M.antag_roles["cultist"])
+	else if (M.antag_roles[id])
 		text += {"head|officer|<a href='?src=\ref[src];remove_role=cultist'>employee</a>|<b>CULTIST</b>
 <ul>
 	<li>Give <a href='?src=\ref[src];mind=\ref[M];give=tome'>tome</a></li>
@@ -197,6 +197,6 @@ Use :V to voxtalk, :H to talk on your encrypted channel, and <b>don't forget to 
 	if("give" in href_list)
 		switch(href_list["give"])
 			if("gear")
-				var/antag_role/group/vox_raider/raider = M.antag_roles["cultist"]
+				var/antag_role/group/vox_raider/raider = M.antag_roles[id]
 				if (!raider.Equip(1))
-					usr << "\red Spawning amulet failed!"
+					usr << "\red Spawning gear failed!"

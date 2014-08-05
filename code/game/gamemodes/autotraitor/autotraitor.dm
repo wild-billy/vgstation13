@@ -12,8 +12,7 @@
 	world << "<B>Game mode is AutoTraitor. Traitors will be added to the round automagically as needed.<br>Expect bugs.</B>"
 
 /datum/game_mode/traitor/autotraitor/pre_setup()
-	if(istype(ticker.mode, /datum/game_mode/mixed))
-		mixed = 1
+
 	if(config.protect_roles_from_antagonist)
 		restricted_jobs += protected_jobs
 
@@ -43,8 +42,8 @@
 	if(config.traitor_scaling)
 		num_traitors = max_traitors - 1 + prob(traitor_prob)
 		// mixed mode scaling
-		if(mixed)
-			num_traitors = min(3, num_traitors)
+		//if(mixed)
+		//	num_traitors = min(3, num_traitors)
 		log_game("Number of traitors: [num_traitors]")
 		message_admins("Players counted: [num_players]  Number of traitors chosen: [num_traitors]")
 	else

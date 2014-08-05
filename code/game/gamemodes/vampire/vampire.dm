@@ -42,12 +42,14 @@
 	world << "<B>There are Vampires from Space Transylvania on the station, keep your blood close and neck safe!</B>"
 
 /datum/game_mode/vampire/pre_setup()
+	/*
 	// mixed mode scaling
 	if(istype(ticker.mode, /datum/game_mode/mixed))
 		mixed = 1
 	if(mixed)
 		recommended_enemies = 2
 		required_enemies = 1
+	*/
 	if(config.protect_roles_from_antagonist)
 		restricted_jobs += protected_jobs
 
@@ -78,9 +80,9 @@
 		vampire.special_role = "Vampire"
 		forge_vampire_objectives(vampire)
 		greet_vampire(vampire)
-	if(!mixed)
-		spawn (rand(waittime_l, waittime_h))
-			send_intercept()
+	//if(!mixed)
+	spawn (rand(waittime_l, waittime_h))
+		send_intercept()
 	..()
 	return
 

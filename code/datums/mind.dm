@@ -93,6 +93,9 @@ datum/mind
 			objectives += O
 		R.Greet(1)
 
+	proc/GetRole(var/role_id)
+		return antag_roles[role_id]
+
 	proc/transfer_to(mob/living/new_character)
 		if(!istype(new_character))
 			error("transfer_to(): Some idiot has tried to transfer_to() a non mob/living mob. Please inform Carn")
@@ -235,8 +238,8 @@ datum/mind
 			if (ticker.mode.config_tag=="changeling" || ticker.mode.config_tag=="traitorchan")
 				text = uppertext(text)
 //			var/datum/game_mode/changeling/changeling = ticker.mode
-//			if (istype(changeling) && changeling.changelingdeath)
-//				text += "<br>All the changelings are dead! Restart in [round((changeling.TIME_TO_GET_REVIVED-(world.time-changeling.changelingdeathtime))/10)] seconds."
+//			if (istype(changeling) && changeling.GetRole("changeling")death)
+//				text += "<br>All the changelings are dead! Restart in [round((changeling.TIME_TO_GET_REVIVED-(world.time-changeling.GetRole("changeling")deathtime))/10)] seconds."
 			sections["changeling"] = text
 
 			/** VAMPIRE ***/
@@ -649,52 +652,6 @@ datum/mind
 					fail |= !ticker.mode.equip_revolutionary(current)
 					if (fail)
 						usr << "\red Reequipping revolutionary goes wrong!"
-
-		else if (href_list["cult"])
-			switch(href_list["cult"])
-				if("clear")
-					if(src in ticker.mode.cult)
-						ticker.mode.cult -= src
-						ticker.mode.update_cult_icons_removed(src)
-						special_role = null
-						var/datum/game_mode/cult/cult = ticker.mode
-						if (istype(cult))
-							cult.memoize_cult_objectives(src)
-						current << "\red <FONT size = 3><B>You have been brainwashed! You are no longer a cultist!</B></FONT>"
-						memory = ""
-						log_admin("[key_name_admin(usr)] has de-cult'ed [current].")
-				if("cultist")
-					if(!(src in ticker.mode.cult))
-						ticker.mode.cult += src
-						ticker.mode.update_cult_icons_added(src)
-						special_role = "Cultist"
-						current << "<span class='sinister'>You catch a glimpse of the Realm of Nar-Sie, The Geometer of Blood. You now see how flimsy the world is, you see that it should be open to the knowledge of Nar-Sie.</span>"
-						current << "<span class='sinister'>Assist your new compatriots in their dark dealings. Their goal is yours, and yours is theirs. You serve the Dark One above all else. Bring It back.</span>"
-						var/datum/game_mode/cult/cult = ticker.mode
-						if (istype(cult))
-							cult.memoize_cult_objectives(src)
-						log_admin("[key_name_admin(usr)] has cult'ed [current].")
-				if("tome")
-					var/mob/living/carbon/human/H = current
-					if (istype(H))
-						var/obj/item/weapon/tome/T = new(H)
-
-						var/list/slots = list (
-							"backpack" = slot_in_backpack,
-							"left pocket" = slot_l_store,
-							"right pocket" = slot_r_store,
-							"left hand" = slot_l_hand,
-							"right hand" = slot_r_hand,
-						)
-						var/where = H.equip_in_one_of_slots(T, slots)
-						if (!where)
-							usr << "\red Spawning tome failed!"
-						else
-							H << "A tome, a message from your new master, appears in your [where]."
-
-				if("amulet")
-					if (!ticker.mode.equip_cultist(current))
-						usr << "\red Spawning amulet failed!"
 
 		else if (href_list["wizard"])
 			switch(href_list["wizard"])
@@ -1120,40 +1077,7 @@ datum/mind
 
 
 	proc/make_Cultist()
-		if(!(src in ticker.mode.cult))
-			ticker.mode.cult += src
-			ticker.mode.update_cult_icons_added(src)
-			special_role = "Cultist"
-			current << "<span class='sinister'>You catch a glimpse of the Realm of Nar-Sie, The Geometer of Blood. You now see how flimsy the world is, you see that it should be open to the knowledge of Nar-Sie.</span>"
-			current << "<span class='sinister'>Assist your new compatriots in their dark dealings. Their goal is yours, and yours is theirs. You serve the Dark One above all else. Bring It back.</span>"
-			var/datum/game_mode/cult/cult = ticker.mode
-			if (istype(cult))
-				cult.memoize_cult_objectives(src)
-			else
-				var/explanation = "Summon Nar-Sie via the use of the appropriate rune (Hell join self). It will only work if nine cultists stand on and around it."
-				current << "<B>Objective #1</B>: [explanation]"
-				current.memory += "<B>Objective #1</B>: [explanation]<BR>"
-				current << "The convert rune is join blood self"
-				current.memory += "The convert rune is join blood self<BR>"
-
-		var/mob/living/carbon/human/H = current
-		if (istype(H))
-			var/obj/item/weapon/tome/T = new(H)
-
-			var/list/slots = list (
-				"backpack" = slot_in_backpack,
-				"left pocket" = slot_l_store,
-				"right pocket" = slot_r_store,
-				"left hand" = slot_l_hand,
-				"right hand" = slot_r_hand,
-			)
-			var/where = H.equip_in_one_of_slots(T, slots)
-			if (!where)
-			else
-				H << "A tome, a message from your new master, appears in your [where]."
-
-		if (!ticker.mode.equip_cultist(current))
-			H << "Spawning an amulet from your Master failed."
+		QuickAssignRole("cultist")
 
 	proc/make_Rev()
 		if (ticker.mode.head_revolutionaries.len>0)

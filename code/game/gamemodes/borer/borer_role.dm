@@ -4,7 +4,7 @@
 /antag_role/borer
 	name="Cortical Borer"
 	id="borer"
-	flags = ANTAG_MIXABLE | ANTAG_NEED_HOST
+	flags = ROLE_MIXABLE | ROLE_NEED_HOST
 	protected_jobs = SILICON_JOBS
 	special_role = "Borer"
 	disallow_job = 1
@@ -37,7 +37,6 @@
 
 	// Pick a backup location to spawn at if we can't infest.
 	var/spawn_loc
-
 	if(found_vents.len)
 		var/vent = pick(found_vents)
 		found_vents.Remove(vent)
@@ -50,18 +49,15 @@
 	antag.transfer_to(M)
 	//M.clearHUD()
 
-	M.perform_infestation(host.current)
+	M.perform_infestation(host)
+	antag=M
 
 	del(original)
 
 	return 1
 
 /antag_role/borer/ForgeObjectives()
-	var/list/objectives = list()
-
-	objectives += new /datum/objective/survive
-
-	return objectives
+	return newlist(/datum/objective/survive)
 
 /antag_role/borer/Greet(you_are=1)
 	if(you_are)

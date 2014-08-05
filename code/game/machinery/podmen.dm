@@ -167,9 +167,9 @@ var/global/list/hasbeendiona = list() // Stores ckeys and a timestamp for ghost 
 				if (podman.mind in ticker.mode:syndicates)
 					ticker.mode:update_all_synd_icons()
 			if ("cult")
-				if (podman.mind in ticker.mode:cult)
+				if (podman.GetRole("cultist"))
 					ticker.mode:add_cultist(podman.mind)
-					ticker.mode:update_all_cult_icons() //So the icon actually appears
+					update_all_cult_icons() //So the icon actually appears
 		// -- End mode specific stuff
 
 

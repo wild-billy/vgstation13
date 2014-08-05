@@ -1,11 +1,10 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
 
-var/list/potential_theft_objectives=list(
-	"traitor" = typesof(/datum/theft_objective/traitor) - /datum/theft_objective/traitor,
-	"special" = typesof(/datum/theft_objective/special) - /datum/theft_objective/special,
-	"heist"   = typesof(/datum/theft_objective/heist) + typesof(/datum/theft_objective/number/heist) - /datum/theft_objective/heist - /datum/theft_objective/number/heist,
-	"salvage" = typesof(/datum/theft_objective/number/salvage) - /datum/theft_objective/number/salvage
-)
+var/list/potential_theft_objectives=typesof(/datum/theft_objective) \
+	- /datum/theft_objective \
+	- /datum/theft_objective/special \
+	- /datum/theft_objective/number \
+	- /datum/theft_objective/number/special
 
 /datum/objective
 	var/antag_role/role
@@ -492,27 +491,30 @@ var/list/potential_theft_objectives=list(
 
 
 /datum/objective/steal
-	var/target_category = "traitor"
 	var/datum/theft_objective/steal_target
 
-	find_target()
+	find_target(var/special_only=0)
 		var/loop=50
 		while(!steal_target && loop > 0)
 			loop--
-			var/thefttype = pick(potential_theft_objectives[target_category])
+			var/thefttype = pick(potential_theft_objectives)
 			var/datum/theft_objective/O = new thefttype
 			if(owner.assigned_role in O.protected_jobs)
 				continue
+			if(special_only)
+				if(!(O.flags & 1)) // THEFT_FLAG_SPECIAL
+					continue
+			else
+				if(O.flags & 1) // THEFT_FLAG_SPECIAL
+					continue
 			steal_target=O
-			explanation_text = format_explanation()
+			explanation_text = "Steal [O]."
 			return
 		explanation_text = "Free Objective."
 
-	proc/format_explanation()
-		return "Steal [steal_target.name]."
 
 	proc/select_target()
-		var/list/possible_items_all = potential_theft_objectives[target_category]+"custom"
+		var/list/possible_items_all = potential_theft_objectives+"custom"
 		var/new_target = input("Select target:", "Objective target", null) as null|anything in possible_items_all
 		if (!new_target) return
 		if (new_target == "custom")
@@ -522,20 +524,21 @@ var/list/potential_theft_objectives=list(
 			var/tmp_obj = new O.typepath
 			var/custom_name = tmp_obj:name
 			del(tmp_obj)
-			O.name = copytext(sanitize(input("Enter target name:", "Objective target", custom_name) as text|null),1,MAX_NAME_LEN)
+			O.name = copytext(sanitize(input("Enter target name:", "Objective target", custom_name) as text|null),1,MAX_MESSAGE_LEN)
 			if (!O.name) return
 			steal_target = O
-			explanation_text = format_explanation()
+			explanation_text = "Steal [O.name]."
 		else
 			steal_target = new new_target
-			explanation_text = format_explanation()
+			explanation_text = "Steal [steal_target.name]."
 		return steal_target
 
 	check_completion()
 		if(!steal_target) return 1 // Free Objective
 		return steal_target.check_completion(owner)
 
-datum/objective/download
+
+/datum/objective/download
 	proc/gen_amount_goal()
 		target_amount = rand(10,20)
 		explanation_text = "Download [target_amount] research levels."
@@ -621,7 +624,7 @@ datum/objective/download
 						n_p ++
 			else if (ticker.current_state == GAME_STATE_PLAYING)
 				for(var/mob/living/carbon/human/P in player_list)
-					if(P.client && !P.mind.antag_roles["changeling"] && P.mind!=owner)
+					if(P.client && !P.GetRole("changeling") && P.mind!=owner)
 						n_p ++
 			target_amount = min(target_amount, n_p)
 
@@ -631,7 +634,7 @@ datum/objective/download
 	check_completion()
 		if(!owner)
 			return 0
-		var/antag_role/changeling/changeling=owner.antag_roles["changeling"]
+		var/antag_role/changeling/changeling=owner.GetRole("changeling")
 		if(changeling && changeling.absorbed_dna && (changeling.absorbedcount >= target_amount))
 			return 1
 		else
