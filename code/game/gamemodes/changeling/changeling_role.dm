@@ -87,25 +87,25 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 	//No escape alone because changelings aren't suited for it and it'd probably just lead to rampant robusting
 	//If it seems like they'd be able to do it in play, add a 10% chance to have to escape alone
 
-	var/datum/objective/absorb/absorb_objective = new
+	var/datum/objective/absorb/absorb_objective = new(src)
 	absorb_objective.gen_amount_goal(2, 3)
 	objectives += absorb_objective
 
-	var/datum/objective/assassinate/kill_objective = new
+	var/datum/objective/assassinate/kill_objective = new(src)
 	kill_objective.find_target()
 	objectives += kill_objective
 
-	var/datum/objective/steal/steal_objective = new
+	var/datum/objective/steal/steal_objective = new(src)
 	steal_objective.find_target()
 	objectives += steal_objective
 
 
 	switch(rand(1,100))
 		if(1 to 80)
-			var/datum/objective/escape/escape_objective = new
+			var/datum/objective/escape/escape_objective = new(src)
 			objectives += escape_objective
 		else
-			var/datum/objective/survive/survive_objective = new
+			var/datum/objective/survive/survive_objective = new(src)
 			objectives += survive_objective
 
 	return objectives
@@ -186,18 +186,14 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 	world << text
 
 /antag_role/changeling/EditMemory(var/datum/mind/M)
-	var/text=""
-	if (M.GetRole("changeling"))
-		text += "<b>YES</b>|<a href='?src=\ref[M];remove_role=[id]'>no</a> <ul>"
+	var/datum/role_controls/RC = ..(M)
+	if (M.GetRole(id))
 		if (objectives.len==0)
-			text += "<li>Objectives are empty! <a href='?src=\ref[src];mind=\ref[M];auto_objectives=[id]'>Randomize!</a></li>"
-		var/antag_role/changeling/changeling=M.GetRole("changeling")
+			RC.warnings += "Objectives are empty!</em> <a href='?src=\ref[src];mind=\ref[M];auto_objectives=[id]'>Randomize!</a>"
+		var/antag_role/changeling/changeling=M.GetRole(id)
 		if(changeling && changeling.absorbed_dna.len && (M.current.real_name != changeling.absorbed_dna[1]) )
-			text += "<li><a href='?src=\ref[src];mind=\ref[M];initialdna=1'>Transform to initial appearance.</a></li>"
-		text += "</ul>"
-	else
-		text += "<a href='?src=\ref[M];assign_role=[id]'>yes</a>|<b>NO</b>"
-	return text
+			RC.controls["Appearance:"]="<a href='?src=\ref[src];mind=\ref[M];initialdna=1'>Transform to initial appearance.</a>"
+	return RC
 
 /antag_role/changeling/RoleTopic(href, href_list, var/datum/mind/M)
 	if("initialdna" in href_list)

@@ -175,24 +175,6 @@ Use :V to voxtalk, :H to talk on your encrypted channel, and <b>don't forget to 
 
 	world << text
 
-/antag_role/group/vox_raider/EditMemory(var/datum/mind/M)
-	var/text="[name]"
-	if (ticker.mode.config_tag=="cult")
-		text = uppertext(text)
-	text = "<i><b>[text]</b></i>: "
-	if (M.assigned_role in command_positions)
-		text += "<b>HEAD</b>|officer|employee|cultist"
-	else if (M.assigned_role in list("Security Officer", "Detective", "Warden"))
-		text += "head|<b>OFFICER</b>|employee|cultist"
-	else if (M.antag_roles[id])
-		text += {"head|officer|<a href='?src=\ref[src];remove_role=cultist'>employee</a>|<b>CULTIST</b>
-<ul>
-	<li>Give <a href='?src=\ref[src];mind=\ref[M];give=tome'>tome</a></li>
-	<li>Give <a href='?src=\ref[src];mind=\ref[M];give=amulet'>amulet</a></li>
-</ul>"}
-	else
-		text += "head|officer|<b>EMPLOYEE</b>|<a href='?src=\ref[src];assign_role=cultist'>cultist</a>"
-
 /antag_role/group/vox_raider/RoleTopic(href, href_list, var/datum/mind/M)
 	if("give" in href_list)
 		switch(href_list["give"])

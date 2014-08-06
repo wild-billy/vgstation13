@@ -57,7 +57,7 @@
 	return 1
 
 /antag_role/borer/ForgeObjectives()
-	return newlist(/datum/objective/survive)
+	return new /datum/objective/survive(src)
 
 /antag_role/borer/Greet(you_are=1)
 	if(you_are)

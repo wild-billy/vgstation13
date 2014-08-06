@@ -65,6 +65,8 @@
 
 /antag_role/New(var/datum/mind/M=null, var/antag_role/parent=null)
 	if(M)
+		if(!istype(M))
+			WARNING("M is [M.type]!")
 		// If we don't have this guy in the parent, add him.
 		if(!(M in parent.minds))
 			parent.minds += M
@@ -177,11 +179,47 @@
 		R.Declare()
 
 /antag_role/proc/Declare()
-	world << "\red <b>[type] didn't make a Declare() override!</b>"
+	world << "\red <b>[type] doesn't have a Declare() override!</b>"
+
+/datum/role_controls
+	var/list/controls[0] // Associative, Label = html
+	var/list/warnings[0] // Just a list
+
+/datum/role_controls/proc/Render(var/_type)
+	var/html = ""
+	if(warnings.len)
+		html += "<ul class='warnings'>"
+		for(var/warning in warnings)
+			html += "<li>[warning]</li>"
+		html += "</ul>"
+	if(controls.len)
+		html += "<table>"
+		for(var/label in controls)
+			html += "<tr><th>[label]</th><td>[controls[label]]</td></tr>"
+		html += "</table>"
+	if(html == "")
+		html += "<em>No controls defined in [_type]/EditMemory()!</em>"
+	return html
 
 // Called from the global instance, NOT the one in /datum/mind!
 /antag_role/proc/EditMemory(var/datum/mind/M)
-	return {"<br /><b><i>[name]</i></b>: \[NO EditMemory() FOR THIS ROLE\]"}
+	var/datum/role_controls/RC = new
+	if (M.GetRole(id))
+		RC.controls["Enabled:"] = "<a href='?src=\ref[M];remove_role=[id]'>No</a>"
+	else
+		RC.controls["Enabled:"] = "<a href='?src=\ref[M];add_role=[id]'>Yes</a>"
+	return RC
+
+// DO NOT OVERRIDE, does formatting.
+/antag_role/proc/GetEditMemoryMenu(var/datum/mind/M)
+	var/datum/role_controls/RC = EditMemory(M)
+	return {"
+<fieldset>
+	<legend>[name]</legend>
+	[RC.Render()]
+</fieldset>
+"}
+
 
 // DO NOT OVERRIDE.
 /antag_role/Topic(href, href_list)

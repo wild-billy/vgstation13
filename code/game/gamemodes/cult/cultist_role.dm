@@ -111,22 +111,24 @@
 	world << text
 
 /antag_role/cultist/EditMemory(var/datum/mind/M)
-	var/text="[name]"
-	if (ticker.mode.config_tag=="cult")
-		text = uppertext(text)
-	text = "<i><b>[text]</b></i>: "
-	if (M.assigned_role in command_positions)
-		text += "<b>HEAD</b>|officer|employee|cultist"
-	else if (M.assigned_role in list("Security Officer", "Detective", "Warden"))
-		text += "head|<b>OFFICER</b>|employee|cultist"
-	else if (M.GetRole("cultist"))
-		text += {"head|officer|<a href='?src=\ref[src];remove_role=cultist'>employee</a>|<b>CULTIST</b>
-<ul>
-	<li>Give <a href='?src=\ref[src];mind=\ref[M];give=tome'>tome</a></li>
-	<li>Give <a href='?src=\ref[src];mind=\ref[M];give=amulet'>amulet</a></li>
-</ul>"}
+	var/datum/role_controls/RC = ..(M)
+	var/antag_role/cultist/C = M.GetRole(id)
+	RC.controls = list()
+	if (C)
+		if (C.objectives.len==0)
+			RC.warnings += "Objectives are empty!</em> <a href='?src=\ref[src];mind=\ref[M];auto_objectives=[id]'>Randomize!</a>"
+		RC.controls["Role:"] = "<a href='?src=\ref[src];remove_role=[id]'>Cultist</a>"
+		if (M.assigned_role in command_positions)
+			RC.controls["Role:"]="<b>HEAD</b> (Cannot remove role)"
+		RC.controls["Equipment:"]={"<ul>
+			<li>Give <a href='?src=\ref[src];mind=\ref[M];give=tome'>tome</a></li>
+			<li>Give <a href='?src=\ref[src];mind=\ref[M];give=amulet'>amulet</a></li>
+		</ul>"}
 	else
-		text += "head|officer|<b>EMPLOYEE</b>|<a href='?src=\ref[src];assign_role=cultist'>cultist</a>"
+		RC.controls["Role:"] = "<a href='?src=\ref[src];assign_role=[id]'>Employee</a>"
+		if (M.assigned_role in SECURITY_JOBS)
+			RC.controls["Role:"]="<b>OFFICER</b> (Cannot assign role)"
+	return RC
 
 /antag_role/cultist/RoleTopic(href, href_list, var/datum/mind/M)
 	if("give" in href_list)

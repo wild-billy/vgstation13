@@ -152,18 +152,45 @@ datum/mind
 			alert("Not before round-start!", "Alert")
 			return
 
-		var/out = "<B>[name]</B>[(current&&(current.real_name!=name))?" (as [current.real_name])":""]<br>"
+		var/out = {"<html>
+	<head>
+		<title>[name]</title>
+		<style type="text/css">
+			html {
+				font-family:sans-serif;
+				font-size:small;
+			}
+			a{
+				color:#0066cc;
+				text-decoration:none;
+			}
 
-		// AUTOFIXED BY fix_string_idiocy.py
-		// C:\Users\Rob\Documents\Projects\vgstation13\code\datums\mind.dm:110: out += "Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>"
-		out += {"Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>
-			Assigned role: [assigned_role]. <a href='?src=\ref[src];role_edit=1'>Edit</a><br>
-			Factions and special roles:<br>"}
+			a img {
+				border:1px solid #0066cc;
+				background:#dfdfdf;
+			}
 
-		for(var/antag_id in ticker.antag_types)
-			var/antag_role/role_type = ticker.antag_types[antag_id]
-			out += "<hr /><span class=\"role-name\">[role_type.GetMemoryHeader()]</span>: "
-			out += role_type.EditMemory(src)
+			a.color {
+				padding: 5px 10px;
+				font-size: large;
+				font-weight: bold;
+				border:1px solid white;
+			}
+
+			a.selected img,
+			a:hover {
+				background: #0066cc;
+				color: #ffffff;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>[name][(current&&(current.real_name!=name))?" (as [current.real_name])":""]</h1>
+		<p>Mind currently owned by key: [key] [active?"(synced)":"(not synced)"]<br>
+		Assigned role: [assigned_role]. <a href='?src=\ref[src];role_edit=1'>Edit</a></p>
+
+		<h2>Roles</h2>"}
+
 
 		// END AUTOFIX
 		var/list/sections = list(
@@ -177,6 +204,12 @@ datum/mind
 			"monkey",
 			"malfunction",
 		)
+
+		for(var/antag_id in ticker.antag_types)
+			var/antag_role/role_type = ticker.antag_types[antag_id]
+			out += role_type.GetEditMemoryMenu(src)
+			//sections -= antag_id
+
 		var/text = ""
 
 		if (istype(current, /mob/living/carbon/human) || istype(current, /mob/living/carbon/monkey))
