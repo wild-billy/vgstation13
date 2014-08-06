@@ -440,11 +440,17 @@ datum/mind
 			return
 
 		if("assign_role" in href_list)
+			if(GetRole(href_list["assign_role"]))
+				usr << "\red That role is already assigned."
+				return
 			assignRole(href_list["assign_role"])
 			log_admin("[key_name_admin(usr)] has assigned special role [href_list["assign_role"]] to [current].")
 			return
 
 		if("remove_role" in href_list)
+			if(!GetRole(href_list["assign_role"]))
+				usr << "\red That role isn't assigned."
+				return
 			unassignRole(href_list["assign_role"])
 			log_admin("[key_name_admin(usr)] has removed special role [href_list["assign_role"]] from [current].")
 			return

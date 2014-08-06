@@ -94,22 +94,18 @@
 		// Select players who wanted to be this role.
 		var/list/available_minds = get_players_for_role(role.be_flag)//ticker.minds.Copy()
 
-		var/role_failed=0
-		if(role.flags & ROLE_NEED_HOST)
-			if(available_minds.len < 2)
-				role_failed=1
-		else
-			if(available_minds.len < 1)
-				role_failed=1
-		if(role_failed)
-			log_admin("MODE FAILURE: [name]. NOT ENOUGH CANDIDATES FOR ROLE [role.name]!")
-			return 0 // not enough candidates for mode
-
 		// For up to X players (where X is between min and max players allowed in this role)
 		for(var/i=0;i<rand(role.min_players,role.max_players);i++)
 
 			// Pop a random mind off the queue
-			var/datum/mind/M = pick(available_minds)
+			var/datum/mind/M
+			if(available_minds.len)
+				M=pick(available_minds)
+			if(!M && ticker.minds.len)
+				M=pick(ticker.minds)
+			if(!M)
+				break
+
 			available_minds.Remove(M)
 
 			// Check if they already have a role, or this role can be slapped on top of other roles
@@ -146,12 +142,12 @@
 		if(M.antag_roles.len>0)
 			for(var/rid in M.antag_roles)
 				var/antag_role/R=M.GetRole(rid)
-				R.antag = M.current
+				R.antag = M
 				// Select a random partner, if needed.
 				if(R.flags & ROLE_NEED_HOST)
 					for(var/datum/mind/HM in ticker.minds)
 						if(HM.current && R.CanBeHost(HM))
-							R.host=HM.current
+							R.host=HM
 
 				if(!R.OnPostSetup())
 					log_admin("MODE FAILURE: [name] UNABLE TO COMPLETE POST-SETUP FOR ROLE [R.name] ON [R.antag.current]!")

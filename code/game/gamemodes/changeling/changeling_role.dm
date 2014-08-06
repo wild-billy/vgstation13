@@ -8,6 +8,7 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 	id="changeling"
 	flags = ROLE_MIXABLE | ROLE_ADDITIVE
 	special_role="Changeling"
+	be_flag = BE_CHANGELING
 	protected_jobs = SILICON_JOBS
 	protected_antags = list("borer")
 

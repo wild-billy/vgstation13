@@ -15,6 +15,8 @@ var/list/potential_theft_objectives=typesof(/datum/theft_objective) \
 	var/completed = 0					//currently only used for custom objectives.
 
 	New(var/antag_role/parent, var/text)
+		if(!istype(parent.antag))
+			WARNING("parent.antag is not /datum/mind!")
 		role = parent
 		owner = parent.antag
 		if(text)

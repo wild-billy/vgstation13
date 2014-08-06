@@ -133,11 +133,11 @@
 	for(var/datum/objective/O in ForgeObjectives())
 		O.owner=antag
 		antag.objectives += O
-	return 0
+	return 1
 
 // Return 1 on success, 0 on failure.
 /antag_role/group/proc/GroupOnPostSetup()
-	return 0
+	return 1
 
 /antag_role/proc/process()
 	return
@@ -204,10 +204,10 @@
 // Called from the global instance, NOT the one in /datum/mind!
 /antag_role/proc/EditMemory(var/datum/mind/M)
 	var/datum/role_controls/RC = new
-	if (M.GetRole(id))
-		RC.controls["Enabled:"] = "<a href='?src=\ref[M];remove_role=[id]'>No</a>"
+	if (!M.GetRole(id))
+		RC.controls["Enabled:"] = "<a href='?src=\ref[M];add_role=[id]'>No</a>"
 	else
-		RC.controls["Enabled:"] = "<a href='?src=\ref[M];add_role=[id]'>Yes</a>"
+		RC.controls["Enabled:"] = "<a href='?src=\ref[M];remove_role=[id]'>Yes</a>"
 	return RC
 
 // DO NOT OVERRIDE, does formatting.
@@ -234,7 +234,7 @@
 		return
 
 	if("auto_objectives" in href_list)
-		var/antag_role/R = M.antag_roles[href_list["auto_objectives"]]
+		var/antag_role/R = M.GetRole(href_list["auto_objectives"])
 		for(var/datum/objective/O in R.ForgeObjectives())
 			O.owner=M
 			M.objectives += O
