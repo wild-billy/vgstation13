@@ -40,10 +40,14 @@ var/global/datum/controller/gameticker/ticker
 
 /datum/controller/gameticker/proc/RoleCount(var/role_id)
 	var/antag_role/R = ticker.antag_types[role_id]
+	if(!R)
+		return list()
 	return R.minds.len
 
 /datum/controller/gameticker/proc/GetPlayersWithRole(var/role_id)
 	var/antag_role/R = ticker.antag_types[role_id]
+	if(!R)
+		return list()
 	return R.minds
 
 /datum/controller/gameticker/proc/GetAllGoodMinds()
@@ -437,10 +441,12 @@ var/global/datum/controller/gameticker/ticker
 
 	mode.declare_completion()//To declare normal completion.
 
+	/* // MODULAR GAMEMODE SHIT REPLACES THIS
 	//calls auto_declare_completion_* for all modes
 	for(var/handler in typesof(/datum/game_mode/proc))
 		if (findtext("[handler]","auto_declare_completion_"))
 			call(mode, handler)()
+	*/
 
 	//Print a list of antagonists to the server log
 	var/list/total_antagonists = list()

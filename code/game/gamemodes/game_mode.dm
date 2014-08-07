@@ -187,7 +187,7 @@
 	return 0
 
 
-/datum/game_mode/proc/declare_completion()
+/datum/game_mode/proc/declare_completion(var/autodeclare=1)
 	var/clients = 0
 	var/surviving_humans = 0
 	var/surviving_total = 0
@@ -201,6 +201,12 @@
 	var/escaped_on_shuttle = 0
 
 	var/list/area/escape_locations = list(/area/shuttle/escape/centcom, /area/shuttle/escape_pod1/centcom, /area/shuttle/escape_pod2/centcom, /area/shuttle/escape_pod3/centcom, /area/shuttle/escape_pod5/centcom)
+
+	if(autodeclare)
+		for(var/role_id in available_roles)
+			var/antag_role/R=ticker.antag_types[role_id]
+			if(!R) continue
+			R.DeclareAll()
 
 	for(var/mob/M in player_list)
 		if(M.client)

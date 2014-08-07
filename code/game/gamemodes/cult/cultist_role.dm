@@ -117,7 +117,7 @@
 	if (C)
 		if (C.objectives.len==0)
 			RC.warnings += "Objectives are empty!</em> <a href='?src=\ref[src];mind=\ref[M];auto_objectives=[id]'>Randomize!</a>"
-		RC.controls["Role:"] = "<a href='?src=\ref[src];remove_role=[id]'>Cultist</a>"
+		RC.controls["Role:"] = "<a href='?src=\ref[M];remove_role=[id]'>Cultist</a>"
 		if (M.assigned_role in command_positions)
 			RC.controls["Role:"]="<b>HEAD</b> (Cannot remove role)"
 		RC.controls["Equipment:"]={"<ul>
@@ -125,7 +125,7 @@
 			<li>Give <a href='?src=\ref[src];mind=\ref[M];give=amulet'>amulet</a></li>
 		</ul>"}
 	else
-		RC.controls["Role:"] = "<a href='?src=\ref[src];assign_role=[id]'>Employee</a>"
+		RC.controls["Role:"] = "<a href='?src=\ref[M];assign_role=[id]'>Employee</a>"
 		if (M.assigned_role in SECURITY_JOBS)
 			RC.controls["Role:"]="<b>OFFICER</b> (Cannot assign role)"
 	return RC

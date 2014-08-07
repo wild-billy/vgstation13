@@ -197,7 +197,6 @@ datum/mind
 			"revolution",
 			"cult",
 			"wizard",
-			"changeling",
 			"vampire",
 			"nuclear",
 			"traitor", // "traitorchan",
