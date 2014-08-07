@@ -133,6 +133,7 @@
 	for(var/datum/objective/O in ForgeObjectives())
 		O.owner=antag
 		antag.objectives += O
+	Greet(1)
 	return 1
 
 // Return 1 on success, 0 on failure.
