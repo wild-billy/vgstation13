@@ -1,5 +1,9 @@
-
-// Normal factions:
+/**
+* Factions
+*
+* N3X15 HERE, ACTUALLY MAKING USE OF THIS SHIT NOW
+*
+*/
 
 /datum/faction
 	var/name		// the name of the faction
@@ -8,6 +12,8 @@
 	var/list/restricted_species = list() // only members of these species can be recruited.
 	var/list/members = list() 	// a list of mind datums that belong to this faction
 	var/max_op = 0		// the maximum number of members a faction can have (0 for no max)
+
+	var/list/items_wanted=list()
 
 // Factions, members of the syndicate coalition:
 
@@ -22,9 +28,6 @@
 	var/operative_notes // some notes to pass onto each operative
 
 	var/uplink_contents			// the contents of the uplink
-
-	proc/assign_objectives(var/datum/mind/traitor)
-		..()
 
 
 /* ----- Begin defining syndicate factions ------ */

@@ -81,35 +81,20 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 			changeling_id = rand(1,999)
 
 /antag_role/changeling/ForgeObjectives()
-	var/list/objectives = list()
-
 	//OBJECTIVES - Always absorb 5 genomes, plus random traitor objectives.
 	//If they have two objectives as well as absorb, they must survive rather than escape
 	//No escape alone because changelings aren't suited for it and it'd probably just lead to rampant robusting
 	//If it seems like they'd be able to do it in play, add a 10% chance to have to escape alone
 
-	var/datum/objective/absorb/absorb_objective = new(src)
+	var/datum/objective/absorb/absorb_objective = AppendObjective(/datum/objective/absorb)
 	absorb_objective.gen_amount_goal(2, 3)
-	objectives += absorb_objective
 
-	var/datum/objective/assassinate/kill_objective = new(src)
-	kill_objective.find_target()
-	objectives += kill_objective
-
-	var/datum/objective/steal/steal_objective = new(src)
-	steal_objective.find_target()
-	objectives += steal_objective
-
-
-	switch(rand(1,100))
-		if(1 to 80)
-			var/datum/objective/escape/escape_objective = new(src)
-			objectives += escape_objective
-		else
-			var/datum/objective/survive/survive_objective = new(src)
-			objectives += survive_objective
-
-	return objectives
+	AppendObjective(/datum/objective/assassinate, duplicate=1)
+	AppendObjective(/datum/objective/steal, duplicate=1)
+	if(pick(80))
+		AppendObjective(/datum/objective/escape)
+	else
+		AppendObjective(/datum/objective/survive)
 
 /antag_role/changeling/Greet(var/you_are=1)
 	if(you_are)
@@ -122,10 +107,6 @@ var/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon"
 			antag.current << "You have evolved beyond your clownish nature, allowing you to wield weapons without harming yourself."
 			antag.current.dna.SetSEState(CLUMSYBLOCK,0)
 			antag.current.mutations.Remove(M_CLUMSY)
-
-	var/obj_count = 1
-	for(var/datum/objective/objective in antag.objectives)
-		antag << "<B>Objective #[obj_count++]</B>: [objective.explanation_text]"
 
 /antag_role/changeling/proc/regenerate()
 	chem_charges = min(max(0, chem_charges+chem_recharge_rate), chem_storage)

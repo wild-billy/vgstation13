@@ -25,6 +25,14 @@ var/list/potential_theft_objectives=typesof(/datum/theft_objective) \
 	proc/check_completion()
 		return completed
 
+	/**
+	*  /antag_role/AppendObjective calls this.
+	*
+	* Should perform a basic check and return 1 on success, 0 on failure.
+	*/
+	proc/PostAppend()
+		return 1
+
 	proc/find_target()
 		var/list/possible_targets = list()
 		for(var/datum/mind/possible_target in ticker.minds)

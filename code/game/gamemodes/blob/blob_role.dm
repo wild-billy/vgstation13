@@ -25,7 +25,7 @@
 	return 1
 
 /antag_role/blob/ForgeObjectives()
-	objectives += new /datum/objective/survive(src)
+	AppendObjective(/datum/objective/survive)
 
 /antag_role/blob/proc/Pop()
 	var/turf/location = null

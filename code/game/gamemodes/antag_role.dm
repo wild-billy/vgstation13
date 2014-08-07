@@ -130,9 +130,7 @@
 
 // Return 1 on success, 0 on failure.
 /antag_role/proc/OnPostSetup()
-	for(var/datum/objective/O in ForgeObjectives())
-		O.owner=antag
-		antag.objectives += O
+	ForgeObjectives()
 	Greet(1)
 	return 1
 
@@ -143,15 +141,33 @@
 /antag_role/proc/process()
 	return
 
-// Return list of objectives.
+// Create objectives here.
 /antag_role/proc/ForgeObjectives()
-	return list()
+	return
+
+// Utility that does all the common stuff.
+/antag_role/proc/AppendObjective(var/objective_type,var/duplicates=0,var/text=null)
+	if(!duplicates && locate(objective_type) in objectives)
+		return
+	var/datum/objective/O
+	if(text)
+		O = new objective_type(src,text)
+	else
+		O = new objective_type(src)
+	if(O.PostAppend())
+		objectives += O
+		antag.objectives += O
+		return 1
+	return 0
 
 // Create the group's objectives.
 /antag_role/proc/ForgeGroupObjectives()
 	return
 
 /antag_role/proc/Greet(var/you_are=1)
+	var/obj_count = 1
+	for(var/datum/objective/objective in objectives)
+		antag << "<B>Objective #[obj_count++]</B>: [objective.explanation_text]"
 	return
 
 /antag_role/proc/PreMindTransfer(var/datum/mind/M)
@@ -236,9 +252,7 @@
 
 	if("auto_objectives" in href_list)
 		var/antag_role/R = M.GetRole(href_list["auto_objectives"])
-		for(var/datum/objective/O in R.ForgeObjectives())
-			O.owner=M
-			M.objectives += O
+		R.ForgeObjectives()
 		usr << "\blue The objectives for [M.key] have been generated. You can edit them. Remember to announce their objectives."
 		return
 

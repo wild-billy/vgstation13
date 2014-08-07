@@ -88,9 +88,7 @@ datum/mind
 	proc/QuickAssignRole(var/role_id)
 		assignRole(role_id)
 		var/antag_role/R=antag_roles[role_id]
-		for (var/datum/objective/O in R.ForgeObjectives())
-			O.owner = src
-			objectives += O
+		R.ForgeObjectives()
 		R.Greet(1)
 
 	proc/GetRole(var/role_id)
