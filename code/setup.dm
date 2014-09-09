@@ -76,9 +76,6 @@ var/global/disable_vents     = 0
 #define PRESSURE_SUIT_REDUCTION_COEFFICIENT 0.8 //This is how much (percentual) a suit with the flag STOPSPRESSUREDMAGE reduces pressure.
 #define PRESSURE_HEAD_REDUCTION_COEFFICIENT 0.4 //This is how much (percentual) a helmet/hat with the flag STOPSPRESSUREDMAGE reduces pressure.
 
-// Doors!
-#define DOOR_CRUSH_DAMAGE 10
-
 // Factor of how fast mob nutrition decreases
 #define HUNGER_FACTOR 0.12
 
