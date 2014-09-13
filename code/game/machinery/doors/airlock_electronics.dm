@@ -1,4 +1,7 @@
-//This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
+
+//**************************************************************
+// Airlock Electronics Board
+//**************************************************************
 
 /obj/item/weapon/circuitboard/airlock
 	name = "airlock electronics"
@@ -8,124 +11,80 @@
 	m_amt = 50
 	g_amt = 50
 	w_type = RECYK_ELECTRONIC
-
 	req_access = list(access_engine)
 
-	var/list/conf_access = null
-	var/one_access = 0 //if set to 1, door would receive req_one_access instead of req_access
-	var/last_configurator = null
 	var/locked = 1
+	var/oneAccess = 0
+	var/lastUser
+	var/list/confAccess
 
-	// Allow dicking with it while it's on the floor.
-	attack_robot(mob/user as mob)
-		if(isMoMMI(user))
-			return ..()
-		attack_self(user)
-		return 1
+//To allow robutts to build airlocks
+/obj/item/weapon/circuitboard/airlock/attack_robot(mob/user)
+	if(isMoMMI(user)) . = ..()
+	else src.attack_self(user)
+	return 1
+	
+/obj/item/weapon/circuitboard/airlock/attack_self(mob/user)
+	if(istype(user,/mob/dead) && !isAdminGhost(user))
+		user << "<span class='danger'>Nope.</span>"
+	else src.interact(user)
+	return
 
-	attack_self(mob/user as mob)
-		if (!ishuman(user) && !isrobot(user))
-			return ..(user)
+// HTML ////////////////////////////////////////////////////////
 
-		// Can't manipulate it when broken (e.g. emagged)
-		if (icon_state == "door_electronics_smoked")
-			return
+/obj/item/weapon/circuitboard/airlock/proc/interact(mob/user)
+	var/t1 = text("<B>Access control</B><br>\n")
+	if(src.lastUser) t1 += "Last Operator: [src.lastUser]<br>"
+	src.lastUser = user.name
+	if(src.locked)
+		if(isrobot(user)) t1 += "<a href='?src=\ref[src];login=1'>Log In</a><hr>"
+		else t1 += "<a href='?src=\ref[src];login=1'>Swipe ID</a><hr>"
+	else
+		t1 += "<a href='?src=\ref[src];logout=1'>Block</a><hr>"
+		t1 += "Access requirement is set to "
+		t1 += src.oneAccess ? "<a style='color: green' href='?src=\ref[src];oneAccess=1'>ONE</a><hr>" : "<a style='color: red' href='?src=\ref[src];oneAccess=1'>ALL</a><hr>"
+		t1 += src.confAccess ? "<a href='?src=\ref[src];access=all'>All</a><br>": "<font color=red>All</font><br>" 
+		t1 += "<br>"
+		var/AccessName
+		for(var/Access in get_all_accesses()) AccessName = get_access_desc(Access)
+			if(!src.confAccess || !src.confAccess.len || !(Access in src.confAccess)) t1 += "<a href='?src=\ref[src];access=[Access]'>[AccessName]</a><br>"
+			else if(src.oneAccess) t1 += "<a style='color: green' href='?src=\ref[src];access=[Access]'>[AccessName]</a><br>"
+			else t1 += "<a style='color: red' href='?src=\ref[src];access=[Access]'>[AccessName]</a><br>"
+	t1 += text("<p><a href='?src=\ref[];close=1'>Close</a></p>\n",src)
+	user << browse(t1,"window=airlock_electronics")
+	onclose(user,"airlock")
+	return
 
-		if(ishuman(user))
-			var/mob/living/carbon/human/H = user
-			if(H.getBrainLoss() >= 60)
-				return
+/obj/item/weapon/circuitboard/airlock/Topic(href,href_list)
+	. = ..()
+	if(href_list["close"]) usr << browse(null,"window=airlock")
+	else if(href_list["login"])
+		if(ishuman(usr))
+			var/mob/living/carbon/human/Human = usr
+			var/obj/item/Item = Human.get_active_hand()
+			var/obj/item/ID
+			if(Item && (istype(Item,/obj/item/weapon/card) || istype(Item,/obj/item/device/pda))) ID = Item
+			else if(Human.wear_id)
+				Item = Human.wear_id
+				if(istype(Item,/obj/item/weapon/card)) ID = Item
+				else if(istype(Item,/obj/item/device/pda) && Item:id) ID = Item:id
+			if(ID && src.check_access(ID))
+				src.locked = 0
+				src.lastUser = ID:registered_name
+		else if(isrobot(usr))
+			src.locked = 0
+			src.lastUser = usr.name
+	else if(!src.locked)
+		if(href_list["logout"]) src.locked = 1
+		else if(href_list["oneAccess"]) src.oneAccess = !src.oneAccess
+		else if(href_list["access"]) src.toggleAccess(href_list["access"])
+	return src.attack_self(usr) //TODO: This is not the right way to update a dialog.
 
-		var/t1 = text("<B>Access control</B><br>\n")
-
-		if (last_configurator)
-			t1 += "Operator: [last_configurator]<br>"
-
-		if (locked)
-			if(isrobot(user))
-				t1 += "<a href='?src=\ref[src];login=1'>Log In</a><hr>"
-			else
-				t1 += "<a href='?src=\ref[src];login=1'>Swipe ID</a><hr>"
-		else
-			t1 += "<a href='?src=\ref[src];logout=1'>Block</a><hr>"
-
-			t1 += "Access requirement is set to "
-			t1 += one_access ? "<a style='color: green' href='?src=\ref[src];one_access=1'>ONE</a><hr>" : "<a style='color: red' href='?src=\ref[src];one_access=1'>ALL</a><hr>"
-
-			t1 += conf_access == null ? "<font color=red>All</font><br>" : "<a href='?src=\ref[src];access=all'>All</a><br>"
-
-			t1 += "<br>"
-
-			var/list/accesses = get_all_accesses()
-			for (var/acc in accesses)
-				var/aname = get_access_desc(acc)
-
-				if (!conf_access || !conf_access.len || !(acc in conf_access))
-					t1 += "<a href='?src=\ref[src];access=[acc]'>[aname]</a><br>"
-				else if(one_access)
-					t1 += "<a style='color: green' href='?src=\ref[src];access=[acc]'>[aname]</a><br>"
-				else
-					t1 += "<a style='color: red' href='?src=\ref[src];access=[acc]'>[aname]</a><br>"
-
-		t1 += text("<p><a href='?src=\ref[];close=1'>Close</a></p>\n", src)
-
-		user << browse(t1, "window=airlock_electronics")
-		onclose(user, "airlock")
-
-	Topic(href, href_list)
-		..()
-		if (usr.stat || usr.restrained() || (!ishuman(usr) && !isrobot(usr)) || icon_state == "door_electronics_smoked")
-			return
-		if (href_list["close"])
-			usr << browse(null, "window=airlock")
-			return
-
-		if (href_list["login"])
-			if(ishuman(usr))
-				var/mob/living/carbon/human/H=usr
-				var/obj/item/I = usr.get_active_hand()
-				if(!istype(I, /obj/item/weapon/card) || !istype(I, /obj/item/device/pda))
-					I = H.wear_id
-				if(!I && (istype(H.wear_id,/obj/item/weapon/card) || istype(H.wear_id, /obj/item/device/pda)))
-					I = H.wear_id
-				if (istype(I, /obj/item/device/pda))
-					var/obj/item/device/pda/pda = I
-					I = pda.id
-				if (I && src.check_access(I))
-					src.locked = 0
-					src.last_configurator = I:registered_name
-			if(isrobot(usr))
-				src.locked=0
-				src.last_configurator = usr.name
-
-		if (locked)
-			return
-
-		if (href_list["logout"])
-			locked = 1
-
-		if (href_list["one_access"])
-			one_access = !one_access
-
-		if (href_list["access"])
-			toggle_access(href_list["access"])
-
-		attack_self(usr)
-
-	proc
-		toggle_access(var/acc)
-			if (acc == "all")
-				conf_access = null
-			else
-				var/req = text2num(acc)
-
-				if (conf_access == null)
-					conf_access = list()
-
-				if (!(req in conf_access))
-					conf_access += req
-				else
-					conf_access -= req
-					if (!conf_access.len)
-						conf_access = null
-
+/obj/item/weapon/circuitboard/airlock/proc/toggleAccess(var/Access)
+	if(Access == "all") src.confAccess = null
+	else
+		var/Required = text2num(Access)
+		if(!src.confAccess) confAccess = list()
+		src.confAccess ^= Required
+		if(!src.confAccess.len) src.confAccess = null
+	return

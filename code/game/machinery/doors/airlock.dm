@@ -14,12 +14,15 @@
 	icon = 'icons/obj/doors/Doorint.dmi'
 	power_channel = ENVIRON
 	
-	var/datum/wires/airlock/wires = null
-	
-	var/boltLights = 0
-	var/mainPower = 0
+	var/powerMain = 1
+	var/powerBackup = 1
 	var/panelOpen = 0
-	var.idScan //Unused
+	var/boltLights = 1
+	var/idScan //Unused
+	
+	var/datum/wires/airlock/wires = null
+	var/assemblyType = /obj/structure/door_assembly
+	var/obj/item/weapon/circuitboard/airlock/electronics = null
 	
 	var/icon_state_bolted = "door_locked"
 	var/overlay_panel = "panel_open"
@@ -32,51 +35,32 @@
 	return ..()
 
 /obj/machinery/door/airlock/proc/deconstruct()
-	var/obj/structure/door_assembly/DA = new assembly_type(loc)
-				DA.anchored = 1
-				DA.fingerprints += src.fingerprints
-				DA.fingerprintshidden += src.fingerprintshidden
-				DA.fingerprintslast = user.ckey
-				if (mineral)
-					DA.glass = mineral
-				// TODO: check DA.glass
-				else if (glass && !DA.glass)
-					DA.glass = 1
-
-				DA.state = 1
-				DA.created_name = name
-				DA.update_state()
-
-				var/obj/item/weapon/circuitboard/airlock/A
-
-				// TODO: check electronics
-				if (!electronics)
-					A = new/obj/item/weapon/circuitboard/airlock(loc)
-
-					// TODO: recheck the vars
-					if(req_access && req_access.len)
-						A.conf_access = req_access
-					else if(req_one_access && req_one_access.len)
-						A.conf_access = req_one_access
-						A.one_access = 1
-				else
-					A = electronics
-					electronics = null
-					A.loc = loc
-
-				if (operating == -1)
-					A.icon_state = "door_electronics_smoked"
-					operating = 0
-	if(src.wires)
-		src.wires.Destroy()
-		src.wires = null
-	return ..()
+	src.busy = 1
+	var/obj/structure/door_assembly/Assembly = new src.assembly_type(src.loc)
+	Assembly.anchored = 1
+	Assembly.clear = src.clear
+	Assembly.state = 1
+	Assembly.created_name = name
+	Assembly.update_state()
+	Assembly.fingerprints += src.fingerprints
+	Assembly.fingerprintshidden += src.fingerprintshidden
+	var/obj/item/weapon/circuitboard/airlock/Electronics = src.electronics
+	if(!Electronics)
+		Electronics = new/obj/item/weapon/circuitboard/airlock(loc)
+		if(src.req_access && src.req_access.len)
+			Electronics.conf_access = src.req_access
+		else if(src.req_one_access && src.req_one_access.len)
+			Electronics.conf_access = req_one_access
+			Electronics.one_access = 1
+	Electronics.loc = src.loc
+	qdel(src)
+	return
 	
 // Utilities ///////////////////////////////////////////////////
 
 /obj/machinery/door/airlock/isPowered()
-	if(src.stat & NOPOWER) . = 0
-	else . = 1
+	if(!(stat & (NOPOWER|BROKEN)))
+		if(src.powerMain || src.powerBackup) . = 1
 	return
 	
 /obj/machinery/door/airlock/update_icon()
@@ -85,6 +69,10 @@
 	src.overlays.Cut()
 	if(src.panelOpen) src.overlays += src.overlay_panel
 	if(src.welded) src.overlays += src.overlay_panel
+	return
+	
+/obj/machinery/door/closeAuto()
+	if(src.isPowered()) ..()
 	return
 	
 // Interactions ////////////////////////////////////////////////
@@ -106,6 +94,7 @@
 				src.update_icon()
 			user << "<span class='notice'>You remove the electronics from [src].</span>
 		else if((istype(I,/obj/item/device/multitool) || istype(I,obj/item/weapon/wirecutters)) && src.panelOpen)
+			if(!src.wires) src.wires = new
 			src.wires.Interact(user)
 		else if(istype(I,/obj/item/weapon/pai_cable))
 			PC:plugin(src,user)
@@ -130,6 +119,7 @@
 // HTML ////////////////////////////////////////////////////////
 
 /obj/machinery/door/airlock/touchDigital(mob/user)
+	if(!src.wires) src.wires = new
 	src.add_hiddenprint(user)
 	if(aiControl)
 		user.set_machine(src)
@@ -372,3 +362,31 @@
 	icon = 'icons/obj/doors/Dooratmoglass.dmi'
 	assembly_type = /obj/structure/door_assembly/door_assembly_atmo
 	
+// Alarmlock ///////////////////////////////////////////////////
+	
+/obj/machinery/door/airlock/glass/alarmlock
+	closeAuto = 0
+	var/datum/radio_frequency/airConnection
+	var/airFrequency = 1437
+	
+/obj/machinery/door/airlock/glass/alarmlock/New()
+	src.airConnection = new
+	radio_controller.remove_object(src,airFrequency)
+	src.airConnection = radio_controller.add_object(src,airFrequency,RADIO_TO_AIRALARM)
+	src.open()
+	return ..()
+
+/obj/machinery/door/airlock/glass/alarmlock/receive_signal(datum/signal/signal)
+	. = ..()
+	if(src.isPowered())
+		var/area/Area = get_area(src)
+		if(Area.master) Area = Area.master
+		if(signal.data["zone"] == Area.name)
+			switch(signal.data["alert"])
+				if("severe")
+					src.closeAuto = 1
+					src.tryToggleOpen(closeOnly=1)
+				if("minor","clear")
+					src.closeAuto = 0
+					src.tryToggleOpen(openOnly=1)
+	return

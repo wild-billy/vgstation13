@@ -30,6 +30,7 @@
 	var/jammed = 0
 	var/shocked = 0
 	var/aiControl = 0
+	var/closeAuto = 0
 	var/closeFast = 0
 	var/closeForce = 0
 	
@@ -68,11 +69,7 @@
 	src.opacity = 0
 	src.density = 0
 	playsound(get_turf(src),src.sfx,100,1)
-	if(src.isPowered())
-		if(src.closeFast) . = 5
-		else . = 20
-		spawn(.) src.tryToggleOpen(closeOnly=1)
-	spawn() src.updateNearbyTiles()
+	src.closeAuto()
 	return
 
 /obj/machinery/door/proc/close(var/force)
@@ -85,7 +82,7 @@
 	spawn() src.updateNearbyTiles()
 	return
 	
-/obj/machinery/door/proc/tryToggleOpen(mob/user,var/force,var/closeOnly)
+/obj/machinery/door/proc/tryToggleOpen(mob/user,var/force,var/closeOnly,var/openOnly)
 	src.busy = 1
 	if(src.jammed) . = "It looks damaged."
 	else if(src.welded) . = "It's welded shut."
@@ -95,9 +92,8 @@
 			. = "Access Denied."
 			flick(src.icon_state_deny,src)
 	if(!.)
-		if(src.density)
-			if(!closeOnly) src.open()
-		else src.close(force)
+		if(src.density && !closeOnly) src.open()
+		else if(!src.openOnly) src.close(force)
 	else if(user) user << "<span class='warning'>[.]</span>"
 	src.busy = 0
 	return
@@ -119,6 +115,11 @@
 			if(A.density) return		
 		if(locate(/mob/living) in src.loc) return
 	return 1
+	
+/obj/machinery/door/proc/closeAuto()
+	if(!src.welded && !src.bolted && !src.jammed && src.closeAuto)
+		spawn(src.closeFast ? 5 : 20) src.tryToggleOpen(closeOnly=1)
+	return
 	
 // Interaction /////////////////////////////////////////////////
 
