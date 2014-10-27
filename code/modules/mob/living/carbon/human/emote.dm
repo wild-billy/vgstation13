@@ -370,7 +370,7 @@
 					message = "<B>[src]</B> takes a drag from a cigarette and blows \"[M]\" out in smoke."
 					m_type = 1
 				else
-					message = "<B>[src]</B> says, \"[M], please. He had a family.\" [src.name] takes a drag from a cigarette and blows \his name out in smoke."
+					message = "<B>[src]</B> says, \"[M], please. \He had a family.\" [src.name] takes a drag from a cigarette and blows \his name out in smoke."
 					m_type = 2
 
 		if ("point")
@@ -566,9 +566,11 @@
 					for(var/mob/M in view(1))
 						if(M != src)
 							if(!miming)
-								visible_message("\red <b>[src]</b> farts in <b>[M]</b>'s face!")
+								//visible_message("\red <b>[src]</b> farts in <b>[M]</b>'s face!") Hope I did it right. -Angelite
+								visible_message("<span class='danger'><b>[src]</b> farts in <b>[M]</b>'s face!</span>")
 							else
-								visible_message("\red <b>[src]</b> silently farts in <b>[M]</b>'s face!")
+								//visible_message("\red <b>[src]</b> silently farts in <b>[M]</b>'s face!") Hope I did it right. -Angelite
+								visible_message("<span class='danger'><b>[src]</b> silently farts in <b>[M]</b>'s face!</span>")
 						else
 							continue
 					if(!miming)
@@ -600,7 +602,8 @@
 						playsound(get_turf(src), 'sound/effects/superfart.ogg', 50, 1)
 						if(wearing_suit)
 							if(!wearing_mask)
-								src << "\red You gas yourself!"
+								//src << "\red You gas yourself!" Hope I did it right! -Angelite
+								src << "<span class='danger'>You gas yourself!</span>"
 								reagents.add_reagent("space_drugs", rand(10,50))
 						else
 							// Was /turf/, now /mob/
@@ -629,9 +632,11 @@
 					if(M_SUPER_FART in mutations)
 						message=""
 						playsound(location, 'sound/effects/smoke.ogg', 50, 1, -3)
-						visible_message("\red <b>[name]</b> hunches down and grits \his teeth!")
+						//visible_message("\red <b>[name]</b> hunches down and grits \his teeth!")
+						visible_message("<spanclass='warning'> <b>[name]</b> hunches down and grits \his teeth!</span>")
 						if(do_after(usr,30))
-							visible_message("\red <b>[name]</b> unleashes a [pick("tremendous","gigantic","colossal")] fart!","You hear a [pick("tremendous","gigantic","colossal")] fart.")
+							//visible_message("\red <b>[name]</b> unleashes a [pick("tremendous","gigantic","colossal")] fart!","You hear a [pick("tremendous","gigantic","colossal")] fart.")
+							visible_message("<spanclass='danger'> <b>[name]</b> unleashes a [pick("tremendous","gigantic","colossal")] fart!","You hear a [pick("tremendous","gigantic","colossal")] fart.</span>")
 							//playsound(L.loc, 'superfart.ogg', 50, 0)
 							if(!wearing_suit)
 								for(var/mob/living/V in view(src,aoe_range))
