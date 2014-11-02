@@ -633,10 +633,10 @@
 						message=""
 						playsound(location, 'sound/effects/smoke.ogg', 50, 1, -3)
 						//visible_message("\red <b>[name]</b> hunches down and grits \his teeth!")
-						visible_message("<spanclass='warning'> <b>[name]</b> hunches down and grits \his teeth!</span>")
+						visible_message("<span class='warning'> <b>[name]</b> hunches down and grits \his teeth!</span>")
 						if(do_after(usr,30))
 							//visible_message("\red <b>[name]</b> unleashes a [pick("tremendous","gigantic","colossal")] fart!","You hear a [pick("tremendous","gigantic","colossal")] fart.")
-							visible_message("<spanclass='danger'> <b>[name]</b> unleashes a [pick("tremendous","gigantic","colossal")] fart!","You hear a [pick("tremendous","gigantic","colossal")] fart.</span>")
+							visible_message("<span class='danger'> <b>[name]</b> unleashes a [pick("tremendous","gigantic","colossal")] fart!","You hear a [pick("tremendous","gigantic","colossal")] fart.</span>")
 							//playsound(L.loc, 'superfart.ogg', 50, 0)
 							if(!wearing_suit)
 								for(var/mob/living/V in view(src,aoe_range))
