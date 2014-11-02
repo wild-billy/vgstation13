@@ -1,4 +1,4 @@
-/mob/living/carbon/human/emote(var/act,var/m_type=1,var/message = null)
+/mob/living/carbon/human/emote(var/act,var/m_type=1,var/message = null, var/auto)
 	var/param = null
 
 	if (findtext(act, "-", 1, null))
@@ -108,7 +108,7 @@
 
 		if ("choke")
 			if(miming)
-				message = "<B>[src]</B> clutches \his throat desperately!"
+				message = "<B>[src]</B> clutches his throat desperately!"
 				m_type = 1
 			else
 				if (!muzzled)
@@ -126,14 +126,14 @@
 					m_type = 1
 		if ("flap")
 			if (!src.restrained())
-				message = "<B>[src]</B> flaps \his wings."
+				message = "<B>[src]</B> flaps his wings."
 				m_type = 2
 				if(miming)
 					m_type = 1
 
 		if ("aflap")
 			if (!src.restrained())
-				message = "<B>[src]</B> flaps \his wings ANGRILY!"
+				message = "<B>[src]</B> flaps his wings ANGRILY!"
 				m_type = 2
 				if(miming)
 					m_type = 1
@@ -370,26 +370,28 @@
 					message = "<B>[src]</B> takes a drag from a cigarette and blows \"[M]\" out in smoke."
 					m_type = 1
 				else
+<<<<<<< HEAD
 					message = "<B>[src]</B> says, \"[M], please. \He had a family.\" [src.name] takes a drag from a cigarette and blows \his name out in smoke."
+=======
+					message = "<B>[src]</B> says, \"[M], please. He had a family.\" [src.name] takes a drag from a cigarette and blows his name out in smoke."
+>>>>>>> upstream/bleeding-edge
 					m_type = 2
 
 		if ("point")
 			if (!src.restrained())
-				var/mob/M = null
-				if (param)
-					for (var/atom/A as mob|obj|turf|area in view(null, null))
-						if (param == A.name)
-							M = A
+				var/atom/object_pointed = null
+
+				if(param)
+					for(var/atom/visible_object as turf | obj | mob in view())
+						if(param == visible_object.name)
+							object_pointed = visible_object
 							break
 
-				if (!M)
+				if(isnull(object_pointed))
 					message = "<B>[src]</B> points."
 				else
-					M.point()
+					pointed(object_pointed)
 
-				if (M)
-					message = "<B>[src]</B> points to [M]."
-				else
 			m_type = 1
 
 		if ("raise")
@@ -548,8 +550,19 @@
 				m_type = 1
 			else
 				if (!muzzled)
-					message = "<B>[src]</B> screams!"
-					m_type = 2
+					if (auto == 1)
+						if(world.time-lastScream >= 30)//prevent scream spam with things like poly spray
+							message = "<B>[src]</B> screams in agony!"
+							var/list/screamSound = list('sound/misc/malescream1.ogg', 'sound/misc/malescream2.ogg', 'sound/misc/malescream3.ogg', 'sound/misc/malescream4.ogg', 'sound/misc/malescream5.ogg', 'sound/misc/wilhelm.ogg', 'sound/misc/goofy.ogg')
+							if (src.gender == FEMALE) //Females have their own screams. Trannys be damned.
+								screamSound = list('sound/misc/femalescream1.ogg', 'sound/misc/femalescream2.ogg', 'sound/misc/femalescream3.ogg', 'sound/misc/femalescream4.ogg', 'sound/misc/femalescream5.ogg')
+							var/scream = pick(screamSound)//AUUUUHHHHHHHHOOOHOOHOOHOOOOIIIIEEEEEE
+							playsound(get_turf(src), scream, 50, 0)
+							m_type = 2
+							lastScream = world.time
+					else
+						message = "<B>[src]</B> screams!"
+						m_type = 2
 				else
 					message = "<B>[src]</B> makes a very loud noise."
 					m_type = 2
@@ -632,8 +645,12 @@
 					if(M_SUPER_FART in mutations)
 						message=""
 						playsound(location, 'sound/effects/smoke.ogg', 50, 1, -3)
+<<<<<<< HEAD
 						//visible_message("\red <b>[name]</b> hunches down and grits \his teeth!")
 						visible_message("<span class='warning'> <b>[name]</b> hunches down and grits \his teeth!</span>")
+=======
+						visible_message("\red <b>[name]</b> hunches down and grits their teeth!")
+>>>>>>> upstream/bleeding-edge
 						if(do_after(usr,30))
 							//visible_message("\red <b>[name]</b> unleashes a [pick("tremendous","gigantic","colossal")] fart!","You hear a [pick("tremendous","gigantic","colossal")] fart.")
 							visible_message("<span class='danger'> <b>[name]</b> unleashes a [pick("tremendous","gigantic","colossal")] fart!","You hear a [pick("tremendous","gigantic","colossal")] fart.</span>")
