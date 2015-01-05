@@ -258,16 +258,8 @@
 
 	attach()
 		..()
-		event = chassis.events.addEvent("onMove",src,"layCable")
+		chassis.callOnMove[src] = "layCable"
 		return
-
-	detach()
-		chassis.events.clearEvent("onMove",event)
-		return ..()
-
-	destroy()
-		chassis.events.clearEvent("onMove",event)
-		return ..()
 
 	action(var/obj/item/weapon/cable_coil/target)
 		if(!action_checks(target))

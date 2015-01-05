@@ -2,7 +2,7 @@
  * WARRANTY VOID IF CODE USED
  */
 
-
+/*
 /datum/events
 	var/list/events
 
@@ -65,3 +65,4 @@
 			call(listener,proc_name)(arglist(args))
 			return 1
 		return
+*/

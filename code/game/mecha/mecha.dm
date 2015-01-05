@@ -67,7 +67,7 @@
 	var/list/equipment = new
 	var/obj/item/mecha_parts/mecha_equipment/selected
 	var/max_equip = 3
-	var/datum/events/events
+	var/list/callOnMove = list()
 
 /obj/mecha/New()
 	..()
@@ -260,7 +260,9 @@
 /obj/mecha/Move()
 	. = ..()
 	if(.)
-		events.fireEvent("onMove",get_turf(src))
+		for(var/callee in src.callOnMove)
+			if(callee) call(callee,src.callOnMove[callee])()
+			else src.callOnMove -= callee
 	return
 
 /obj/mecha/relaymove(mob/user,direction)
